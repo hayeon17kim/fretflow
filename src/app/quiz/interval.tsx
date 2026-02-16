@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -12,8 +12,6 @@ import type { FretPosition, IntervalName } from '@/types/music';
 import { generateCardBatch, type IntervalQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 import { getNoteAtPosition } from '@/utils/music';
-
-const SESSION_SIZE = 10;
 
 // ─── Adapt generated cards to tap-based format ───
 interface TapIntervalQuestion {
@@ -56,12 +54,16 @@ export default function QuizIntervalScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
+  const params = useLocalSearchParams();
+
+  // Get session size from params, default to 10
+  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
   // Generate cards for this session
   const questions = useMemo(() => {
-    const generatedCards = generateCardBatch('interval', SESSION_SIZE) as IntervalQuestionCard[];
-    return generatedCards.map(card => adaptIntervalCard(card, t));
-  }, [t]);
+    const generatedCards = generateCardBatch('interval', sessionSize) as IntervalQuestionCard[];
+    return generatedCards.map((card) => adaptIntervalCard(card, t));
+  }, [sessionSize, t]);
 
   const {
     currentCard: q,

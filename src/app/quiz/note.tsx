@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
@@ -12,17 +12,19 @@ import { useAppStore } from '@/stores/useAppStore';
 import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-const SESSION_SIZE = 10; // Number of cards per session
-
 export default function QuizNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
+  const params = useLocalSearchParams();
+
+  // Get session size from params, default to 10
+  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
   // Generate cards at session start (once)
   const questions = useMemo(
-    () => generateCardBatch('note', SESSION_SIZE) as NoteQuestionCard[],
-    [],
+    () => generateCardBatch('note', sessionSize) as NoteQuestionCard[],
+    [sessionSize],
   );
 
   const {

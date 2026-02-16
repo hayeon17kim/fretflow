@@ -144,7 +144,10 @@ export default function PracticeScreen() {
                           pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] },
                         ]}
                         onPress={() => {
-                          router.push(QUIZ_ROUTES[lv.id]);
+                          router.push({
+                            pathname: QUIZ_ROUTES[lv.id],
+                            params: { sessionSize: opt.cards.toString() },
+                          });
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={t(`practice.sessions.${opt.key}`)}

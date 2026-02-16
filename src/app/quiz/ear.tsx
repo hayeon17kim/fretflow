@@ -1,5 +1,5 @@
 import { Audio } from 'expo-av';
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -80,15 +80,20 @@ function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => voi
   );
 }
 
-const SESSION_SIZE = 10;
-
 export default function QuizEarScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
+  const params = useLocalSearchParams();
+
+  // Get session size from params, default to 10
+  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
   // 세션 시작 시 카드 생성
-  const questions = useMemo(() => generateCardBatch('ear', SESSION_SIZE) as EarQuestionCard[], []);
+  const questions = useMemo(
+    () => generateCardBatch('ear', sessionSize) as EarQuestionCard[],
+    [sessionSize],
+  );
 
   const {
     currentCard: q,

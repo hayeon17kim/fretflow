@@ -1,4 +1,4 @@
-import { useRouter } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -12,13 +12,11 @@ import type { FretPosition, StringNumber } from '@/types/music';
 import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-const SESSION_SIZE = 10;
-
 // ─── Adapt generated cards to tap-based format ───
 interface TapScaleQuestion {
   id: string;
-  name: string;           // e.g., "C Pentatonic Minor"
-  position: string;       // e.g., "Position 1"
+  name: string; // e.g., "C Pentatonic Minor"
+  position: string; // e.g., "Position 1"
   scaleName: string;
   rootNote: string;
   rootPosition: FretPosition;
@@ -64,12 +62,16 @@ export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
+  const params = useLocalSearchParams();
+
+  // Get session size from params, default to 10
+  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
   // Generate cards for this session
   const questions = useMemo(() => {
-    const generatedCards = generateCardBatch('scale', SESSION_SIZE) as ScaleQuestionCard[];
-    return generatedCards.map(card => adaptScaleCard(card, t));
-  }, [t]);
+    const generatedCards = generateCardBatch('scale', sessionSize) as ScaleQuestionCard[];
+    return generatedCards.map((card) => adaptScaleCard(card, t));
+  }, [sessionSize, t]);
 
   const {
     currentCard: q,
