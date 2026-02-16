@@ -7,6 +7,7 @@ import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { useAppStore } from '@/stores/useAppStore';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -140,6 +141,9 @@ export default function QuizScaleScreen() {
 
     // Record this review in SM-2 algorithm
     recordReview(q.id, correct, responseTime);
+
+    // 일일 통계 업데이트
+    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = () => {

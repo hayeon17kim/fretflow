@@ -8,6 +8,7 @@ import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { useAppStore } from '@/stores/useAppStore';
 import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -49,6 +50,9 @@ export default function QuizNoteScreen() {
       question: { string: q.string, fret: q.fret } as any,
     });
     recordReview(q.id, correct, responseTime);
+
+    // 일일 통계 업데이트
+    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = () => {
