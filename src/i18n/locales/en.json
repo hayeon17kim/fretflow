@@ -240,5 +240,19 @@
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
     "english": "English"
+  },
+  "badges": {
+    "beginner": "Beginner",
+    "familiar": "Familiar",
+    "proficient": "Proficient",
+    "master": "Master",
+    "levelUp": "{{level}} Level Up! {{badge}} Achieved",
+    "nextBadge": "{{percent}}% to next badge"
+  },
+  "softGuide": {
+    "title": "Hold on!",
+    "message": "This level is easier if you know basic note positions. Start now?",
+    "continue": "Yes, Start",
+    "goToLevel1": "Start from Lv.1"
   }
 }

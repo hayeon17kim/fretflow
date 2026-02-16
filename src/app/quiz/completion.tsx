@@ -3,9 +3,13 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
+import { Toast } from '@/components/Toast';
 import { getLevelLabel, LEVELS } from '@/config/levels';
+import { useBadgeCheck, getBadgeLevelUpMessage } from '@/hooks/useBadgeCheck';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { useToast } from '@/hooks/useToast';
 import { useAppStore } from '@/stores/useAppStore';
+import { BADGES } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 export default function QuizCompletionScreen() {
@@ -27,10 +31,22 @@ export default function QuizCompletionScreen() {
   // Get streak from app store
   const streak = useAppStore((state) => state.todayStats.streak);
 
-  // Get due cards count
-  const { getDueCards } = useSpacedRepetition();
+  // Get due cards count and level progress
+  const { getDueCards, getLevelProgress } = useSpacedRepetition();
   const dueCards = getDueCards();
   const tomorrowDueCount = dueCards.length;
+
+  // Badge check for level-up detection (Issue #22)
+  const { visible, message, emoji, showToast, hideToast } = useToast();
+  const levelProgress = level ? getLevelProgress(level.id) : 0;
+
+  useBadgeCheck(level?.id || 'note', levelProgress, {
+    onBadgeLevelUp: (levelId, newBadge) => {
+      const badge = BADGES[newBadge];
+      const toastMessage = getBadgeLevelUpMessage(levelId, newBadge, t);
+      showToast(toastMessage, badge.emoji);
+    },
+  });
 
   // Motivational message based on accuracy
   const getMessage = () => {
@@ -106,6 +122,9 @@ export default function QuizCompletionScreen() {
       >
         <Text style={s.continueBtnText}>{t('quiz.completion.continue')}</Text>
       </Pressable>
+
+      {/* Badge level-up toast notification */}
+      <Toast visible={visible} message={message} emoji={emoji} onHide={hideToast} />
     </View>
   );
 }

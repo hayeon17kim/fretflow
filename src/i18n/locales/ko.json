@@ -240,5 +240,19 @@
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
     "english": "English"
+  },
+  "badges": {
+    "beginner": "입문",
+    "familiar": "익숙함",
+    "proficient": "숙련",
+    "master": "마스터",
+    "levelUp": "{{level}} 레벨업! {{badge}} 달성",
+    "nextBadge": "다음 뱃지까지 {{percent}}%"
+  },
+  "softGuide": {
+    "title": "잠깐만요!",
+    "message": "이 레벨은 기본 음 위치를 알면 더 쉬워요. 바로 시작할까요?",
+    "continue": "네, 시작",
+    "goToLevel1": "Lv.1부터 할래요"
   }
 }
