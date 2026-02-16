@@ -19,10 +19,10 @@ export default function HomeScreen() {
   const todayStats = useAppStore((s) => s.todayStats);
   const settings = useAppStore((s) => s.settings);
 
-  // 화면 포커스 시 리렌더링을 위한 상태
+  // State to trigger re-render on screen focus
   const [_refreshKey, setRefreshKey] = useState(0);
 
-  // 화면이 포커스될 때마다 데이터 새로고침
+  // Refresh data whenever screen gains focus
   useFocusEffect(
     useCallback(() => {
       setRefreshKey((prev) => prev + 1);

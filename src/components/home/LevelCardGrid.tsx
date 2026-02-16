@@ -4,7 +4,7 @@ import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import type { LevelId } from '@/config/levels';
-import { LEVELS } from '@/config/levels';
+import { getLevelDesc, getLevelLabel, LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -50,7 +50,7 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
           t('home.lockedAlert'),
           t('home.lockedMessage', {
             level: prevLevel,
-            name: LEVELS[prevLevel - 1].label,
+            name: getLevelLabel(LEVELS[prevLevel - 1].id, t),
             progress: prevLevelProgress,
           }),
           [{ text: t('home.confirm'), style: 'default' }],
@@ -80,7 +80,7 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
             ]}
             onPress={() => handleLevelPress(lv)}
             accessibilityRole="button"
-            accessibilityLabel={lv.label}
+            accessibilityLabel={getLevelLabel(lv.id, t)}
           >
             <View style={s.levelCardInner}>
               {/* Icon with circular progress */}
@@ -93,7 +93,7 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
               <View style={s.levelInfo}>
                 <View style={s.levelNameRow}>
                   <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
-                    {lv.label}
+                    {getLevelLabel(lv.id, t)}
                   </Text>
                   {locked && (
                     <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
@@ -109,7 +109,7 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
                   )}
                 </View>
                 <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
-                  {lv.desc}
+                  {getLevelDesc(lv.id, t)}
                 </Text>
               </View>
 

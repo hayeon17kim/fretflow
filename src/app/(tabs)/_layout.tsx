@@ -1,8 +1,11 @@
 import { Tabs } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import { TabIcon } from '@/components/TabIcon';
 import { COLORS, FONT_SIZE } from '@/utils/constants';
 
 export default function TabLayout() {
+  const { t } = useTranslation();
+
   return (
     <Tabs
       screenOptions={{
@@ -26,7 +29,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: '홈',
+          title: t('tabs.home'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="home" color={color} focused={focused} />
           ),
@@ -35,7 +38,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="practice"
         options={{
-          title: '연습',
+          title: t('tabs.practice'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="practice" color={color} focused={focused} />
           ),
@@ -44,7 +47,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="mastery"
         options={{
-          title: '마스터리',
+          title: t('tabs.mastery'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="mastery" color={color} focused={focused} />
           ),
@@ -53,7 +56,7 @@ export default function TabLayout() {
       <Tabs.Screen
         name="settings"
         options={{
-          title: '설정',
+          title: t('tabs.settings'),
           tabBarIcon: ({ color, focused }) => (
             <TabIcon name="settings" color={color} focused={focused} />
           ),
