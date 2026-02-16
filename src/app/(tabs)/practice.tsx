@@ -5,7 +5,7 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LockIcon } from '@/components/icons/LockIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
+import { getLevelDesc, getLevelExample, getLevelLabel, LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -24,7 +24,7 @@ export default function PracticeScreen() {
   const [_refreshKey, setRefreshKey] = useState(0);
   const { getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
 
-  // 화면 포커스 시 새로고침
+  // Refresh on screen focus
   useFocusEffect(
     useCallback(() => {
       setRefreshKey((prev) => prev + 1);
@@ -54,7 +54,7 @@ export default function PracticeScreen() {
               key={lv.id}
               onPress={() => {
                 if (locked) {
-                  // 잠금 해제 조건 알림
+                  // Show unlock requirement alert
                   const prevLevel = lv.num - 1;
                   const prevLevelProgress = getLevelProgress(
                     LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
@@ -63,7 +63,7 @@ export default function PracticeScreen() {
                     t('practice.lockedAlert'),
                     t('practice.lockedMessage', {
                       level: prevLevel,
-                      name: LEVELS[prevLevel - 1].label,
+                      name: getLevelLabel(LEVELS[prevLevel - 1].id, t),
                       progress: prevLevelProgress,
                     }),
                     [{ text: t('practice.confirm'), style: 'default' }],
@@ -74,7 +74,7 @@ export default function PracticeScreen() {
               }}
               style={[s.levelCard, { borderColor: `${lv.color}25` }, locked && { opacity: 0.5 }]}
               accessibilityRole="button"
-              accessibilityLabel={`${lv.label}`}
+              accessibilityLabel={getLevelLabel(lv.id, t)}
               accessibilityState={{ expanded: isExpanded }}
             >
               {/* Main row */}
@@ -89,7 +89,7 @@ export default function PracticeScreen() {
                 <View style={s.levelInfo}>
                   <View style={s.levelNameRow}>
                     <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
-                      {lv.label}
+                      {getLevelLabel(lv.id, t)}
                     </Text>
                     {locked && (
                       <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
@@ -107,7 +107,7 @@ export default function PracticeScreen() {
                     )}
                   </View>
                   <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
-                    {lv.desc}
+                    {getLevelDesc(lv.id, t)}
                   </Text>
                 </View>
 
@@ -125,7 +125,7 @@ export default function PracticeScreen() {
                   {/* Example */}
                   <View style={s.exampleBox}>
                     <Text style={s.exampleLabel}>{t('practice.exampleProblem')}</Text>
-                    <Text style={s.exampleText}>{lv.example}</Text>
+                    <Text style={s.exampleText}>{getLevelExample(lv.id, t)}</Text>
                   </View>
 
                   {/* Session option buttons */}
