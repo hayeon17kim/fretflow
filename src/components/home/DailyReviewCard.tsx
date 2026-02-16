@@ -12,7 +12,9 @@ interface DailyReviewCardProps {
   levelDueCounts: Record<LevelId, number>;
   cardsReviewed: number;
   dailyGoal: number;
+  recommendedLevel: LevelId; // Issue #22
   onStartReview: () => void;
+  onLearnNew: () => void;
 }
 
 export function DailyReviewCard({
@@ -22,7 +24,9 @@ export function DailyReviewCard({
   levelDueCounts,
   cardsReviewed,
   dailyGoal,
+  recommendedLevel,
   onStartReview,
+  onLearnNew,
 }: DailyReviewCardProps) {
   const { t } = useTranslation();
 
@@ -40,6 +44,13 @@ export function DailyReviewCard({
 
   const progressColor = getProgressColor();
 
+  // Get recommended level label (Issue #22)
+  const recommendedLevelLabel = getLevelLabel(recommendedLevel, t);
+
+  const hasDueCards = dueCount > 0;
+  const isFirstTime = cardsReviewed === 0 && !hasDueCards;
+  const isReviewDone = cardsReviewed > 0 && !hasDueCards;
+
   return (
     <View style={s.ctaCard}>
       {/* Streak + count */}
@@ -50,9 +61,11 @@ export function DailyReviewCard({
             {t('home.streak', { count: streak })}
           </Text>
         </View>
-        <Text style={s.dueInfo}>
-          {t('home.dueInfo', { count: dueCount, minutes: estimatedMinutes })}
-        </Text>
+        {hasDueCards && (
+          <Text style={s.dueInfo}>
+            {t('home.recommendedLevel', { level: recommendedLevelLabel, count: dueCount })}
+          </Text>
+        )}
       </View>
 
       {/* Daily goal progress */}
@@ -79,35 +92,75 @@ export function DailyReviewCard({
         </Text>
       </View>
 
-      {/* Title */}
-      <Text style={s.ctaTitle}>{t('home.todayReview')}</Text>
+      {hasDueCards ? (
+        <>
+          {/* ── Due cards exist: review mode ── */}
+          <Text style={s.ctaTitle}>
+            {`${t('home.todayReview')}: ${recommendedLevelLabel}`}
+          </Text>
 
-      {/* Level composition chips */}
-      <View style={s.chipRow}>
-        {LEVELS.map((lv) => {
-          const count = levelDueCounts[lv.id];
-          if (count === 0) return null;
-          return (
-            <View key={lv.id} style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-              <Text style={[s.chipText, { color: lv.color }]}>
-                {getLevelLabel(lv.id, t)} ×{count}
-              </Text>
-            </View>
-          );
-        })}
-      </View>
+          {/* Level composition chips */}
+          <View style={s.chipRow}>
+            {LEVELS.map((lv) => {
+              const count = levelDueCounts[lv.id];
+              if (count === 0) return null;
+              return (
+                <View key={lv.id} style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
+                  <Text style={[s.chipText, { color: lv.color }]}>
+                    {getLevelLabel(lv.id, t)} ×{count}
+                  </Text>
+                </View>
+              );
+            })}
+          </View>
 
-      {/* CTA button */}
-      <Pressable
-        style={({ pressed }) => [s.ctaBtn, pressed && s.ctaBtnPressed]}
-        onPress={onStartReview}
-        accessibilityRole="button"
-        accessibilityLabel={dueCount > 0 ? t('home.startReview') : t('home.addCards')}
-      >
-        <Text style={s.ctaBtnText}>
-          {dueCount > 0 ? t('home.startReview') : t('home.addCards')}
-        </Text>
-      </Pressable>
+          {/* Start review CTA */}
+          <Pressable
+            style={({ pressed }) => [s.ctaBtn, pressed && s.ctaBtnPressed]}
+            onPress={onStartReview}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.startReview')}
+          >
+            <Text style={s.ctaBtnText}>{t('home.startReview')}</Text>
+          </Pressable>
+        </>
+      ) : isFirstTime ? (
+        <>
+          {/* ── First time user: welcome state ── */}
+          <Text style={s.ctaTitle}>{t('home.firstTimeTitle')}</Text>
+          <Text style={s.doneDesc}>{t('home.firstTimeDesc')}</Text>
+
+          {/* Start first lesson — filled button for strong CTA */}
+          <Pressable
+            style={({ pressed }) => [s.ctaBtn, pressed && s.ctaBtnPressed]}
+            onPress={onLearnNew}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.firstTimeCta')}
+          >
+            <Text style={s.ctaBtnText}>
+              {t('home.firstTimeCta')}: {recommendedLevelLabel} →
+            </Text>
+          </Pressable>
+        </>
+      ) : (
+        <>
+          {/* ── Review done: completed state ── */}
+          <Text style={s.ctaTitle}>{t('home.reviewDone')}</Text>
+          <Text style={s.doneDesc}>{t('home.reviewDoneDesc')}</Text>
+
+          {/* Learn new cards CTA — outline button (secondary action) */}
+          <Pressable
+            style={({ pressed }) => [s.learnBtn, pressed && s.ctaBtnPressed]}
+            onPress={onLearnNew}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.learnNew')}
+          >
+            <Text style={s.learnBtnText}>
+              {t('home.learnNew')}: {recommendedLevelLabel} →
+            </Text>
+          </Pressable>
+        </>
+      )}
     </View>
   );
 }
@@ -176,6 +229,26 @@ const s = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
     color: COLORS.bg,
+  },
+  doneDesc: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.lg,
+    lineHeight: 18,
+  },
+  learnBtn: {
+    height: 50,
+    borderRadius: 25,
+    backgroundColor: 'transparent',
+    borderWidth: 1.5,
+    borderColor: COLORS.level1,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  learnBtnText: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: '700',
+    color: COLORS.level1,
   },
   goalSection: {
     marginBottom: SPACING.md,
