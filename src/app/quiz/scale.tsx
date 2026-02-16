@@ -1,125 +1,16 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Line, Circle as SvgCircle } from 'react-native-svg';
+import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import type { StringNumber } from '@/types/music';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
 interface Pos {
-  s: number;
+  s: StringNumber;
   f: number;
-}
-
-// ─── Multi-select tappable fretboard ───
-function ScaleFretboard({
-  startFret,
-  endFret,
-  selected,
-  scalePositions,
-  state,
-  onTap,
-}: {
-  startFret: number;
-  endFret: number;
-  selected: Pos[];
-  scalePositions: Pos[];
-  state: QuizState;
-  onTap: (s: number, f: number) => void;
-}) {
-  const strings = 6;
-  const fretCount = endFret - startFret + 1;
-  const w = 280;
-  const h = 160;
-  const padX = 24;
-  const padY = 16;
-  const fretW = (w - padX * 2) / Math.max(1, fretCount - 1);
-  const stringH = (h - padY * 2) / (strings - 1);
-
-  const isScale = (s: number, f: number) => scalePositions.some((p) => p.s === s && p.f === f);
-  const isSelected = (s: number, f: number) => selected.some((p) => p.s === s && p.f === f);
-
-  const dots: Array<{ cx: number; cy: number; color: string; r: number; dashed?: boolean }> = [];
-
-  for (let si = 0; si < strings; si++) {
-    for (let fi = startFret; fi <= endFret; fi++) {
-      const cx = padX + (fi - startFret) * fretW;
-      const cy = padY + si * stringH;
-      const sel = isSelected(si, fi);
-      const scale = isScale(si, fi);
-
-      if (state === 'question') {
-        if (sel) dots.push({ cx, cy, color: COLORS.level3, r: 10 });
-      } else {
-        if (scale && sel) dots.push({ cx, cy, color: COLORS.correct, r: 10 });
-        else if (scale && !sel)
-          dots.push({ cx, cy, color: `${COLORS.correct}40`, r: 10, dashed: true });
-        else if (!scale && sel) dots.push({ cx, cy, color: COLORS.wrong, r: 10 });
-      }
-    }
-  }
-
-  return (
-    <View>
-      <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-        {/* Fret lines */}
-        {Array.from({ length: fretCount }, (_, i) => (
-          <Line
-            key={`f${i}`}
-            x1={padX + i * fretW}
-            y1={padY}
-            x2={padX + i * fretW}
-            y2={h - padY}
-            stroke={COLORS.fretLine}
-            strokeWidth={i === 0 && startFret === 0 ? 3 : 1}
-          />
-        ))}
-        {/* String lines */}
-        {Array.from({ length: strings }, (_, i) => (
-          <Line
-            key={`s${i}`}
-            x1={padX}
-            y1={padY + i * stringH}
-            x2={w - padX}
-            y2={padY + i * stringH}
-            stroke={COLORS.fretLine}
-            strokeWidth={1}
-          />
-        ))}
-        {/* Dots */}
-        {dots.map((d, i) => (
-          <SvgCircle
-            key={`d${i}`}
-            cx={d.cx}
-            cy={d.cy}
-            r={d.r}
-            fill={d.dashed ? 'none' : d.color}
-            stroke={d.dashed ? COLORS.correct : 'none'}
-            strokeWidth={d.dashed ? 2 : 0}
-            strokeDasharray={d.dashed ? '4 3' : undefined}
-          />
-        ))}
-      </Svg>
-
-      {/* Tap overlay */}
-      {state === 'question' && (
-        <View style={[StyleSheet.absoluteFill, { flexDirection: 'column' }]}>
-          {Array.from({ length: strings }, (_, si) => (
-            <View key={`row${si}`} style={{ flex: 1, flexDirection: 'row' }}>
-              {Array.from({ length: fretCount }, (_, fi) => (
-                <Pressable
-                  key={`cell${fi}`}
-                  style={{ flex: 1 }}
-                  onPress={() => onTap(si, startFret + fi)}
-                />
-              ))}
-            </View>
-          ))}
-        </View>
-      )}
-    </View>
-  );
 }
 
 // ─── Mock data ───
@@ -128,18 +19,18 @@ const MOCK_SCALE = {
   position: '1포지션',
   fretRange: [0, 4] as [number, number],
   positions: [
-    { s: 0, f: 0 },
-    { s: 0, f: 3 },
-    { s: 1, f: 0 },
-    { s: 1, f: 2 },
-    { s: 2, f: 0 },
-    { s: 2, f: 2 },
-    { s: 3, f: 0 },
-    { s: 3, f: 2 },
-    { s: 4, f: 0 },
-    { s: 4, f: 2 },
-    { s: 5, f: 0 },
-    { s: 5, f: 3 },
+    { s: 1 as StringNumber, f: 0 },
+    { s: 1 as StringNumber, f: 3 },
+    { s: 2 as StringNumber, f: 0 },
+    { s: 2 as StringNumber, f: 2 },
+    { s: 3 as StringNumber, f: 0 },
+    { s: 3 as StringNumber, f: 2 },
+    { s: 4 as StringNumber, f: 0 },
+    { s: 4 as StringNumber, f: 2 },
+    { s: 5 as StringNumber, f: 0 },
+    { s: 5 as StringNumber, f: 2 },
+    { s: 6 as StringNumber, f: 0 },
+    { s: 6 as StringNumber, f: 3 },
   ],
   notes: 'A, C, D, E, G',
   hint: 'Am 펜타토닉 1포지션은 0~3프렛 안에서 A, C, D, E, G 5개 음이 반복되는 "박스" 모양이에요.',
@@ -159,16 +50,16 @@ export default function QuizScaleScreen() {
   const [selected, setSelected] = useState<Pos[]>([]);
   const [score, setScore] = useState<Score | null>(null);
 
-  const isSelected = (s: number, f: number) => selected.some((p) => p.s === s && p.f === f);
-  const isScalePos = (s: number, f: number) =>
+  const isSelected = (s: StringNumber, f: number) => selected.some((p) => p.s === s && p.f === f);
+  const isScalePos = (s: StringNumber, f: number) =>
     MOCK_SCALE.positions.some((p) => p.s === s && p.f === f);
 
-  const handleTap = (s: number, f: number) => {
+  const handleTap = (pos: { string: StringNumber; fret: number }) => {
     if (state !== 'question') return;
-    if (isSelected(s, f)) {
-      setSelected((prev) => prev.filter((p) => !(p.s === s && p.f === f)));
+    if (isSelected(pos.string, pos.fret)) {
+      setSelected((prev) => prev.filter((p) => !(p.s === pos.string && p.f === pos.fret)));
     } else {
-      setSelected((prev) => [...prev, { s, f }]);
+      setSelected((prev) => [...prev, { s: pos.string, f: pos.fret }]);
     }
   };
 
@@ -193,6 +84,42 @@ export default function QuizScaleScreen() {
     setState('question');
     setSelected([]);
     setScore(null);
+  };
+
+  const buildHighlights = (): FretHighlight[] => {
+    const highlights: FretHighlight[] = [];
+
+    for (let s = 1; s <= 6; s++) {
+      const str = s as StringNumber;
+      for (let f = 0; f <= 4; f++) {
+        const sel = isSelected(str, f);
+        const isScale = isScalePos(str, f);
+
+        if (state === 'question') {
+          if (sel) {
+            highlights.push({ string: str, fret: f, color: COLORS.level3, label: '●', textColor: '#fff' });
+          }
+        } else {
+          if (isScale && sel) {
+            highlights.push({ string: str, fret: f, color: COLORS.correct, label: '✓' });
+          } else if (isScale && !sel) {
+            highlights.push({
+              string: str,
+              fret: f,
+              color: `${COLORS.correct}40`,
+              label: '○',
+              textColor: COLORS.correct,
+              border: COLORS.correct,
+              opacity: 0.6,
+            });
+          } else if (!isScale && sel) {
+            highlights.push({ string: str, fret: f, color: COLORS.wrong, label: '✕', textColor: '#fff' });
+          }
+        }
+      }
+    }
+
+    return highlights;
   };
 
   return (
@@ -228,12 +155,11 @@ export default function QuizScaleScreen() {
         </Text>
         <Text style={s.questionSub}>스케일에 속하는 음을 모두 탭하세요</Text>
 
-        <ScaleFretboard
+        <Fretboard
           startFret={MOCK_SCALE.fretRange[0]}
           endFret={MOCK_SCALE.fretRange[1]}
-          selected={selected}
-          scalePositions={MOCK_SCALE.positions}
-          state={state}
+          highlights={buildHighlights()}
+          tappable={state === 'question'}
           onTap={handleTap}
         />
 

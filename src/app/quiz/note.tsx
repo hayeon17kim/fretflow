@@ -1,91 +1,19 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import Svg, { Line, Circle as SvgCircle, Rect as SvgRect } from 'react-native-svg';
+import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import type { StringNumber } from '@/types/music';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
 
-// ─── Mini fretboard (read-only, 4-fret window) ───
-function MiniFretboard({
-  highlightFret,
-  highlightString,
-  state,
-}: {
-  highlightFret: number;
-  highlightString: number;
-  state: QuizState;
-}) {
-  const strings = 6;
-  const fretStart = Math.max(0, highlightFret - 2);
-  const fretEnd = fretStart + 4;
-  const fretCount = fretEnd - fretStart + 1;
-  const w = 260;
-  const h = 140;
-  const padX = 30;
-  const padY = 16;
-  const fretW = (w - padX * 2) / (fretCount - 1);
-  const stringH = (h - padY * 2) / (strings - 1);
-
-  const dotColor =
-    state === 'correct' ? COLORS.correct : state === 'wrong' ? COLORS.wrong : COLORS.accent;
-
-  return (
-    <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-      {/* Fret lines */}
-      {Array.from({ length: fretCount }, (_, i) => (
-        <Line
-          key={`f${i}`}
-          x1={padX + i * fretW}
-          y1={padY}
-          x2={padX + i * fretW}
-          y2={h - padY}
-          stroke={COLORS.fretLine}
-          strokeWidth={i === 0 && fretStart === 0 ? 3 : 1}
-        />
-      ))}
-      {/* String lines */}
-      {Array.from({ length: strings }, (_, i) => (
-        <Line
-          key={`s${i}`}
-          x1={padX}
-          y1={padY + i * stringH}
-          x2={w - padX}
-          y2={padY + i * stringH}
-          stroke={COLORS.fretLine}
-          strokeWidth={1}
-        />
-      ))}
-      {/* Fret labels */}
-      {Array.from({ length: fretCount }, (_, i) => (
-        <SvgRect key={`fl${i}`} x={0} y={0} width={0} height={0} fill="none" />
-      ))}
-      {/* Highlight dot */}
-      <SvgCircle
-        cx={padX + (highlightFret - fretStart) * fretW - fretW / 2}
-        cy={padY + highlightString * stringH}
-        r={14}
-        fill={dotColor}
-      />
-      <SvgRect
-        x={padX + (highlightFret - fretStart) * fretW - fretW / 2 - 8}
-        y={padY + highlightString * stringH - 8}
-        width={16}
-        height={16}
-        fill="none"
-      />
-      {/* Highlight label handled below in Text overlay */}
-    </Svg>
-  );
-}
-
 // ─── Mock quiz data ───
 const MOCK_QUESTIONS = [
   {
-    string: 4,
+    string: 5 as StringNumber,
     fret: 7,
     answer: 'E',
     options: ['A', 'E', 'D', 'B'],
@@ -93,7 +21,7 @@ const MOCK_QUESTIONS = [
     fretLabel: '7프렛',
   },
   {
-    string: 5,
+    string: 6 as StringNumber,
     fret: 3,
     answer: 'G',
     options: ['G', 'A', 'F', 'E'],
@@ -101,7 +29,7 @@ const MOCK_QUESTIONS = [
     fretLabel: '3프렛',
   },
   {
-    string: 2,
+    string: 3 as StringNumber,
     fret: 5,
     answer: 'E',
     options: ['D', 'C', 'E', 'F'],
@@ -109,7 +37,7 @@ const MOCK_QUESTIONS = [
     fretLabel: '5프렛',
   },
   {
-    string: 0,
+    string: 1 as StringNumber,
     fret: 1,
     answer: 'F',
     options: ['F', 'G', 'E', 'D'],
@@ -117,7 +45,7 @@ const MOCK_QUESTIONS = [
     fretLabel: '1프렛',
   },
   {
-    string: 3,
+    string: 4 as StringNumber,
     fret: 2,
     answer: 'E',
     options: ['A', 'B', 'E', 'D'],
@@ -165,7 +93,18 @@ export default function QuizNoteScreen() {
         <Text style={s.positionLabel}>
           {q.stringLabel} · {q.fretLabel}
         </Text>
-        <MiniFretboard highlightFret={q.fret} highlightString={q.string} state={state} />
+        <Fretboard
+          startFret={Math.max(0, q.fret - 2)}
+          endFret={Math.max(0, q.fret - 2) + 4}
+          highlights={[
+            {
+              string: q.string,
+              fret: q.fret,
+              color: state === 'correct' ? COLORS.correct : state === 'wrong' ? COLORS.wrong : COLORS.accent,
+              label: state !== 'question' ? q.answer : '?',
+            },
+          ]}
+        />
         <View style={s.resultArea}>
           {state === 'correct' && (
             <View style={s.resultRow}>

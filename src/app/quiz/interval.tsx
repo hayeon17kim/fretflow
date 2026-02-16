@@ -1,131 +1,23 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Line, Circle as SvgCircle } from 'react-native-svg';
+import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import type { StringNumber } from '@/types/music';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
 interface Pos {
-  s: number;
+  s: StringNumber;
   f: number;
-}
-
-// ─── Tappable fretboard ───
-function TappableFretboard({
-  startFret,
-  endFret,
-  rootPos,
-  tapped,
-  correctPos,
-  state,
-  onTap,
-}: {
-  startFret: number;
-  endFret: number;
-  rootPos: Pos;
-  tapped: Pos | null;
-  correctPos: Pos;
-  state: QuizState;
-  onTap: (s: number, f: number) => void;
-}) {
-  const strings = 6;
-  const fretCount = endFret - startFret + 1;
-  const w = 280;
-  const h = 160;
-  const padX = 24;
-  const padY = 16;
-  const fretW = (w - padX * 2) / Math.max(1, fretCount - 1);
-  const stringH = (h - padY * 2) / (strings - 1);
-
-  const dots: Array<{ cx: number; cy: number; color: string; label: string }> = [];
-
-  // Root dot
-  const rootCx = padX + (rootPos.f - startFret) * fretW;
-  const rootCy = padY + rootPos.s * stringH;
-  dots.push({ cx: rootCx, cy: rootCy, color: COLORS.correct, label: '' });
-
-  // User selection (question state) or answer result
-  if (state === 'question' && tapped) {
-    const cx = padX + (tapped.f - startFret) * fretW;
-    const cy = padY + tapped.s * stringH;
-    dots.push({ cx, cy, color: COLORS.accent, label: '?' });
-  }
-  if (state === 'correct') {
-    const cx = padX + (correctPos.f - startFret) * fretW;
-    const cy = padY + correctPos.s * stringH;
-    dots.push({ cx, cy, color: COLORS.correct, label: '' });
-  }
-  if (state === 'wrong') {
-    if (tapped) {
-      const cx = padX + (tapped.f - startFret) * fretW;
-      const cy = padY + tapped.s * stringH;
-      dots.push({ cx, cy, color: COLORS.wrong, label: '✕' });
-    }
-    const cx = padX + (correctPos.f - startFret) * fretW;
-    const cy = padY + correctPos.s * stringH;
-    dots.push({ cx, cy, color: COLORS.correct, label: '' });
-  }
-
-  return (
-    <View>
-      <Svg width={w} height={h} viewBox={`0 0 ${w} ${h}`}>
-        {/* Fret lines */}
-        {Array.from({ length: fretCount }, (_, i) => (
-          <Line
-            key={`f${i}`}
-            x1={padX + i * fretW}
-            y1={padY}
-            x2={padX + i * fretW}
-            y2={h - padY}
-            stroke={COLORS.fretLine}
-            strokeWidth={i === 0 && startFret === 0 ? 3 : 1}
-          />
-        ))}
-        {/* String lines */}
-        {Array.from({ length: strings }, (_, i) => (
-          <Line
-            key={`s${i}`}
-            x1={padX}
-            y1={padY + i * stringH}
-            x2={w - padX}
-            y2={padY + i * stringH}
-            stroke={COLORS.fretLine}
-            strokeWidth={1}
-          />
-        ))}
-        {/* Dots */}
-        {dots.map((d, i) => (
-          <SvgCircle key={`d${i}`} cx={d.cx} cy={d.cy} r={12} fill={d.color} />
-        ))}
-      </Svg>
-
-      {/* Tap overlay — invisible pressable grid */}
-      {state === 'question' && (
-        <View style={[StyleSheet.absoluteFill, { flexDirection: 'column' }]}>
-          {Array.from({ length: strings }, (_, si) => (
-            <View key={`row${si}`} style={{ flex: 1, flexDirection: 'row' }}>
-              {Array.from({ length: fretCount }, (_, fi) => (
-                <Pressable
-                  key={`cell${fi}`}
-                  style={{ flex: 1 }}
-                  onPress={() => onTap(si, startFret + fi)}
-                />
-              ))}
-            </View>
-          ))}
-        </View>
-      )}
-    </View>
-  );
 }
 
 // ─── Mock data ───
 const MOCK_QUESTIONS = [
   {
-    root: { s: 4, f: 0 },
-    correct: { s: 4, f: 7 },
+    root: { s: 5 as StringNumber, f: 0 },
+    correct: { s: 5 as StringNumber, f: 7 },
     rootNote: 'A',
     answerNote: 'E',
     intervalName: '완전5도 ↑',
@@ -134,8 +26,8 @@ const MOCK_QUESTIONS = [
     fretRange: [0, 9] as [number, number],
   },
   {
-    root: { s: 3, f: 2 },
-    correct: { s: 3, f: 7 },
+    root: { s: 4 as StringNumber, f: 2 },
+    correct: { s: 4 as StringNumber, f: 7 },
     rootNote: 'E',
     answerNote: 'B',
     intervalName: '완전5도 ↑',
@@ -153,12 +45,12 @@ export default function QuizIntervalScreen() {
 
   const q = MOCK_QUESTIONS[currentIdx];
 
-  const handleTap = (s: number, f: number) => {
+  const handleTap = (pos: { string: StringNumber; fret: number }) => {
     if (state !== 'question') return;
-    if (tapped?.s === s && tapped?.f === f) {
+    if (tapped?.s === pos.string && tapped?.f === pos.fret) {
       setTapped(null);
     } else {
-      setTapped({ s, f });
+      setTapped({ s: pos.string, f: pos.fret });
     }
   };
 
@@ -169,6 +61,57 @@ export default function QuizIntervalScreen() {
     } else {
       setState('wrong');
     }
+  };
+
+  const buildHighlights = (): FretHighlight[] => {
+    const highlights: FretHighlight[] = [
+      // Root position (always shown)
+      { string: q.root.s, fret: q.root.f, color: COLORS.correct, label: q.rootNote },
+    ];
+
+    // Show user's current selection (before confirming)
+    if (state === 'question' && tapped) {
+      highlights.push({
+        string: tapped.s,
+        fret: tapped.f,
+        color: COLORS.level2,
+        label: '?',
+        textColor: '#fff',
+        border: COLORS.level2,
+      });
+    }
+
+    // Show correct answer after submission
+    if (state === 'correct') {
+      highlights.push({
+        string: q.correct.s,
+        fret: q.correct.f,
+        color: COLORS.correct,
+        label: q.answerNote,
+      });
+    }
+
+    // Show both wrong and correct after wrong answer
+    if (state === 'wrong') {
+      if (tapped) {
+        highlights.push({
+          string: tapped.s,
+          fret: tapped.f,
+          color: COLORS.wrong,
+          label: '✕',
+          textColor: '#fff',
+        });
+      }
+      highlights.push({
+        string: q.correct.s,
+        fret: q.correct.f,
+        color: COLORS.correct,
+        label: q.answerNote,
+        border: COLORS.correct,
+      });
+    }
+
+    return highlights;
   };
 
   const nextCard = () => {
@@ -215,13 +158,11 @@ export default function QuizIntervalScreen() {
         </Text>
         <Text style={s.questionSub}>프렛보드에서 해당 음의 위치를 탭하세요</Text>
 
-        <TappableFretboard
+        <Fretboard
           startFret={q.fretRange[0]}
           endFret={q.fretRange[1]}
-          rootPos={q.root}
-          tapped={tapped}
-          correctPos={q.correct}
-          state={state}
+          highlights={buildHighlights()}
+          tappable={state === 'question'}
           onTap={handleTap}
         />
 
