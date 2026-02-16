@@ -12,14 +12,14 @@ import { useAppStore } from '@/stores/useAppStore';
 import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-const SESSION_SIZE = 10; // 한 세션당 카드 수
+const SESSION_SIZE = 10; // Number of cards per session
 
 export default function QuizNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
 
-  // 세션 시작 시 카드 생성 (한 번만)
+  // Generate cards at session start (once)
   const questions = useMemo(
     () => generateCardBatch('note', SESSION_SIZE) as NoteQuestionCard[],
     [],
@@ -42,10 +42,10 @@ export default function QuizNoteScreen() {
     if (state !== 'question') return;
     const correct = q.options[index] === q.answer;
 
-    // 응답 시간 기록
+    // Record response time
     const responseTime = recordAnswer(correct);
 
-    // 카드 추가 (아직 없으면) & 리뷰 기록
+    // Add card (if not exists) & record review
     addCard({
       id: q.id,
       type: 'note',
@@ -53,7 +53,7 @@ export default function QuizNoteScreen() {
     });
     recordReview(q.id, correct, responseTime);
 
-    // 일일 통계 업데이트
+    // Update daily statistics
     useAppStore.getState().incrementReview(correct);
   };
 

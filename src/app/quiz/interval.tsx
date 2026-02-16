@@ -15,40 +15,6 @@ import { getNoteAtPosition } from '@/utils/music';
 
 const SESSION_SIZE = 10;
 
-// ─── Interval name translations ───
-const INTERVAL_NAMES_KO: Record<IntervalName, string> = {
-  P1: '완전1도',
-  m2: '단2도',
-  M2: '장2도',
-  m3: '단3도',
-  M3: '장3도',
-  P4: '완전4도',
-  TT: '증4도',
-  P5: '완전5도',
-  m6: '단6도',
-  M6: '장6도',
-  m7: '단7도',
-  M7: '장7도',
-  P8: '완전8도',
-};
-
-// ─── Pattern hints ───
-const INTERVAL_PATTERN_HINTS: Record<IntervalName, string> = {
-  P1: '같은 위치 = 같은 음! 옥타브 패턴의 기준점이에요.',
-  m2: '같은 줄에서 1프렛 위 = 반음! 가장 작은 음정 간격이에요.',
-  M2: '같은 줄에서 2프렛 위 = 온음! 도레미파 중 대부분의 간격이에요.',
-  m3: '같은 줄에서 3프렛 위 = 단3도! 단조 화음의 핵심 음정이에요.',
-  M3: '같은 줄에서 4프렛 위 = 장3도! 밝은 느낌의 장조 화음이에요.',
-  P4: '같은 줄에서 5프렛 위 = 완전4도! 코드 구성의 기본이 되는 음정이에요.',
-  TT: '같은 줄에서 6프렛 위 = 증4도(감5도)! 블루스와 록의 텐션 사운드예요.',
-  P5: '같은 줄에서 7프렛 위 = 완전5도! 가장 안정적이고 조화로운 음정이에요.',
-  m6: '같은 줄에서 8프렛 위 = 단6도! 슬픈 느낌을 주는 음정이에요.',
-  M6: '같은 줄에서 9프렛 위 = 장6도! 밝고 따뜻한 느낌의 음정이에요.',
-  m7: '같은 줄에서 10프렛 위 = 단7도! 재즈와 블루스의 필수 음정이에요.',
-  M7: '같은 줄에서 11프렛 위 = 장7도! 부드럽고 세련된 느낌의 음정이에요.',
-  P8: '같은 줄에서 12프렛 위 = 완전8도(옥타브)! 같은 음의 높은 버전이에요.',
-};
-
 // ─── Adapt generated cards to tap-based format ───
 interface TapIntervalQuestion {
   id: string;
@@ -61,11 +27,11 @@ interface TapIntervalQuestion {
   fretRange: [number, number];
 }
 
-function adaptIntervalCard(card: IntervalQuestionCard): TapIntervalQuestion {
+function adaptIntervalCard(card: IntervalQuestionCard, t: (key: string) => string): TapIntervalQuestion {
   const rootNote = getNoteAtPosition(card.rootPosition);
   const answerNote = getNoteAtPosition(card.targetPosition);
-  const intervalNameKo = INTERVAL_NAMES_KO[card.answer];
-  const patternHint = INTERVAL_PATTERN_HINTS[card.answer];
+  const intervalNameKo = t(`quiz.interval.intervalNames.${card.answer}`);
+  const patternHint = t(`quiz.interval.patternHints.${card.answer}`);
 
   // Calculate fret range to show (show root - 1 to target + 2)
   const minFret = Math.max(0, card.rootPosition.fret - 1);
@@ -91,8 +57,8 @@ export default function QuizIntervalScreen() {
   // Generate cards for this session
   const questions = useMemo(() => {
     const generatedCards = generateCardBatch('interval', SESSION_SIZE) as IntervalQuestionCard[];
-    return generatedCards.map(adaptIntervalCard);
-  }, []);
+    return generatedCards.map(card => adaptIntervalCard(card, t));
+  }, [t]);
 
   const {
     currentCard: q,
@@ -134,7 +100,7 @@ export default function QuizIntervalScreen() {
     // Record this review in SM-2 algorithm
     recordReview(q.id, correct, responseTime);
 
-    // 일일 통계 업데이트
+    // Update daily statistics
     useAppStore.getState().incrementReview(correct);
   };
 

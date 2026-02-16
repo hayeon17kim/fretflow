@@ -14,25 +14,11 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 const SESSION_SIZE = 10;
 
-// ─── Scale name translations ───
-const SCALE_NAMES_KO: Record<string, string> = {
-  'major': '메이저',
-  'pentatonic-major': '펜타토닉 메이저',
-  'pentatonic-minor': '펜타토닉 마이너',
-};
-
-// ─── Pattern hints ───
-const SCALE_PATTERN_HINTS: Record<string, string> = {
-  'major': '메이저 스케일은 밝고 긍정적인 느낌의 7음 음계예요. 도레미파솔라시도!',
-  'pentatonic-major': '펜타토닉 메이저는 5음 음계로 밝은 느낌이에요. 블루스와 록에서 자주 쓰여요.',
-  'pentatonic-minor': '펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!',
-};
-
 // ─── Adapt generated cards to tap-based format ───
 interface TapScaleQuestion {
   id: string;
-  name: string;           // e.g., "C 펜타토닉 마이너"
-  position: string;       // "1포지션"
+  name: string;           // e.g., "C Pentatonic Minor"
+  position: string;       // e.g., "Position 1"
   scaleName: string;
   rootNote: string;
   rootPosition: FretPosition;
@@ -41,9 +27,9 @@ interface TapScaleQuestion {
   hint: string;
 }
 
-function adaptScaleCard(card: ScaleQuestionCard): TapScaleQuestion {
-  const scaleNameKo = SCALE_NAMES_KO[card.scaleName] || card.scaleName;
-  const hint = SCALE_PATTERN_HINTS[card.scaleName] || '';
+function adaptScaleCard(card: ScaleQuestionCard, t: (key: string, params?: any) => string): TapScaleQuestion {
+  const scaleNameKo = t(`quiz.scale.scaleNames.${card.scaleName}`);
+  const hint = t(`quiz.scale.patternHints.${card.scaleName}`);
 
   // Calculate fret range from correctPositions
   const frets = card.correctPositions.map(p => p.fret);
@@ -53,7 +39,7 @@ function adaptScaleCard(card: ScaleQuestionCard): TapScaleQuestion {
   return {
     id: card.id,
     name: `${card.rootNote} ${scaleNameKo}`,
-    position: '1포지션',
+    position: t('quiz.scale.position', { number: 1 }),
     scaleName: card.scaleName,
     rootNote: card.rootNote,
     rootPosition: card.rootPosition,
@@ -79,8 +65,8 @@ export default function QuizScaleScreen() {
   // Generate cards for this session
   const questions = useMemo(() => {
     const generatedCards = generateCardBatch('scale', SESSION_SIZE) as ScaleQuestionCard[];
-    return generatedCards.map(adaptScaleCard);
-  }, []);
+    return generatedCards.map(card => adaptScaleCard(card, t));
+  }, [t]);
 
   const {
     currentCard: q,
@@ -144,7 +130,7 @@ export default function QuizScaleScreen() {
     // Record this review in SM-2 algorithm
     recordReview(q.id, correct, responseTime);
 
-    // 일일 통계 업데이트
+    // Update daily statistics
     useAppStore.getState().incrementReview(correct);
   };
 
