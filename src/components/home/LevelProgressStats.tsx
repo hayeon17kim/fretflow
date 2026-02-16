@@ -1,7 +1,7 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import type { LevelId } from '@/config/levels';
-import { LEVELS } from '@/config/levels';
+import { getLevelLabel, LEVELS } from '@/config/levels';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface LevelProgressStatsProps {
@@ -17,7 +17,7 @@ export function LevelProgressStats({ levelProgress }: LevelProgressStatsProps) {
         <View key={lv.id} style={[s.statBox, { borderColor: `${lv.color}15` }]}>
           <Text style={[s.statValue, { color: lv.color }]}>{levelProgress[lv.id]}%</Text>
           <Text style={s.statLabel}>
-            {t('common.levelShort', { num: lv.num })} {lv.label}
+            {t('common.levelShort', { num: lv.num })} {getLevelLabel(lv.id, t)}
           </Text>
         </View>
       ))}

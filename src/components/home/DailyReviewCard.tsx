@@ -2,7 +2,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
 import type { LevelId } from '@/config/levels';
-import { LEVELS } from '@/config/levels';
+import { getLevelLabel, LEVELS } from '@/config/levels';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface DailyReviewCardProps {
@@ -91,7 +91,7 @@ export function DailyReviewCard({
           return (
             <View key={lv.id} style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
               <Text style={[s.chipText, { color: lv.color }]}>
-                {lv.label} ×{count}
+                {getLevelLabel(lv.id, t)} ×{count}
               </Text>
             </View>
           );
