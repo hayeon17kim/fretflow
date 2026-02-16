@@ -27,7 +27,10 @@ interface TapIntervalQuestion {
   fretRange: [number, number];
 }
 
-function adaptIntervalCard(card: IntervalQuestionCard, t: (key: string) => string): TapIntervalQuestion {
+function adaptIntervalCard(
+  card: IntervalQuestionCard,
+  t: (key: string) => string,
+): TapIntervalQuestion {
   const rootNote = getNoteAtPosition(card.rootPosition);
   const answerNote = getNoteAtPosition(card.targetPosition);
   const intervalNameKo = t(`quiz.interval.intervalNames.${card.answer}`);

@@ -1,4 +1,4 @@
-import { useRouter, useLocalSearchParams } from 'expo-router';
+import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
@@ -67,9 +67,7 @@ export default function QuizCompletionScreen() {
 
         {/* Accuracy */}
         <Text style={[s.accuracyText, { color: level.color }]}>{accuracy}%</Text>
-        <Text style={s.scoreText}>
-          {t('quiz.completion.score', { correct, total })}
-        </Text>
+        <Text style={s.scoreText}>{t('quiz.completion.score', { correct, total })}</Text>
 
         {/* Message */}
         <Text style={s.messageText}>{getMessage()}</Text>

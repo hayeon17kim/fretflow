@@ -1,5 +1,5 @@
-import { StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { StyleSheet, Text, View } from 'react-native';
 import { COLORS } from '@/utils/constants';
 
 interface OnboardingOverlayProps {

@@ -75,8 +75,7 @@ export function DailyReviewCard({
           />
         </View>
         <Text style={[s.progressPercent, { color: progressColor }]}>
-          {progressPercent}%
-          {progressPercent >= 100 && ' 🎉'}
+          {progressPercent}%{progressPercent >= 100 && ' 🎉'}
         </Text>
       </View>
 

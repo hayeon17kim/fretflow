@@ -59,96 +59,96 @@ interface AppState {
 
 // Store implementation
 const storeImpl: StateCreator<AppState> = (set, get) => ({
-      activeLevel: null,
-      setActiveLevel: (level) => set({ activeLevel: level }),
+  activeLevel: null,
+  setActiveLevel: (level) => set({ activeLevel: level }),
 
+  todayStats: {
+    cardsReviewed: 0,
+    correctCount: 0,
+    streak: 0,
+    lastReviewDate: null,
+  },
+  incrementReview: (correct) => {
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const state = get();
+    const lastReview = state.todayStats.lastReviewDate;
+
+    let newStreak = state.todayStats.streak;
+
+    // If this is the first review of the day, handle streak logic
+    if (lastReview !== today) {
+      if (!lastReview) {
+        // First time ever or after reset - start new streak
+        newStreak = 1;
+      } else {
+        // Calculate days difference
+        const lastDate = new Date(lastReview);
+        const todayDate = new Date(today);
+        const daysDiff = Math.floor(
+          (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
+        );
+
+        if (daysDiff === 1) {
+          // Consecutive day - increment streak
+          newStreak = state.todayStats.streak + 1;
+        } else if (daysDiff > 1) {
+          // Missed days - reset to 1 (new streak starts today)
+          newStreak = 1;
+        }
+      }
+    }
+
+    set((state) => ({
+      todayStats: {
+        cardsReviewed: state.todayStats.cardsReviewed + 1,
+        correctCount: state.todayStats.correctCount + (correct ? 1 : 0),
+        streak: newStreak,
+        lastReviewDate: today,
+      },
+    }));
+  },
+  resetDailyStats: () =>
+    set({
       todayStats: {
         cardsReviewed: 0,
         correctCount: 0,
         streak: 0,
         lastReviewDate: null,
       },
-      incrementReview: (correct) => {
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        const state = get();
-        const lastReview = state.todayStats.lastReviewDate;
+    }),
+  checkAndResetDailyStats: () => {
+    const state = get();
+    const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
+    const lastReview = state.todayStats.lastReviewDate;
 
-        let newStreak = state.todayStats.streak;
+    // If no last review date or it's the same day, do nothing
+    if (!lastReview || lastReview === today) {
+      return;
+    }
 
-        // If this is the first review of the day, handle streak logic
-        if (lastReview !== today) {
-          if (!lastReview) {
-            // First time ever or after reset - start new streak
-            newStreak = 1;
-          } else {
-            // Calculate days difference
-            const lastDate = new Date(lastReview);
-            const todayDate = new Date(today);
-            const daysDiff = Math.floor(
-              (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
-            );
-
-            if (daysDiff === 1) {
-              // Consecutive day - increment streak
-              newStreak = state.todayStats.streak + 1;
-            } else if (daysDiff > 1) {
-              // Missed days - reset to 1 (new streak starts today)
-              newStreak = 1;
-            }
-          }
-        }
-
-        set((state) => ({
-          todayStats: {
-            cardsReviewed: state.todayStats.cardsReviewed + 1,
-            correctCount: state.todayStats.correctCount + (correct ? 1 : 0),
-            streak: newStreak,
-            lastReviewDate: today,
-          },
-        }));
+    // If it's a new day, reset daily counters
+    // Note: Streak logic is handled in incrementReview on first review
+    set({
+      todayStats: {
+        ...state.todayStats,
+        cardsReviewed: 0,
+        correctCount: 0,
       },
-      resetDailyStats: () =>
-        set({
-          todayStats: {
-            cardsReviewed: 0,
-            correctCount: 0,
-            streak: 0,
-            lastReviewDate: null,
-          },
-        }),
-      checkAndResetDailyStats: () => {
-        const state = get();
-        const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
-        const lastReview = state.todayStats.lastReviewDate;
+    });
+  },
 
-        // If no last review date or it's the same day, do nothing
-        if (!lastReview || lastReview === today) {
-          return;
-        }
+  hasSeenOnboarding: false,
+  setHasSeenOnboarding: (seen) => set({ hasSeenOnboarding: seen }),
 
-        // If it's a new day, reset daily counters
-        // Note: Streak logic is handled in incrementReview on first review
-        set({
-          todayStats: {
-            ...state.todayStats,
-            cardsReviewed: 0,
-            correctCount: 0,
-          },
-        });
-      },
-
-      hasSeenOnboarding: false,
-      setHasSeenOnboarding: (seen) => set({ hasSeenOnboarding: seen }),
-
-      settings: {
-        username: '기타 학습자',
-        dailyGoal: 20,
-        vibrationEnabled: true,
-      },
-      updateSettings: (newSettings) =>
-        set((state) => ({
-          settings: { ...state.settings, ...newSettings },
-        })),
+  settings: {
+    username: '기타 학습자',
+    dailyGoal: 20,
+    vibrationEnabled: true,
+  },
+  updateSettings: (newSettings) =>
+    set((state) => ({
+      settings: { ...state.settings, ...newSettings },
+    })),
 });
 
 // Conditionally apply persist middleware based on platform

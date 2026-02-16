@@ -125,8 +125,15 @@ export default function MasteryScreen() {
             <View style={s.weakCard} accessibilityRole="alert">
               <Text style={s.weakCardTitle}>
                 {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}`)[0]}
-                <Text style={{ color: COLORS.wrong }}>{totalWeak}{t('mastery.cardUnit')}</Text>
-                {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}${t('mastery.cardUnit')}`)[1]}
+                <Text style={{ color: COLORS.wrong }}>
+                  {totalWeak}
+                  {t('mastery.cardUnit')}
+                </Text>
+                {
+                  t('mastery.weakCardsCount', { count: totalWeak }).split(
+                    `${totalWeak}${t('mastery.cardUnit')}`,
+                  )[1]
+                }
               </Text>
               <Text style={s.weakCardDesc}>{t('mastery.weakCardsDesc')}</Text>
 
@@ -138,7 +145,8 @@ export default function MasteryScreen() {
                     <View key={lv.id} style={s.weakBreakdownItem}>
                       <View style={[s.weakDot, { backgroundColor: lv.color }]} />
                       <Text style={s.weakBreakdownText}>
-                        {getLevelLabel(lv.id, t)}: {lv.weak}{t('mastery.cardUnit')}
+                        {getLevelLabel(lv.id, t)}: {lv.weak}
+                        {t('mastery.cardUnit')}
                       </Text>
                     </View>
                   ))}

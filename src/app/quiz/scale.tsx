@@ -27,12 +27,15 @@ interface TapScaleQuestion {
   hint: string;
 }
 
-function adaptScaleCard(card: ScaleQuestionCard, t: (key: string, params?: any) => string): TapScaleQuestion {
+function adaptScaleCard(
+  card: ScaleQuestionCard,
+  t: (key: string, params?: any) => string,
+): TapScaleQuestion {
   const scaleNameKo = t(`quiz.scale.scaleNames.${card.scaleName}`);
   const hint = t(`quiz.scale.patternHints.${card.scaleName}`);
 
   // Calculate fret range from correctPositions
-  const frets = card.correctPositions.map(p => p.fret);
+  const frets = card.correctPositions.map((p) => p.fret);
   const minFret = Math.min(...frets);
   const maxFret = Math.min(Math.max(...frets) + 2, 15);
 

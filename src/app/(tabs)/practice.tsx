@@ -5,7 +5,13 @@ import { useTranslation } from 'react-i18next';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { LockIcon } from '@/components/icons/LockIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { getLevelDesc, getLevelExample, getLevelLabel, LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
+import {
+  getLevelDesc,
+  getLevelExample,
+  getLevelLabel,
+  LEVELS,
+  TARGET_CARDS_PER_LEVEL,
+} from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
