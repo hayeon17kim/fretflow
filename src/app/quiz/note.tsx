@@ -1,5 +1,6 @@
 import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { Fretboard } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
@@ -15,6 +16,7 @@ const SESSION_SIZE = 10; // 한 세션당 카드 수
 
 export default function QuizNoteScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
 
   // 세션 시작 시 카드 생성 (한 번만)
@@ -61,7 +63,7 @@ export default function QuizNoteScreen() {
   return (
     <View style={s.container}>
       <QuizHeader
-        label="음 위치"
+        label={t('quiz.note.title')}
         levelNum={1}
         color={COLORS.level1}
         progress={currentIdx + (state !== 'question' ? 1 : 0)}
@@ -72,7 +74,7 @@ export default function QuizNoteScreen() {
       {/* Card */}
       <QuizCard state={state}>
         <Text style={s.positionLabel}>
-          {q.string}번줄 · {q.fret}프렛
+          {t('quiz.note.position', { string: q.string, fret: q.fret })}
         </Text>
         <Fretboard
           startFret={Math.max(0, q.fret - 2)}
@@ -94,8 +96,8 @@ export default function QuizNoteScreen() {
         <View style={s.resultArea}>
           {state === 'correct' && (
             <View style={s.resultRow}>
-              <Text style={s.soundTag}>🔊 소리 재생</Text>
-              <Text style={s.resultCorrect}>정답!</Text>
+              <Text style={s.soundTag}>{t('quiz.note.soundPlay')}</Text>
+              <Text style={s.resultCorrect}>{t('quiz.note.correct')}</Text>
             </View>
           )}
           {state === 'wrong' && (
@@ -103,12 +105,12 @@ export default function QuizNoteScreen() {
               <Text
                 style={[s.soundTag, { color: COLORS.wrong, backgroundColor: `${COLORS.wrong}15` }]}
               >
-                🔇 오답음
+                {t('quiz.note.wrongSound')}
               </Text>
-              <Text style={s.resultWrong}>정답은 {q.answer}</Text>
+              <Text style={s.resultWrong}>{t('quiz.note.wrongAnswer', { answer: q.answer })}</Text>
             </View>
           )}
-          {state === 'question' && <Text style={s.questionText}>이 음은?</Text>}
+          {state === 'question' && <Text style={s.questionText}>{t('quiz.note.question')}</Text>}
         </View>
       </QuizCard>
 
