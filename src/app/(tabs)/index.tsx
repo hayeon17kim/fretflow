@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { FireIcon } from '@/components/icons/FireIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
@@ -32,6 +33,7 @@ function LockIcon({ size = 20 }: { size?: number }) {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const todayStats = useAppStore((s) => s.todayStats);
   const { getDueCards, getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
 
@@ -72,15 +74,14 @@ export default function HomeScreen() {
         {/* ─── Top row ─── */}
         <View style={s.topRow}>
           <View>
-            <Text style={s.greeting}>좋은 하루에요 👋</Text>
-            <Text style={s.title}>기타 사고력 키우기</Text>
+            <Text style={s.greeting}>{t('home.greeting')}</Text>
+            <Text style={s.title}>{t('home.title')}</Text>
           </View>
           <Pressable
             onPress={() => router.push('/(tabs)/settings')}
             style={s.profileBtn}
             accessibilityRole="button"
-            accessibilityLabel="설정"
-            accessibilityHint="설정 화면으로 이동합니다"
+            accessibilityLabel={t('settings.title')}
           >
             <Svg
               width={18}
@@ -105,16 +106,16 @@ export default function HomeScreen() {
             <View style={s.streakRow}>
               <FireIcon color={COLORS.level1} />
               <Text style={[s.streakText, { color: COLORS.level1 }]}>
-                {todayStats.streak}일 연속
+                {t('home.streak', { count: todayStats.streak })}
               </Text>
             </View>
             <Text style={s.dueInfo}>
-              {dueCount}장 · 약 {estimatedMinutes}분
+              {t('home.dueInfo', { count: dueCount, minutes: estimatedMinutes })}
             </Text>
           </View>
 
           {/* Title */}
-          <Text style={s.ctaTitle}>오늘의 복습 믹스</Text>
+          <Text style={s.ctaTitle}>{t('home.todayReview')}</Text>
 
           {/* Level composition chips */}
           <View style={s.chipRow}>
@@ -139,14 +140,11 @@ export default function HomeScreen() {
               router.push('/quiz/note');
             }}
             accessibilityRole="button"
-            accessibilityLabel={dueCount > 0 ? '복습 시작' : '새 카드 추가하기'}
-            accessibilityHint={
-              dueCount > 0
-                ? `오늘 복습할 카드 ${dueCount}장, 약 ${estimatedMinutes}분 소요`
-                : '새로운 학습 카드를 추가합니다'
-            }
+            accessibilityLabel={dueCount > 0 ? t('home.startReview') : t('home.addCards')}
           >
-            <Text style={s.ctaBtnText}>{dueCount > 0 ? '복습 시작 →' : '새 카드 추가하기 →'}</Text>
+            <Text style={s.ctaBtnText}>
+              {dueCount > 0 ? t('home.startReview') : t('home.addCards')}
+            </Text>
           </Pressable>
         </View>
 
@@ -156,14 +154,14 @@ export default function HomeScreen() {
             <View key={lv.id} style={[s.statBox, { borderColor: `${lv.color}15` }]}>
               <Text style={[s.statValue, { color: lv.color }]}>{levelProgress[lv.id]}%</Text>
               <Text style={s.statLabel}>
-                Lv.{lv.num} {lv.label}
+                {t('common.levelShort', { num: lv.num })} {lv.label}
               </Text>
             </View>
           ))}
         </View>
 
         {/* ─── Level cards ─── */}
-        <Text style={s.sectionTitle}>레벨별 연습</Text>
+        <Text style={s.sectionTitle}>{t('home.levelPractice')}</Text>
         {LEVELS.map((lv) => {
           const progress = levelProgress[lv.id];
           const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
@@ -185,21 +183,20 @@ export default function HomeScreen() {
                     LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
                   );
                   Alert.alert(
-                    '🔒 잠긴 레벨',
-                    `Lv.${prevLevel} ${LEVELS[prevLevel - 1].label}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: ${prevLevelProgress}%`,
-                    [{ text: '확인', style: 'default' }],
+                    t('home.lockedAlert'),
+                    t('home.lockedMessage', {
+                      level: prevLevel,
+                      name: LEVELS[prevLevel - 1].label,
+                      progress: prevLevelProgress,
+                    }),
+                    [{ text: t('home.confirm'), style: 'default' }],
                   );
                 } else {
                   router.push(QUIZ_ROUTES[lv.id]);
                 }
               }}
               accessibilityRole="button"
-              accessibilityLabel={`${lv.label} 연습`}
-              accessibilityHint={
-                locked
-                  ? `잠긴 레벨입니다. 이전 레벨을 80퍼센트 이상 달성해야 합니다`
-                  : `${lv.desc}. 현재 진행도 ${progress}퍼센트`
-              }
+              accessibilityLabel={`${lv.label}`}
             >
               <View style={s.levelCardInner}>
                 {/* Icon with circular progress */}
@@ -216,12 +213,14 @@ export default function HomeScreen() {
                     </Text>
                     {locked && (
                       <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
-                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>잠김</Text>
+                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>
+                          {t('home.locked')}
+                        </Text>
                       </View>
                     )}
                     {'basic' in lv && lv.basic && !locked && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                        <Text style={[s.chipText, { color: lv.color }]}>기초 모드</Text>
+                        <Text style={[s.chipText, { color: lv.color }]}>{t('home.basicMode')}</Text>
                       </View>
                     )}
                   </View>
@@ -246,10 +245,9 @@ export default function HomeScreen() {
           style={({ pressed }) => [s.practiceBtn, pressed && { opacity: 0.7 }]}
           onPress={() => router.push('/(tabs)/practice')}
           accessibilityRole="button"
-          accessibilityLabel="특정 레벨만 연습하기"
-          accessibilityHint="연습 탭으로 이동하여 원하는 레벨을 선택할 수 있습니다"
+          accessibilityLabel={t('home.practiceShortcut')}
         >
-          <Text style={s.practiceBtnText}>특정 레벨만 연습하기 →</Text>
+          <Text style={s.practiceBtnText}>{t('home.practiceShortcut')}</Text>
         </Pressable>
       </ScrollView>
     </View>

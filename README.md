@@ -1,146 +1,104 @@
 # 🎸 FretFlow
 
-> Master the guitar fretboard with science-backed spaced repetition learning
+> Master the guitar fretboard faster with science-backed spaced repetition
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.76-61dafb.svg)](https://reactnative.dev/)
 [![Expo](https://img.shields.io/badge/Expo-54.0-000020.svg)](https://expo.dev/)
 
-## 💡 Overview
+## What is FretFlow?
 
-Learning guitar is challenging - memorizing hundreds of note positions across the fretboard can be overwhelming. **FretFlow** solves this with the **SM-2 Spaced Repetition Algorithm**, scientifically proven to optimize memory retention.
+Learning guitar means memorizing hundreds of note positions across the fretboard. FretFlow makes this process faster and more efficient using the **SM-2 spaced repetition algorithm** - the same technique used by apps like Anki and Duolingo.
 
-- 📊 **Personalized Learning**: Analyzes your memory patterns to schedule optimal review timing
-- 🎯 **4-Level Progression**: Note Position → Intervals → Scales → Ear Training
-- 📱 **Native Experience**: Smooth interactions powered by React Native
-- 🎨 **Interactive Fretboard**: Real-time SVG-based visualizations
+The app analyzes what you're struggling with and schedules reviews at the perfect moment, just before you forget.
 
-## ✨ Features
+## Features
 
-### 🎯 Progressive 4-Level System
-Each level builds naturally on the previous one:
-- **Lv.1 Note Position**: Mini fretboard + multiple-choice quiz
-- **Lv.2 Intervals**: Tappable fretboard for pattern recognition
-- **Lv.3 Scales**: Multi-select fretboard to build complete scales
-- **Lv.4 Ear Training**: Audio playback with pitch identification
+### 🎯 4-Level Learning Path
+Progress through increasingly complex concepts:
+- **Level 1**: Find notes on the fretboard
+- **Level 2**: Learn interval patterns
+- **Level 3**: Master scale shapes
+- **Level 4**: Train your ear
 
-### 🧠 Intelligent Review System
-SM-2 algorithm tracks difficulty for each card to beat the forgetting curve:
-- Easy cards appear less frequently, difficult ones more often
-- Auto-adjusts difficulty based on response time
-- High-performance MMKV local storage
+### 🧠 Smart Review System
+- Cards you find easy appear less often
+- Difficult cards come back more frequently
+- Automatic difficulty adjustment based on your response time
+- Track your daily progress and study streaks
 
-### 📈 Progress Visualization
-- Daily review count with estimated study time
-- Mastery progress by level
-- Study streak tracking
+### 📱 Interactive Fretboard
+- Touch-responsive fretboard for hands-on practice
+- Visual feedback for correct/incorrect answers
+- Multiple quiz formats: multiple choice, tap selection, multi-select
 
-## 🛠 Tech Stack
+## Tech Stack
 
-| Category | Technologies |
-|---------|-------------|
-| **Frontend** | React Native 0.76.6, TypeScript 5.9, Expo 54 |
-| **Navigation** | Expo Router 6.0 (file-based routing) |
-| **State Management** | Zustand 5.0 (global), React Query 5.90 (server) |
-| **Storage** | MMKV (high-performance local storage) |
-| **Graphics** | React Native SVG, Reanimated 3.16 |
-| **Backend** | Supabase (planned) |
-| **i18n** | i18next, react-i18next |
-| **Dev Tools** | Biome 2.4, Zod 4.3 |
+Built with **React Native** + **TypeScript** + **Expo** for cross-platform mobile development.
 
-## 🏗 Technical Highlights
+**Key technologies:**
+- Expo Router for navigation
+- Zustand for state management
+- MMKV for high-performance local storage (30x faster than AsyncStorage)
+- React Native SVG for fretboard visualizations
+- React Native Reanimated for smooth animations
 
-### 1. SM-2 Algorithm Implementation
-Scientifically validated spaced repetition algorithm implemented in TypeScript for maximum learning efficiency:
-```typescript
-// Auto-adjusts difficulty based on response time
-const quality = responseTimeMs < 3000 ? 5 : responseTimeMs < 5000 ? 4 : 3;
-const updated = calculateSM2(card, quality);
-```
+**Planned:** Supabase backend for cloud sync and user accounts
 
-### 2. File-Based Routing Architecture
-Leveraging Expo Router's file-system navigation for scalable structure:
-- Tab navigation: `(tabs)` group
-- Nested stacks: `quiz/` directory
-
-### 3. High-Performance Local Storage
-Native performance data persistence with MMKV (**30x faster** than AsyncStorage)
-
-### 4. Design System
-Centralized design tokens for consistent UI/UX (`constants.ts`):
-- Level-based color coding
-- Responsive spacing system
-- Typography scale
-
-## 🚀 Quick Start
+## Quick Start
 
 ```bash
-# Install dependencies
 npm install
-
-# Start development server
 npm start
 
-# Run on iOS / Android / Web
-npm run ios | android | web
+# Run on your platform
+npm run ios     # iOS simulator
+npm run android # Android emulator
+npm run web     # Web browser
 ```
 
-### Development Commands
-```bash
-npm run lint          # Biome lint check
-npm run lint:fix      # Auto-fix issues
-npm run format        # Format code
-npm run typecheck     # TypeScript type checking
-```
-
-## 📁 Project Structure
+## Project Structure
 
 ```
 src/
-├── app/                      # Expo Router screens
-│   ├── (tabs)/              # Tab navigation (Home, Practice, etc.)
-│   └── quiz/                # Quiz screens (Note, Interval, Scale, Ear)
-├── components/              # Reusable components
-│   └── quiz/                # Quiz-specific components
-├── hooks/                   # Custom hooks
-│   └── useSpacedRepetition.ts    # SM-2 card management
-├── stores/                  # Zustand stores
-├── types/                   # TypeScript definitions
-├── utils/                   # Utilities
-│   ├── constants.ts         # Design tokens
-│   ├── music.ts             # Music theory calculations
-│   ├── sm2.ts               # SM-2 algorithm
-│   └── storage.ts           # MMKV adapter
-└── i18n/                    # Internationalization
+├── app/
+│   ├── (tabs)/          # Home, Practice, Mastery, Settings
+│   └── quiz/            # Note, Interval, Scale, Ear quizzes
+├── components/          # Reusable UI components
+├── hooks/               # useSpacedRepetition (SM-2 implementation)
+├── stores/              # Global state management
+├── utils/
+│   ├── sm2.ts          # Spaced repetition algorithm
+│   ├── music.ts        # Music theory calculations
+│   └── constants.ts    # Design tokens
+└── i18n/               # Internationalization
 ```
 
-## 🎨 Design Philosophy
+## Development
 
-- **Design Tokens First**: All colors, spacing, and typography sourced from centralized constants
-- **TypeScript Strict Mode**: Type safety throughout
-- **Component Composition**: Reusable, testable components
-- **Performance**: Native animations with Reanimated, MMKV for storage
+```bash
+npm run lint       # Check code style
+npm run lint:fix   # Auto-fix issues
+npm run typecheck  # Type checking
+npm run format     # Format code
+```
 
-## 🚧 Roadmap
+Code quality enforced with:
+- **Biome** for fast linting and formatting
+- **TypeScript** strict mode
+- **Zod** for runtime validation
 
-- [ ] Audio playback (expo-av integration)
-- [ ] Supabase backend integration
-- [ ] Level unlock system
-- [ ] Mastery dashboard with analytics
-- [ ] Daily review notifications
-- [ ] Settings & customization
+## Roadmap
 
-## 📝 Development Guidelines
-
-- **UI Language**: Korean for user-facing text, English for code
-- **Linting**: Biome enforces consistent code style (100 char line width, 2-space tabs)
-- **Commit Style**: Conventional commits preferred
-
-## 📄 License
-
-Personal project.
+- [ ] Audio playback for ear training
+- [ ] Cloud sync with Supabase
+- [ ] Achievement system
+- [ ] Practice statistics and insights
+- [ ] Daily review reminders
 
 ---
 
-**Last Updated**: Feb 2026
-**Detailed Docs**: See `handoff.md` for architecture details
+**Status**: Active development
+**Last updated**: Feb 2026
+
+For detailed architecture and development docs, see `handoff.md`

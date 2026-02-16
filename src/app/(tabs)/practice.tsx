@@ -2,6 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
@@ -11,9 +12,9 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 // ─── Session duration options ───
 const SESSION_OPTIONS = [
-  { label: '퀵 3분', cards: 10 },
-  { label: '포커스 10분', cards: 25 },
-  { label: '딥 20분', cards: 50 },
+  { key: 'quick', cards: 10 },
+  { key: 'focus', cards: 25 },
+  { key: 'deep', cards: 50 },
 ] as const;
 
 // ─── Lock icon ───
@@ -37,6 +38,7 @@ function LockIcon({ size = 18 }: { size?: number }) {
 
 export default function PracticeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
   const [_refreshKey, setRefreshKey] = useState(0);
   const { getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
@@ -56,8 +58,8 @@ export default function PracticeScreen() {
     <View style={s.container}>
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* Header */}
-        <Text style={s.title}>연습하기</Text>
-        <Text style={s.subtitle}>레벨을 선택하고 연습을 시작하세요</Text>
+        <Text style={s.title}>{t('practice.title')}</Text>
+        <Text style={s.subtitle}>{t('practice.subtitle')}</Text>
 
         {/* Level cards */}
         {LEVELS.map((lv) => {
@@ -77,9 +79,13 @@ export default function PracticeScreen() {
                     LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
                   );
                   Alert.alert(
-                    '🔒 잠긴 레벨',
-                    `Lv.${prevLevel} ${LEVELS[prevLevel - 1].label}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: ${prevLevelProgress}%`,
-                    [{ text: '확인', style: 'default' }],
+                    t('practice.lockedAlert'),
+                    t('practice.lockedMessage', {
+                      level: prevLevel,
+                      name: LEVELS[prevLevel - 1].label,
+                      progress: prevLevelProgress,
+                    }),
+                    [{ text: t('practice.confirm'), style: 'default' }],
                   );
                 } else {
                   toggleExpand(lv.id);
@@ -87,14 +93,7 @@ export default function PracticeScreen() {
               }}
               style={[s.levelCard, { borderColor: `${lv.color}25` }, locked && { opacity: 0.5 }]}
               accessibilityRole="button"
-              accessibilityLabel={`${lv.label} 레벨`}
-              accessibilityHint={
-                locked
-                  ? '잠긴 레벨입니다. 이전 레벨을 80퍼센트 이상 달성해야 합니다'
-                  : isExpanded
-                    ? '세션 옵션을 숨기려면 탭하세요'
-                    : `세션 옵션을 보려면 탭하세요. 진행도는 ${progress}퍼센트입니다`
-              }
+              accessibilityLabel={`${lv.label}`}
               accessibilityState={{ expanded: isExpanded }}
             >
               {/* Main row */}
@@ -113,12 +112,14 @@ export default function PracticeScreen() {
                     </Text>
                     {locked && (
                       <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
-                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>잠김</Text>
+                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>
+                          {t('practice.locked')}
+                        </Text>
                       </View>
                     )}
                     {'basic' in lv && lv.basic && !locked && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                        <Text style={[s.chipText, { color: lv.color }]}>기초 모드</Text>
+                        <Text style={[s.chipText, { color: lv.color }]}>{t('practice.basicMode')}</Text>
                       </View>
                     )}
                   </View>
@@ -140,7 +141,7 @@ export default function PracticeScreen() {
                 <View style={s.expandedSection}>
                   {/* Example */}
                   <View style={s.exampleBox}>
-                    <Text style={s.exampleLabel}>예시 문제</Text>
+                    <Text style={s.exampleLabel}>{t('practice.exampleProblem')}</Text>
                     <Text style={s.exampleText}>{lv.example}</Text>
                   </View>
 
@@ -148,7 +149,7 @@ export default function PracticeScreen() {
                   <View style={s.sessionRow}>
                     {SESSION_OPTIONS.map((opt) => (
                       <Pressable
-                        key={opt.label}
+                        key={opt.key}
                         style={({ pressed }) => [
                           s.sessionBtn,
                           pressed && { opacity: 0.7, transform: [{ scale: 0.97 }] },
@@ -157,11 +158,14 @@ export default function PracticeScreen() {
                           router.push(QUIZ_ROUTES[lv.id]);
                         }}
                         accessibilityRole="button"
-                        accessibilityLabel={`${opt.label} 세션`}
-                        accessibilityHint={`${opt.cards}장의 카드로 ${lv.label} 연습을 시작합니다`}
+                        accessibilityLabel={t(`practice.sessions.${opt.key}`)}
                       >
-                        <Text style={[s.sessionBtnLabel, { color: lv.color }]}>{opt.label}</Text>
-                        <Text style={s.sessionBtnCards}>{opt.cards}장</Text>
+                        <Text style={[s.sessionBtnLabel, { color: lv.color }]}>
+                          {t(`practice.sessions.${opt.key}`)}
+                        </Text>
+                        <Text style={s.sessionBtnCards}>
+                          {t('practice.sessions.cardsCount', { count: opt.cards })}
+                        </Text>
                       </Pressable>
                     ))}
                   </View>
@@ -179,10 +183,9 @@ export default function PracticeScreen() {
             router.push('/quiz/note');
           }}
           accessibilityRole="button"
-          accessibilityLabel="전체 레벨 믹스 연습"
-          accessibilityHint="모든 레벨의 카드를 섞어서 연습합니다"
+          accessibilityLabel={t('practice.mixMode')}
         >
-          <Text style={s.mixBtnText}>🎲 전체 레벨 믹스 연습</Text>
+          <Text style={s.mixBtnText}>{t('practice.mixMode')}</Text>
         </Pressable>
       </ScrollView>
     </View>

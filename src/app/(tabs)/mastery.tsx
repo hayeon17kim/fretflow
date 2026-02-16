@@ -1,6 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
@@ -9,6 +10,7 @@ import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 export default function MasteryScreen() {
+  const { t } = useTranslation();
   const { getCardCount, getMasteredCards, getWeakCards } = useSpacedRepetition();
   const [_refreshKey, setRefreshKey] = useState(0);
 
@@ -39,35 +41,31 @@ export default function MasteryScreen() {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* ─── Header ─── */}
         <View style={s.header}>
-          <Text style={s.title}>마스터리 맵</Text>
-          <Text style={s.subtitle}>전체 학습 진행도를 확인하세요</Text>
+          <Text style={s.title}>{t('mastery.title')}</Text>
+          <Text style={s.subtitle}>{t('mastery.subtitle')}</Text>
         </View>
 
         {/* ─── Overall stats card ─── */}
-        <View
-          style={s.overallCard}
-          accessibilityRole="summary"
-          accessibilityLabel={`전체 학습 현황. 총 카드 수 ${totalCards}장, 마스터 완료 ${totalMastered}장, 약점 카드 ${totalWeak}장, 전체 진행도 ${overallProgress}퍼센트`}
-        >
+        <View style={s.overallCard} accessibilityRole="summary">
           <View style={s.overallHeader}>
             <TrophyIcon color={COLORS.level1} size={24} />
-            <Text style={s.overallTitle}>전체 학습 현황</Text>
+            <Text style={s.overallTitle}>{t('mastery.overallStatus')}</Text>
           </View>
 
           <View style={s.overallStats}>
             <View style={s.overallStatItem}>
               <Text style={s.overallStatValue}>{totalCards}</Text>
-              <Text style={s.overallStatLabel}>총 카드 수</Text>
+              <Text style={s.overallStatLabel}>{t('mastery.totalCards')}</Text>
             </View>
             <View style={s.overallStatDivider} />
             <View style={s.overallStatItem}>
               <Text style={[s.overallStatValue, { color: COLORS.level1 }]}>{totalMastered}</Text>
-              <Text style={s.overallStatLabel}>마스터 완료</Text>
+              <Text style={s.overallStatLabel}>{t('mastery.mastered')}</Text>
             </View>
             <View style={s.overallStatDivider} />
             <View style={s.overallStatItem}>
               <Text style={[s.overallStatValue, { color: COLORS.wrong }]}>{totalWeak}</Text>
-              <Text style={s.overallStatLabel}>약점 카드</Text>
+              <Text style={s.overallStatLabel}>{t('mastery.weakCards')}</Text>
             </View>
           </View>
 
@@ -76,20 +74,15 @@ export default function MasteryScreen() {
             <View style={s.progressBarBg}>
               <View style={[s.progressBarFill, { width: `${overallProgress}%` }]} />
             </View>
-            <Text style={s.progressBarText}>{overallProgress}% 완성</Text>
+            <Text style={s.progressBarText}>{t('mastery.completion', { progress: overallProgress })}</Text>
           </View>
         </View>
 
         {/* ─── Level mastery grid ─── */}
-        <Text style={s.sectionTitle}>레벨별 마스터리</Text>
+        <Text style={s.sectionTitle}>{t('mastery.levelMastery')}</Text>
         <View style={s.levelGrid}>
           {levelStats.map((lv) => (
-            <View
-              key={lv.id}
-              style={[s.levelBox, { borderColor: `${lv.color}25` }]}
-              accessibilityRole="summary"
-              accessibilityLabel={`레벨 ${lv.num} ${lv.label}. 진행도 ${lv.progress}퍼센트. ${lv.mastered}장 중 ${lv.total}장 마스터 완료`}
-            >
+            <View key={lv.id} style={[s.levelBox, { borderColor: `${lv.color}25` }]} accessibilityRole="summary">
               {/* Icon with circular progress */}
               <View style={s.levelIconContainer}>
                 <CircularProgress progress={lv.progress} color={lv.color} size={60} />
@@ -98,7 +91,7 @@ export default function MasteryScreen() {
 
               {/* Info */}
               <Text style={s.levelBoxName}>
-                Lv.{lv.num} {lv.label}
+                {t('common.levelShort', { num: lv.num })} {lv.label}
               </Text>
               <Text style={s.levelBoxProgress}>{lv.progress}%</Text>
 
@@ -106,7 +99,7 @@ export default function MasteryScreen() {
               <View style={s.levelBoxStats}>
                 <Text style={s.levelBoxStat}>
                   <Text style={[s.levelBoxStatValue, { color: lv.color }]}>{lv.mastered}</Text>
-                  <Text style={s.levelBoxStatLabel}>/{lv.total} 마스터</Text>
+                  <Text style={s.levelBoxStatLabel}>/{lv.total} {t('mastery.mastered')}</Text>
                 </Text>
               </View>
             </View>
@@ -118,20 +111,16 @@ export default function MasteryScreen() {
           <>
             <View style={s.weakHeader}>
               <AlertIcon color={COLORS.wrong} size={18} />
-              <Text style={s.sectionTitle}>집중 복습 필요</Text>
+              <Text style={s.sectionTitle}>{t('mastery.focusReview')}</Text>
             </View>
 
-            <View
-              style={s.weakCard}
-              accessibilityRole="alert"
-              accessibilityLabel={`집중 복습 필요. 약점 카드가 ${totalWeak}장 있습니다. EF 점수가 낮거나 반복 실수가 많은 카드입니다.`}
-            >
+            <View style={s.weakCard} accessibilityRole="alert">
               <Text style={s.weakCardTitle}>
-                약점 카드가 <Text style={{ color: COLORS.wrong }}>{totalWeak}장</Text> 있습니다
+                {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}`)[0]}
+                <Text style={{ color: COLORS.wrong }}>{totalWeak}장</Text>
+                {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}장`)[1]}
               </Text>
-              <Text style={s.weakCardDesc}>
-                EF 점수가 낮거나 반복 실수가 많은 카드입니다. 집중 복습을 통해 마스터하세요.
-              </Text>
+              <Text style={s.weakCardDesc}>{t('mastery.weakCardsDesc')}</Text>
 
               {/* Level breakdown */}
               <View style={s.weakBreakdown}>
@@ -152,14 +141,10 @@ export default function MasteryScreen() {
 
         {/* ─── Empty state ─── */}
         {totalCards === 0 && (
-          <View
-            style={s.emptyState}
-            accessibilityRole="text"
-            accessibilityLabel="아직 학습 카드가 없습니다. 홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다."
-          >
+          <View style={s.emptyState} accessibilityRole="text">
             <Text style={s.emptyEmoji}>📚</Text>
-            <Text style={s.emptyTitle}>아직 학습 카드가 없습니다</Text>
-            <Text style={s.emptyDesc}>홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다</Text>
+            <Text style={s.emptyTitle}>{t('mastery.emptyTitle')}</Text>
+            <Text style={s.emptyDesc}>{t('mastery.emptyDesc')}</Text>
           </View>
         )}
       </ScrollView>
