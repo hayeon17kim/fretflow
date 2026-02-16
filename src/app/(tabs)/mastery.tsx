@@ -1,116 +1,10 @@
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
-import Svg, { Circle, Path } from 'react-native-svg';
+import { AlertIcon } from '@/components/icons/AlertIcon';
+import { TrophyIcon } from '@/components/icons/TrophyIcon';
+import { CircularProgress } from '@/components/progress/CircularProgress';
+import { LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-// ─── Level config (V5.2) ───
-const LEVELS = [
-  {
-    id: 'note' as const,
-    num: 1,
-    emoji: '🎵',
-    label: '음 위치',
-    color: COLORS.level1,
-  },
-  {
-    id: 'interval' as const,
-    num: 2,
-    emoji: '📏',
-    label: '인터벌',
-    color: COLORS.level2,
-  },
-  {
-    id: 'scale' as const,
-    num: 3,
-    emoji: '🎼',
-    label: '스케일',
-    color: COLORS.level3,
-  },
-  {
-    id: 'ear' as const,
-    num: 4,
-    emoji: '👂',
-    label: '귀 훈련',
-    color: COLORS.level4,
-  },
-] as const;
-
-// ─── Trophy icon ───
-function TrophyIcon({ color, size = 20 }: { color: string; size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth={2}>
-      <Path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-      <Path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-      <Path d="M4 22h16" />
-      <Path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22" />
-      <Path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22" />
-      <Path d="M18 2H6v7a6 6 0 0 0 12 0V2Z" />
-    </Svg>
-  );
-}
-
-// ─── Alert icon ───
-function AlertIcon({ color, size = 16 }: { color: string; size?: number }) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={color}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-      <Path d="M12 9v4" />
-      <Path d="M12 17h.01" />
-    </Svg>
-  );
-}
-
-// ─── Circular progress ───
-function CircularProgress({
-  progress,
-  color,
-  size = 60,
-  strokeWidth = 3,
-}: {
-  progress: number;
-  color: string;
-  size?: number;
-  strokeWidth?: number;
-}) {
-  const r = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * r;
-  const offset = circumference * (1 - progress / 100);
-
-  return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <Circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={`${color}20`}
-        strokeWidth={strokeWidth}
-      />
-      <Circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        rotation={-90}
-        origin={`${size / 2}, ${size / 2}`}
-      />
-    </Svg>
-  );
-}
 
 export default function MasteryScreen() {
   const { getCardCount, getMasteredCards, getWeakCards } = useSpacedRepetition();
@@ -140,7 +34,11 @@ export default function MasteryScreen() {
         </View>
 
         {/* ─── Overall stats card ─── */}
-        <View style={s.overallCard}>
+        <View
+          style={s.overallCard}
+          accessibilityRole="summary"
+          accessibilityLabel={`전체 학습 현황. 총 카드 수 ${totalCards}장, 마스터 완료 ${totalMastered}장, 약점 카드 ${totalWeak}장, 전체 진행도 ${overallProgress}퍼센트`}
+        >
           <View style={s.overallHeader}>
             <TrophyIcon color={COLORS.level1} size={24} />
             <Text style={s.overallTitle}>전체 학습 현황</Text>
@@ -176,7 +74,12 @@ export default function MasteryScreen() {
         <Text style={s.sectionTitle}>레벨별 마스터리</Text>
         <View style={s.levelGrid}>
           {levelStats.map((lv) => (
-            <View key={lv.id} style={[s.levelBox, { borderColor: `${lv.color}25` }]}>
+            <View
+              key={lv.id}
+              style={[s.levelBox, { borderColor: `${lv.color}25` }]}
+              accessibilityRole="summary"
+              accessibilityLabel={`레벨 ${lv.num} ${lv.label}. 진행도 ${lv.progress}퍼센트. ${lv.mastered}장 중 ${lv.total}장 마스터 완료`}
+            >
               {/* Icon with circular progress */}
               <View style={s.levelIconContainer}>
                 <CircularProgress progress={lv.progress} color={lv.color} size={60} />
@@ -208,7 +111,11 @@ export default function MasteryScreen() {
               <Text style={s.sectionTitle}>집중 복습 필요</Text>
             </View>
 
-            <View style={s.weakCard}>
+            <View
+              style={s.weakCard}
+              accessibilityRole="alert"
+              accessibilityLabel={`집중 복습 필요. 약점 카드가 ${totalWeak}장 있습니다. EF 점수가 낮거나 반복 실수가 많은 카드입니다.`}
+            >
               <Text style={s.weakCardTitle}>
                 약점 카드가 <Text style={{ color: COLORS.wrong }}>{totalWeak}장</Text> 있습니다
               </Text>
@@ -235,7 +142,11 @@ export default function MasteryScreen() {
 
         {/* ─── Empty state ─── */}
         {totalCards === 0 && (
-          <View style={s.emptyState}>
+          <View
+            style={s.emptyState}
+            accessibilityRole="text"
+            accessibilityLabel="아직 학습 카드가 없습니다. 홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다."
+          >
             <Text style={s.emptyEmoji}>📚</Text>
             <Text style={s.emptyTitle}>아직 학습 카드가 없습니다</Text>
             <Text style={s.emptyDesc}>홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다</Text>

@@ -1,102 +1,13 @@
 import { useRouter } from 'expo-router';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { FireIcon } from '@/components/icons/FireIcon';
+import { CircularProgress } from '@/components/progress/CircularProgress';
+import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
+import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-// ─── Level config (V5.2) ───
-const LEVELS = [
-  {
-    id: 'notes' as const,
-    num: 1,
-    emoji: '🎵',
-    label: '음 위치',
-    labelEn: 'Note Position',
-    color: COLORS.level1,
-    desc: '프렛보드의 음 이름 외우기',
-  },
-  {
-    id: 'intervals' as const,
-    num: 2,
-    emoji: '📏',
-    label: '인터벌',
-    labelEn: 'Intervals',
-    color: COLORS.level2,
-    desc: '프렛보드 위에서 음정 거리 찾기',
-  },
-  {
-    id: 'scales' as const,
-    num: 3,
-    emoji: '🎼',
-    label: '스케일 패턴',
-    labelEn: 'Scale Patterns',
-    color: COLORS.level3,
-    desc: '프렛보드에서 스케일 음 짚기',
-  },
-  {
-    id: 'ear' as const,
-    num: 4,
-    emoji: '👂',
-    label: '귀 훈련',
-    labelEn: 'Ear Training',
-    color: COLORS.level4,
-    desc: '소리를 듣고 음 맞추기',
-    basic: true,
-  },
-] as const;
-
-// ─── Fire icon ───
-function FireIcon({ color, size = 16 }: { color: string; size?: number }) {
-  return (
-    <Svg width={size} height={size} viewBox="0 0 24 24" fill={color} stroke="none">
-      <Path d="M12 23c-4.97 0-8-3.03-8-7 0-2.66 1.34-5.36 4-8 0 3 2 5 4 5s3-1 3-3c1.33 1.33 3 4.33 3 6 0 4.97-2.03 8-6 8z" />
-    </Svg>
-  );
-}
-
-// ─── Circular progress ───
-function CircularProgress({
-  progress,
-  color,
-  size = 44,
-  strokeWidth = 2.5,
-}: {
-  progress: number;
-  color: string;
-  size?: number;
-  strokeWidth?: number;
-}) {
-  const r = (size - strokeWidth) / 2;
-  const circumference = 2 * Math.PI * r;
-  const offset = circumference * (1 - progress / 100);
-
-  return (
-    <Svg width={size} height={size} viewBox={`0 0 ${size} ${size}`}>
-      <Circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={`${color}20`}
-        strokeWidth={strokeWidth}
-      />
-      <Circle
-        cx={size / 2}
-        cy={size / 2}
-        r={r}
-        fill="none"
-        stroke={color}
-        strokeWidth={strokeWidth}
-        strokeDasharray={circumference}
-        strokeDashoffset={offset}
-        strokeLinecap="round"
-        rotation={-90}
-        origin={`${size / 2}, ${size / 2}`}
-      />
-    </Svg>
-  );
-}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -110,19 +21,18 @@ export default function HomeScreen() {
 
   // Per-level due card count
   const levelDueCounts = {
-    notes: dueCards.filter((c) => c.type === 'note').length,
-    intervals: dueCards.filter((c) => c.type === 'interval').length,
-    scales: dueCards.filter((c) => c.type === 'scale').length,
+    note: dueCards.filter((c) => c.type === 'note').length,
+    interval: dueCards.filter((c) => c.type === 'interval').length,
+    scale: dueCards.filter((c) => c.type === 'scale').length,
     ear: dueCards.filter((c) => c.type === 'ear').length,
   };
 
   // Per-level progress (mastered cards / total target per level)
-  const TARGET_PER_LEVEL = 60;
   const levelProgress = {
-    notes: Math.min(100, Math.round((getCardCount('note') / TARGET_PER_LEVEL) * 100)),
-    intervals: Math.min(100, Math.round((getCardCount('interval') / TARGET_PER_LEVEL) * 100)),
-    scales: Math.min(100, Math.round((getCardCount('scale') / TARGET_PER_LEVEL) * 100)),
-    ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_PER_LEVEL) * 100)),
+    note: Math.min(100, Math.round((getCardCount('note') / TARGET_CARDS_PER_LEVEL) * 100)),
+    interval: Math.min(100, Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100)),
+    scale: Math.min(100, Math.round((getCardCount('scale') / TARGET_CARDS_PER_LEVEL) * 100)),
+    ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_CARDS_PER_LEVEL) * 100)),
   };
 
   return (
@@ -134,7 +44,13 @@ export default function HomeScreen() {
             <Text style={s.greeting}>좋은 하루에요 👋</Text>
             <Text style={s.title}>기타 사고력 키우기</Text>
           </View>
-          <Pressable onPress={() => router.push('/(tabs)/settings')} style={s.profileBtn}>
+          <Pressable
+            onPress={() => router.push('/(tabs)/settings')}
+            style={s.profileBtn}
+            accessibilityRole="button"
+            accessibilityLabel="설정"
+            accessibilityHint="설정 화면으로 이동합니다"
+          >
             <Svg
               width={18}
               height={18}
@@ -191,6 +107,13 @@ export default function HomeScreen() {
               // Start review — route to note quiz as default mix
               router.push('/quiz/note');
             }}
+            accessibilityRole="button"
+            accessibilityLabel={dueCount > 0 ? '복습 시작' : '새 카드 추가하기'}
+            accessibilityHint={
+              dueCount > 0
+                ? `오늘 복습할 카드 ${dueCount}장, 약 ${estimatedMinutes}분 소요`
+                : '새로운 학습 카드를 추가합니다'
+            }
           >
             <Text style={s.ctaBtnText}>{dueCount > 0 ? '복습 시작 →' : '새 카드 추가하기 →'}</Text>
           </Pressable>
@@ -221,14 +144,11 @@ export default function HomeScreen() {
                 pressed && { opacity: 0.85 },
               ]}
               onPress={() => {
-                const routeMap: Record<string, string> = {
-                  notes: '/quiz/note',
-                  intervals: '/quiz/interval',
-                  scales: '/quiz/scale',
-                  ear: '/quiz/ear',
-                };
-                router.push(routeMap[lv.id] ?? '/quiz/note');
+                router.push(QUIZ_ROUTES[lv.id]);
               }}
+              accessibilityRole="button"
+              accessibilityLabel={`${lv.label} 연습`}
+              accessibilityHint={`${lv.desc}. 현재 진행도 ${progress}퍼센트`}
             >
               <View style={s.levelCardInner}>
                 {/* Icon with circular progress */}
@@ -261,6 +181,9 @@ export default function HomeScreen() {
         <Pressable
           style={({ pressed }) => [s.practiceBtn, pressed && { opacity: 0.7 }]}
           onPress={() => router.push('/(tabs)/practice')}
+          accessibilityRole="button"
+          accessibilityLabel="특정 레벨만 연습하기"
+          accessibilityHint="연습 탭으로 이동하여 원하는 레벨을 선택할 수 있습니다"
         >
           <Text style={s.practiceBtnText}>특정 레벨만 연습하기 →</Text>
         </Pressable>
