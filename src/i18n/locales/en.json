@@ -1,0 +1,142 @@
+{
+  "home": {
+    "greeting": "Have a great day 👋",
+    "title": "Build Guitar Thinking",
+    "streak": "{{count}}-day streak",
+    "dueInfo": "{{count}} cards · ~{{minutes}} min",
+    "todayReview": "Today's Review Mix",
+    "startReview": "Start Review →",
+    "addCards": "Add New Cards →",
+    "levelPractice": "Practice by Level",
+    "practiceShortcut": "Practice Specific Level →",
+    "locked": "Locked",
+    "basicMode": "Basic Mode",
+    "lockedAlert": "🔒 Locked Level",
+    "lockedMessage": "Unlock by achieving 80%+ in Lv.{{level}} {{name}}.\n\nCurrent progress: {{progress}}%",
+    "confirm": "OK"
+  },
+  "practice": {
+    "title": "Practice",
+    "subtitle": "Select a level and start practicing",
+    "locked": "Locked",
+    "basicMode": "Basic Mode",
+    "exampleProblem": "Example Problem",
+    "sessions": {
+      "quick": "Quick 3min",
+      "focus": "Focus 10min",
+      "deep": "Deep 20min",
+      "cardsCount": "{{count}} cards"
+    },
+    "mixMode": "🎲 All Levels Mix",
+    "lockedAlert": "🔒 Locked Level",
+    "lockedMessage": "Unlock by achieving 80%+ in Lv.{{level}} {{name}}.\n\nCurrent progress: {{progress}}%",
+    "confirm": "OK"
+  },
+  "mastery": {
+    "title": "Mastery Map",
+    "subtitle": "Track your overall learning progress",
+    "overallStatus": "Overall Learning Status",
+    "totalCards": "Total Cards",
+    "mastered": "Mastered",
+    "weakCards": "Weak Cards",
+    "completion": "{{progress}}% Complete",
+    "levelMastery": "Mastery by Level",
+    "masteredCount": "{{mastered}}/{{total}} Mastered",
+    "focusReview": "Needs Focused Review",
+    "weakCardsCount": "You have {{count}} weak cards",
+    "weakCardsDesc": "Cards with low EF scores or repeated mistakes. Master them through focused review.",
+    "emptyTitle": "No learning cards yet",
+    "emptyDesc": "Start reviewing from the Home tab to see your progress here"
+  },
+  "quiz": {
+    "note": {
+      "title": "Note Position",
+      "position": "String {{string}} · Fret {{fret}}",
+      "question": "What note is this?",
+      "correct": "Correct!",
+      "wrongAnswer": "The answer is {{answer}}",
+      "soundPlay": "🔊 Play Sound",
+      "wrongSound": "🔇 Wrong Sound"
+    },
+    "interval": {
+      "title": "Interval",
+      "badge": "📏 Interval Quiz",
+      "questionMain": "{{intervalName}} from {{rootNote}}",
+      "questionSub": "Tap the position on the fretboard",
+      "patternRule": "💡 Pattern Rule",
+      "correctAnswer": "🔊 Correct! {{rootNote}} → {{answerNote}} ({{intervalName}})",
+      "wrongAnswer": "The answer is string {{string}}, fret {{fret}} ({{answerNote}})",
+      "confirmButton": "Confirm this position →",
+      "selectPosition": "Select a position on the fretboard"
+    },
+    "scale": {
+      "title": "Scale Pattern",
+      "badge": "🎼 Scale Quiz",
+      "questionMain": "{{scaleName}} {{position}}",
+      "questionSub": "Tap all notes in the scale",
+      "patternTip": "💡 Pattern Tip",
+      "correctAnswer": "Correct! {{correct}}/{{total}} notes ({{accuracy}}%)",
+      "wrongAnswer": "{{correct}}/{{total}} correct",
+      "wrongCount": "{{count}} wrong",
+      "missedCount": "{{count}} missed",
+      "scoreSub": "Dashed circle (○) = missed note · 80%+ to pass",
+      "confirmButton": "Confirm ({{count}} selected)"
+    },
+    "ear": {
+      "title": "Ear Training",
+      "badge": "👂 Ear Training · Basic",
+      "modeDesc": "One of 5 open strings (E, A, D, G, B)",
+      "playing": "Listening...",
+      "playSound": "Tap to play sound",
+      "correctSound": "🔊 Correct Sound",
+      "wrongSound": "🔇 Wrong Sound",
+      "correctAnswer": "Correct! {{answer}} note",
+      "wrongAnswer": "The answer is {{answer}}",
+      "unlockHint": "Achieve 80% in Lv.1 Note Position → Unlock all notes mode",
+      "basicMode": "Basic Mode"
+    }
+  },
+  "settings": {
+    "title": "Settings",
+    "subtitle": "Customize your app experience",
+    "profile": {
+      "title": "Profile",
+      "username": "Username",
+      "edit": "Edit",
+      "save": "Save"
+    },
+    "goals": {
+      "title": "Learning Goals",
+      "daily": "Daily Goal",
+      "dailyDesc": "Number of cards to review per day",
+      "cards": "{{count}} cards"
+    },
+    "accessibility": {
+      "title": "Accessibility",
+      "language": "Language",
+      "languageDesc": "App display language",
+      "vibration": "Vibration Feedback",
+      "vibrationDesc": "Vibrate on correct/wrong answers"
+    },
+    "appInfo": {
+      "title": "App Info",
+      "version": "Version",
+      "versionAlert": "Version Info",
+      "versionMessage": "FretFlow v1.0.0\n\nMaster the guitar fretboard",
+      "license": "License",
+      "licenseAlert": "License",
+      "licenseMessage": "MIT License\n\nCopyright (c) 2026 FretFlow\n\nOpen source libraries:\n- React Native\n- Expo\n- Zustand\n- React Query",
+      "developer": "Developer",
+      "developerName": "FretFlow Team"
+    },
+    "footer": "Made with 💚 for guitar learners"
+  },
+  "common": {
+    "next": "Next",
+    "level": "Level {{num}}",
+    "levelShort": "Lv.{{num}}",
+    "progress": "{{current}}/{{total}}",
+    "korean": "한국어",
+    "english": "English"
+  }
+}

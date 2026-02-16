@@ -3,6 +3,7 @@ import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { queryClient } from '@/api/query-client';
 import { COLORS } from '@/utils/constants';
+import '@/i18n';
 
 export default function RootLayout() {
   return (

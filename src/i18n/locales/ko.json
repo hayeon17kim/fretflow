@@ -1,0 +1,142 @@
+{
+  "home": {
+    "greeting": "좋은 하루에요 👋",
+    "title": "기타 사고력 키우기",
+    "streak": "{{count}}일 연속",
+    "dueInfo": "{{count}}장 · 약 {{minutes}}분",
+    "todayReview": "오늘의 복습 믹스",
+    "startReview": "복습 시작 →",
+    "addCards": "새 카드 추가하기 →",
+    "levelPractice": "레벨별 연습",
+    "practiceShortcut": "특정 레벨만 연습하기 →",
+    "locked": "잠김",
+    "basicMode": "기초 모드",
+    "lockedAlert": "🔒 잠긴 레벨",
+    "lockedMessage": "Lv.{{level}} {{name}}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: {{progress}}%",
+    "confirm": "확인"
+  },
+  "practice": {
+    "title": "연습하기",
+    "subtitle": "레벨을 선택하고 연습을 시작하세요",
+    "locked": "잠김",
+    "basicMode": "기초 모드",
+    "exampleProblem": "예시 문제",
+    "sessions": {
+      "quick": "퀵 3분",
+      "focus": "포커스 10분",
+      "deep": "딥 20분",
+      "cardsCount": "{{count}}장"
+    },
+    "mixMode": "🎲 전체 레벨 믹스 연습",
+    "lockedAlert": "🔒 잠긴 레벨",
+    "lockedMessage": "Lv.{{level}} {{name}}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: {{progress}}%",
+    "confirm": "확인"
+  },
+  "mastery": {
+    "title": "마스터리 맵",
+    "subtitle": "전체 학습 진행도를 확인하세요",
+    "overallStatus": "전체 학습 현황",
+    "totalCards": "총 카드 수",
+    "mastered": "마스터 완료",
+    "weakCards": "약점 카드",
+    "completion": "{{progress}}% 완성",
+    "levelMastery": "레벨별 마스터리",
+    "masteredCount": "{{mastered}}/{{total}} 마스터",
+    "focusReview": "집중 복습 필요",
+    "weakCardsCount": "약점 카드가 {{count}}장 있습니다",
+    "weakCardsDesc": "EF 점수가 낮거나 반복 실수가 많은 카드입니다. 집중 복습을 통해 마스터하세요.",
+    "emptyTitle": "아직 학습 카드가 없습니다",
+    "emptyDesc": "홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다"
+  },
+  "quiz": {
+    "note": {
+      "title": "음 위치",
+      "position": "{{string}}번줄 · {{fret}}프렛",
+      "question": "이 음은?",
+      "correct": "정답!",
+      "wrongAnswer": "정답은 {{answer}}",
+      "soundPlay": "🔊 소리 재생",
+      "wrongSound": "🔇 오답음"
+    },
+    "interval": {
+      "title": "인터벌",
+      "badge": "📏 인터벌 퀴즈",
+      "questionMain": "{{rootNote}}에서 {{intervalName}}",
+      "questionSub": "프렛보드에서 해당 음의 위치를 탭하세요",
+      "patternRule": "💡 패턴 규칙",
+      "correctAnswer": "🔊 정답! {{rootNote}} → {{answerNote}} ({{intervalName}})",
+      "wrongAnswer": "정답은 {{string}}번줄 {{fret}}프렛 ({{answerNote}})예요",
+      "confirmButton": "이 위치로 확인 →",
+      "selectPosition": "프렛보드에서 위치를 선택하세요"
+    },
+    "scale": {
+      "title": "스케일 패턴",
+      "badge": "🎼 스케일 퀴즈",
+      "questionMain": "{{scaleName}} {{position}}",
+      "questionSub": "스케일에 속하는 음을 모두 탭하세요",
+      "patternTip": "💡 패턴 팁",
+      "correctAnswer": "정답! {{correct}}/{{total}}개 맞음 ({{accuracy}}%)",
+      "wrongAnswer": "{{correct}}/{{total}}개 맞음",
+      "wrongCount": "{{count}}개 오답",
+      "missedCount": "{{count}}개 누락",
+      "scoreSub": "점선 원(○) = 놓친 음 · 80% 이상이면 통과",
+      "confirmButton": "확인 ({{count}}개 선택)"
+    },
+    "ear": {
+      "title": "귀 훈련",
+      "badge": "👂 귀 훈련 · 기초",
+      "modeDesc": "개방현 5음 (E, A, D, G, B) 중 하나",
+      "playing": "듣고 있어요...",
+      "playSound": "탭하여 소리 듣기",
+      "correctSound": "🔊 정답음",
+      "wrongSound": "🔇 오답음",
+      "correctAnswer": "정답! {{answer}}음",
+      "wrongAnswer": "정답은 {{answer}}예요",
+      "unlockHint": "Lv.1 음 위치 80% 달성 시 → 전체 음 모드 해금",
+      "basicMode": "기초 모드"
+    }
+  },
+  "settings": {
+    "title": "설정",
+    "subtitle": "앱 환경을 맞춤 설정하세요",
+    "profile": {
+      "title": "프로필",
+      "username": "사용자 이름",
+      "edit": "수정",
+      "save": "저장"
+    },
+    "goals": {
+      "title": "학습 목표",
+      "daily": "일일 목표",
+      "dailyDesc": "하루에 복습할 카드 수",
+      "cards": "{{count}}장"
+    },
+    "accessibility": {
+      "title": "접근성",
+      "language": "언어",
+      "languageDesc": "앱 표시 언어",
+      "vibration": "진동 피드백",
+      "vibrationDesc": "정답/오답 시 진동으로 알림"
+    },
+    "appInfo": {
+      "title": "앱 정보",
+      "version": "버전",
+      "versionAlert": "버전 정보",
+      "versionMessage": "FretFlow v1.0.0\n\n기타 프렛보드 마스터하기",
+      "license": "라이선스",
+      "licenseAlert": "라이선스",
+      "licenseMessage": "MIT License\n\nCopyright (c) 2026 FretFlow\n\n오픈소스 라이브러리:\n- React Native\n- Expo\n- Zustand\n- React Query",
+      "developer": "개발자",
+      "developerName": "FretFlow Team"
+    },
+    "footer": "Made with 💚 for guitar learners"
+  },
+  "common": {
+    "next": "다음",
+    "level": "레벨 {{num}}",
+    "levelShort": "Lv.{{num}}",
+    "progress": "{{current}}/{{total}}",
+    "korean": "한국어",
+    "english": "English"
+  }
+}
