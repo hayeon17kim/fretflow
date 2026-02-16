@@ -6,11 +6,10 @@ import { useTranslation } from 'react-i18next';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { type EarQuestionCard, generateCardBatch } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-type QuizState = 'question' | 'correct' | 'wrong';
 
 // ─── Audio file mapping ───
 // NOTE: 개방현 5음 (기초 모드)
@@ -89,15 +88,12 @@ export default function QuizEarScreen() {
 
   // 세션 시작 시 카드 생성
   const questions = useMemo(() => generateCardBatch('ear', SESSION_SIZE) as EarQuestionCard[], []);
-  const total = questions.length;
 
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [startTime, setStartTime] = useState(Date.now());
-  const [state, setState] = useState<QuizState>('question');
+  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
+    cards: questions,
+  });
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
-
-  const q = questions[currentIdx];
 
   // Setup audio
   useEffect(() => {
@@ -152,11 +148,10 @@ export default function QuizEarScreen() {
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
     const correct = q.options[index] === q.answer;
-    setState(correct ? 'correct' : 'wrong');
     setPlaying(false);
 
     // 응답 시간 기록
-    const responseTime = Date.now() - startTime;
+    const responseTime = recordAnswer(correct);
 
     // 카드 추가 & 리뷰 기록
     addCard({
@@ -167,21 +162,15 @@ export default function QuizEarScreen() {
     recordReview(q.id, correct, responseTime);
   };
 
-  const nextCard = async () => {
+  const handleNext = async () => {
     // Stop current sound
     if (soundRef.current) {
       await soundRef.current.unloadAsync();
       soundRef.current = null;
     }
 
-    if (currentIdx + 1 >= total) {
-      router.back();
-      return;
-    }
-    setCurrentIdx((prev) => prev + 1);
-    setState('question');
     setPlaying(false);
-    setStartTime(Date.now());
+    nextCard(() => router.back());
   };
 
   return (
@@ -190,7 +179,7 @@ export default function QuizEarScreen() {
         label={t('quiz.ear.title')}
         levelNum={4}
         color={COLORS.level4}
-        progress={currentIdx + (state !== 'question' ? 1 : 0)}
+        progress={progress}
         total={total}
         onBack={() => router.back()}
         badge={t('quiz.ear.basicMode')}
@@ -254,7 +243,7 @@ export default function QuizEarScreen() {
         {state === 'question' ? (
           <AnswerGrid options={q.options} onSelect={handleAnswer} />
         ) : (
-          <NextButton onPress={nextCard} correct={state === 'correct'} />
+          <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
     </View>
