@@ -6,6 +6,7 @@ import { CircularProgress } from '@/components/progress/CircularProgress';
 import type { LevelId } from '@/config/levels';
 import { getLevelDesc, getLevelLabel, LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { BADGES, getBadgeForProgress } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 // ─── Internal Lock Icon ───
@@ -68,6 +69,8 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
       {LEVELS.map((lv) => {
         const progress = levelProgress[lv.id];
         const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
+        const badgeLevel = getBadgeForProgress(progress); // Issue #22
+        const badge = BADGES[badgeLevel];
 
         return (
           <Pressable
@@ -99,6 +102,14 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
                     <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
                       <Text style={[s.chipText, { color: COLORS.textSecondary }]}>
                         {t('home.locked')}
+                      </Text>
+                    </View>
+                  )}
+                  {!locked && badge.emoji && (
+                    <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
+                      <Text style={s.chipText}>{badge.emoji}</Text>
+                      <Text style={[s.chipText, { color: lv.color }]}>
+                        {t(`badges.${badgeLevel}`)}
                       </Text>
                     </View>
                   )}
@@ -177,6 +188,9 @@ const s = StyleSheet.create({
     fontWeight: '700',
   },
   chip: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 3,
     paddingHorizontal: 8,
     paddingVertical: 3,
     borderRadius: 6,

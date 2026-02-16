@@ -7,6 +7,7 @@ import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import { getLevelLabel, LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { BADGES, getBadgeForProgress, getProgressToNextBadge } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 export default function MasteryScreen() {
@@ -22,18 +23,22 @@ export default function MasteryScreen() {
   );
 
   // Overall statistics
+  const totalCards = getCardCount(); // Fix: Add missing variable (Issue #22)
   const totalMastered = getMasteredCards().length;
   const totalWeak = getWeakCards().length;
   const totalTarget = LEVELS.length * TARGET_CARDS_PER_LEVEL; // 4 levels × 60 = 240
   const overallProgress = Math.min(100, Math.round((totalMastered / totalTarget) * 100));
 
-  // Statistics by level
+  // Statistics by level (Issue #22: Add badge info)
   const levelStats = LEVELS.map((lv) => {
     const total = getCardCount(lv.id);
     const mastered = getMasteredCards(lv.id).length;
     const weak = getWeakCards(lv.id).length;
     const progress = Math.min(100, Math.round((mastered / TARGET_CARDS_PER_LEVEL) * 100));
-    return { ...lv, total, mastered, weak, progress };
+    const badgeLevel = getBadgeForProgress(progress);
+    const badge = BADGES[badgeLevel];
+    const progressToNext = getProgressToNextBadge(progress, badgeLevel);
+    return { ...lv, total, mastered, weak, progress, badge, badgeLevel, progressToNext };
   });
 
   return (
@@ -89,7 +94,7 @@ export default function MasteryScreen() {
               style={[s.levelBox, { borderColor: `${lv.color}25` }]}
               accessibilityRole="summary"
             >
-              {/* Icon with circular progress */}
+              {/* Icon with circular progress and badge (Issue #22) */}
               <View style={s.levelIconContainer}>
                 <CircularProgress progress={lv.progress} color={lv.color} size={60} />
                 <Text style={s.levelBoxEmoji}>{lv.emoji}</Text>
@@ -100,6 +105,19 @@ export default function MasteryScreen() {
                 {t('common.levelShort', { num: lv.num })} {getLevelLabel(lv.id, t)}
               </Text>
               <Text style={s.levelBoxProgress}>{lv.progress}%</Text>
+
+              {/* Badge info (Issue #22) */}
+              {lv.badge.emoji && (
+                <View style={s.badgeInfo}>
+                  <Text style={s.badgeEmoji}>{lv.badge.emoji}</Text>
+                  <Text style={s.badgeName}>{t(`badges.${lv.badgeLevel}`)}</Text>
+                </View>
+              )}
+              {lv.progressToNext > 0 && (
+                <Text style={s.nextBadgeText}>
+                  {t('badges.nextBadge', { percent: lv.progressToNext })}
+                </Text>
+              )}
 
               {/* Stats */}
               <View style={s.levelBoxStats}>
@@ -304,6 +322,25 @@ const s = StyleSheet.create({
     fontSize: FONT_SIZE.lg,
     fontWeight: '800',
     color: COLORS.textPrimary,
+    marginBottom: SPACING.sm,
+  },
+  badgeInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: SPACING.xs,
+    marginBottom: SPACING.xs,
+  },
+  badgeEmoji: {
+    fontSize: 16,
+  },
+  badgeName: {
+    fontSize: FONT_SIZE.xs,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+  nextBadgeText: {
+    fontSize: 10,
+    color: COLORS.textTertiary,
     marginBottom: SPACING.sm,
   },
   levelBoxStats: {
