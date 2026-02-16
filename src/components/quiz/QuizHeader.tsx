@@ -27,7 +27,14 @@ export function QuizHeader({
     <View style={s.wrapper}>
       {/* Top bar */}
       <View style={s.topBar}>
-        <Pressable onPress={onBack} hitSlop={12} style={s.backBtn}>
+        <Pressable
+          onPress={onBack}
+          hitSlop={12}
+          style={s.backBtn}
+          accessibilityRole="button"
+          accessibilityLabel="뒤로 가기"
+          accessibilityHint={`${label} 화면으로 돌아갑니다`}
+        >
           <Svg
             width={18}
             height={18}
@@ -59,7 +66,12 @@ export function QuizHeader({
       </View>
 
       {/* Progress bar */}
-      <View style={s.barTrack}>
+      <View
+        style={s.barTrack}
+        accessibilityRole="progressbar"
+        accessibilityLabel="퀴즈 진행 상태"
+        accessibilityValue={{ min: 0, max: total, now: progress, text: `${progress}/${total}` }}
+      >
         <View style={[s.barFill, { width: `${pct}%`, backgroundColor: color }]} />
       </View>
     </View>

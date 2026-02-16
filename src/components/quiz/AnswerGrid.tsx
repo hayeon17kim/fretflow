@@ -16,6 +16,10 @@ export function AnswerGrid({ options, onSelect, disabled }: AnswerGridProps) {
           onPress={() => !disabled && onSelect(i)}
           style={({ pressed }) => [s.btn, pressed && !disabled && s.pressed]}
           disabled={disabled}
+          accessibilityRole="button"
+          accessibilityLabel={`답안 ${opt}`}
+          accessibilityHint="이 답을 선택하려면 탭하세요"
+          accessibilityState={{ disabled }}
         >
           <Text style={s.btnText}>{opt}</Text>
         </Pressable>
@@ -38,6 +42,9 @@ export function NextButton({ onPress, correct }: NextButtonProps) {
         { backgroundColor: correct ? COLORS.correct : COLORS.surface },
         pressed && { opacity: 0.8 },
       ]}
+      accessibilityRole="button"
+      accessibilityLabel="다음 문제"
+      accessibilityHint={correct ? '정답입니다. 다음 문제로 이동합니다' : '오답입니다. 다음 문제로 이동합니다'}
     >
       <Text style={[s.nextText, { color: correct ? COLORS.bg : COLORS.textPrimary }]}>다음 →</Text>
     </Pressable>
