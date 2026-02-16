@@ -2,6 +2,7 @@ import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
@@ -83,6 +84,7 @@ const SESSION_SIZE = 10;
 
 export default function QuizEarScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
 
   // 세션 시작 시 카드 생성
@@ -185,13 +187,13 @@ export default function QuizEarScreen() {
   return (
     <View style={s.container}>
       <QuizHeader
-        label="귀 훈련"
+        label={t('quiz.ear.title')}
         levelNum={4}
         color={COLORS.level4}
         progress={currentIdx + (state !== 'question' ? 1 : 0)}
         total={total}
         onBack={() => router.back()}
-        badge="기초 모드"
+        badge={t('quiz.ear.basicMode')}
       />
 
       {/* Card */}
@@ -209,13 +211,13 @@ export default function QuizEarScreen() {
         ]}
       >
         <View style={s.quizBadge}>
-          <Text style={s.quizBadgeText}>👂 귀 훈련 · 기초</Text>
+          <Text style={s.quizBadgeText}>{t('quiz.ear.badge')}</Text>
         </View>
-        <Text style={s.modeDesc}>개방현 5음 (E, A, D, G, B) 중 하나</Text>
+        <Text style={s.modeDesc}>{t('quiz.ear.modeDesc')}</Text>
 
         <PlayButton playing={playing} onPress={playSound} />
 
-        <Text style={s.playLabel}>{playing ? '듣고 있어요...' : '탭하여 소리 듣기'}</Text>
+        <Text style={s.playLabel}>{playing ? t('quiz.ear.playing') : t('quiz.ear.playSound')}</Text>
 
         {/* Result */}
         {state !== 'question' && (
@@ -230,18 +232,20 @@ export default function QuizEarScreen() {
                 },
               ]}
             >
-              {state === 'correct' ? '🔊 정답음' : '🔇 오답음'}
+              {state === 'correct' ? t('quiz.ear.correctSound') : t('quiz.ear.wrongSound')}
             </Text>
             <Text
               style={[s.resultText, { color: state === 'correct' ? COLORS.correct : COLORS.wrong }]}
             >
-              {state === 'correct' ? `정답! ${q.answer}음` : `정답은 ${q.answer}예요`}
+              {state === 'correct'
+                ? t('quiz.ear.correctAnswer', { answer: q.answer })
+                : t('quiz.ear.wrongAnswer', { answer: q.answer })}
             </Text>
           </View>
         )}
 
         <View style={s.unlockHint}>
-          <Text style={s.unlockHintText}>Lv.1 음 위치 80% 달성 시 → 전체 음 모드 해금</Text>
+          <Text style={s.unlockHintText}>{t('quiz.ear.unlockHint')}</Text>
         </View>
       </View>
 
