@@ -95,6 +95,8 @@ export default function QuizEarScreen() {
     state,
     total,
     progress,
+    correctCount,
+    wrongCount,
     recordAnswer,
     nextCard,
   } = useQuizSession({
@@ -181,7 +183,16 @@ export default function QuizEarScreen() {
     }
 
     setPlaying(false);
-    nextCard(() => router.back());
+    nextCard(() => {
+      router.push({
+        pathname: '/quiz/completion',
+        params: {
+          correct: correctCount.toString(),
+          total: total.toString(),
+          levelNum: '4',
+        },
+      });
+    });
   };
 
   return (

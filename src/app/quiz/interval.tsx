@@ -99,6 +99,8 @@ export default function QuizIntervalScreen() {
     state,
     total,
     progress,
+    correctCount,
+    wrongCount,
     recordAnswer,
     nextCard,
   } = useQuizSession({
@@ -137,7 +139,16 @@ export default function QuizIntervalScreen() {
   };
 
   const handleNext = () => {
-    nextCard(() => router.back());
+    nextCard(() => {
+      router.push({
+        pathname: '/quiz/completion',
+        params: {
+          correct: correctCount.toString(),
+          total: total.toString(),
+          levelNum: '2',
+        },
+      });
+    });
     setTapped(null);
   };
 
