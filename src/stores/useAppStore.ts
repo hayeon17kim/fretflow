@@ -1,17 +1,29 @@
-import { create } from 'zustand';
-import { persist, createJSONStorage, StateStorage } from 'zustand/middleware';
+import { Platform } from 'react-native';
+import { create, type StateCreator } from 'zustand';
 import { appStorage } from '@/utils/storage';
 
-// MMKV storage adapter for Zustand persist
-const mmkvStorage: StateStorage = {
-  getItem: (name) => {
+// Only import persist on native platforms to avoid import.meta issues on web
+let persist: any;
+let createJSONStorage: any;
+let StateStorage: any;
+
+if (Platform.OS !== 'web') {
+  const middleware = require('zustand/middleware');
+  persist = middleware.persist;
+  createJSONStorage = middleware.createJSONStorage;
+  StateStorage = middleware.StateStorage;
+}
+
+// MMKV storage adapter for Zustand persist (native only)
+const mmkvStorage = {
+  getItem: (name: string) => {
     const value = appStorage.getString(name);
     return value ?? null;
   },
-  setItem: (name, value) => {
+  setItem: (name: string, value: string) => {
     appStorage.set(name, value);
   },
-  removeItem: (name) => {
+  removeItem: (name: string) => {
     appStorage.delete(name);
   },
 };
@@ -45,9 +57,8 @@ interface AppState {
   updateSettings: (settings: Partial<AppState['settings']>) => void;
 }
 
-export const useAppStore = create<AppState>()(
-  persist(
-    (set, get) => ({
+// Store implementation
+const storeImpl: StateCreator<AppState> = (set, get) => ({
       activeLevel: null,
       setActiveLevel: (level) => set({ activeLevel: level }),
 
@@ -138,16 +149,21 @@ export const useAppStore = create<AppState>()(
         set((state) => ({
           settings: { ...state.settings, ...newSettings },
         })),
-    }),
-    {
-      name: 'app-store',
-      storage: createJSONStorage(() => mmkvStorage),
-      onRehydrateStorage: () => (state) => {
-        // Check and reset daily stats after rehydration
-        if (state) {
-          state.checkAndResetDailyStats();
-        }
-      },
-    },
-  ),
-);
+});
+
+// Conditionally apply persist middleware based on platform
+export const useAppStore =
+  Platform.OS !== 'web'
+    ? create<AppState>()(
+        persist(storeImpl, {
+          name: 'app-store',
+          storage: createJSONStorage(() => mmkvStorage),
+          onRehydrateStorage: () => (state: AppState | undefined) => {
+            // Check and reset daily stats after rehydration
+            if (state) {
+              state.checkAndResetDailyStats();
+            }
+          },
+        }),
+      )
+    : create<AppState>()(storeImpl);

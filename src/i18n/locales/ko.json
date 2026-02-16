@@ -5,6 +5,7 @@
     "streak": "{{count}}일 연속",
     "dueInfo": "{{count}}장 · 약 {{minutes}}분",
     "todayReview": "오늘의 복습 믹스",
+    "dailyGoal": "오늘의 목표",
     "startReview": "복습 시작 →",
     "addCards": "새 카드 추가하기 →",
     "levelPractice": "레벨별 연습",

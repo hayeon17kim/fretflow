@@ -17,6 +17,7 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const todayStats = useAppStore((s) => s.todayStats);
+  const settings = useAppStore((s) => s.settings);
 
   // 화면 포커스 시 리렌더링을 위한 상태
   const [_refreshKey, setRefreshKey] = useState(0);
@@ -79,6 +80,8 @@ export default function HomeScreen() {
           dueCount={dueCount}
           estimatedMinutes={estimatedMinutes}
           levelDueCounts={levelDueCounts}
+          cardsReviewed={todayStats.cardsReviewed}
+          dailyGoal={settings.dailyGoal}
           onStartReview={handleStartReview}
         />
 

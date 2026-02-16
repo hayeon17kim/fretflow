@@ -5,6 +5,7 @@
     "streak": "{{count}}-day streak",
     "dueInfo": "{{count}} cards · ~{{minutes}} min",
     "todayReview": "Today's Review Mix",
+    "dailyGoal": "Today's Goal",
     "startReview": "Start Review →",
     "addCards": "Add New Cards →",
     "levelPractice": "Practice by Level",

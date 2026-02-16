@@ -10,6 +10,8 @@ interface DailyReviewCardProps {
   dueCount: number;
   estimatedMinutes: number;
   levelDueCounts: Record<LevelId, number>;
+  cardsReviewed: number;
+  dailyGoal: number;
   onStartReview: () => void;
 }
 
@@ -18,9 +20,25 @@ export function DailyReviewCard({
   dueCount,
   estimatedMinutes,
   levelDueCounts,
+  cardsReviewed,
+  dailyGoal,
   onStartReview,
 }: DailyReviewCardProps) {
   const { t } = useTranslation();
+
+  // Calculate progress
+  const progress = dailyGoal > 0 ? cardsReviewed / dailyGoal : 0;
+  const progressPercent = Math.min(Math.round(progress * 100), 100);
+
+  // Determine progress color based on percentage
+  const getProgressColor = () => {
+    if (progressPercent >= 100) return COLORS.correct; // Green for complete
+    if (progressPercent >= 67) return COLORS.level2; // Blue for good progress
+    if (progressPercent >= 34) return '#F59E0B'; // Yellow for moderate progress
+    return COLORS.textTertiary; // Gray for low progress
+  };
+
+  const progressColor = getProgressColor();
 
   return (
     <View style={s.ctaCard}>
@@ -34,6 +52,31 @@ export function DailyReviewCard({
         </View>
         <Text style={s.dueInfo}>
           {t('home.dueInfo', { count: dueCount, minutes: estimatedMinutes })}
+        </Text>
+      </View>
+
+      {/* Daily goal progress */}
+      <View style={s.goalSection}>
+        <View style={s.goalTextRow}>
+          <Text style={s.goalLabel}>{t('home.dailyGoal')}</Text>
+          <Text style={[s.goalProgress, { color: progressColor }]}>
+            {cardsReviewed} / {dailyGoal}
+          </Text>
+        </View>
+        <View style={s.progressBarContainer}>
+          <View
+            style={[
+              s.progressBar,
+              {
+                width: `${progressPercent}%`,
+                backgroundColor: progressColor,
+              },
+            ]}
+          />
+        </View>
+        <Text style={[s.progressPercent, { color: progressColor }]}>
+          {progressPercent}%
+          {progressPercent >= 100 && ' 🎉'}
         </Text>
       </View>
 
@@ -134,5 +177,39 @@ const s = StyleSheet.create({
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
     color: COLORS.bg,
+  },
+  goalSection: {
+    marginBottom: SPACING.md,
+  },
+  goalTextRow: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  goalLabel: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textSecondary,
+    fontWeight: '600',
+  },
+  goalProgress: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '700',
+  },
+  progressBarContainer: {
+    height: 8,
+    backgroundColor: `${COLORS.border}40`,
+    borderRadius: 4,
+    overflow: 'hidden',
+    marginBottom: SPACING.xs,
+  },
+  progressBar: {
+    height: '100%',
+    borderRadius: 4,
+  },
+  progressPercent: {
+    fontSize: FONT_SIZE.xs,
+    fontWeight: '600',
+    textAlign: 'right',
   },
 });
