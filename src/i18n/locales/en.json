@@ -95,6 +95,19 @@
       "wrongAnswer": "The answer is {{answer}}",
       "unlockHint": "Achieve 80% in Lv.1 Note Position → Unlock all notes mode",
       "basicMode": "Basic Mode"
+    },
+    "completion": {
+      "sessionComplete": "Session Complete!",
+      "score": "{{correct}}/{{total}} correct",
+      "perfect": "Perfect! 🎉",
+      "great": "Great job! 👏",
+      "good": "Good work! 💪",
+      "keepGoing": "Keep practicing, you'll get better!",
+      "streak": "Streak",
+      "streakDays": "{{count}} days",
+      "tomorrow": "Tomorrow",
+      "tomorrowCards": "{{count}} cards",
+      "continue": "Continue"
     }
   },
   "settings": {

@@ -95,6 +95,19 @@
       "wrongAnswer": "정답은 {{answer}}예요",
       "unlockHint": "Lv.1 음 위치 80% 달성 시 → 전체 음 모드 해금",
       "basicMode": "기초 모드"
+    },
+    "completion": {
+      "sessionComplete": "세션 완료!",
+      "score": "{{correct}}/{{total}}개 정답",
+      "perfect": "완벽해요! 🎉",
+      "great": "정말 잘했어요! 👏",
+      "good": "잘하고 있어요! 💪",
+      "keepGoing": "계속 연습하면 더 잘할 수 있어요!",
+      "streak": "연속 학습",
+      "streakDays": "{{count}}일",
+      "tomorrow": "내일 복습",
+      "tomorrowCards": "{{count}}장",
+      "continue": "계속하기"
     }
   },
   "settings": {
