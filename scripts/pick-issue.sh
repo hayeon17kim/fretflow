@@ -78,9 +78,9 @@ fi
 
 BRANCH_NAME="$BRANCH_PREFIX/$ISSUE_NUMBER-$(echo "$ISSUE_TITLE" | tr '[:upper:]' '[:lower:]' | sed 's/ /-/g' | sed 's/[^a-z0-9-]//g' | cut -c1-50)"
 
-# master 브랜치로 이동 (최신 상태 확인)
-echo -e "${BLUE}🔄 Master 브랜치로 전환...${NC}"
-git checkout master 2>/dev/null || git checkout main 2>/dev/null || true
+# Main 브랜치로 이동 (최신 상태 확인)
+echo -e "${BLUE}🔄 Main 브랜치로 전환...${NC}"
+git checkout main 2>/dev/null || git checkout main 2>/dev/null || true
 
 # 브랜치가 이미 존재하는지 확인
 if git show-ref --verify --quiet "refs/heads/$BRANCH_NAME"; then
