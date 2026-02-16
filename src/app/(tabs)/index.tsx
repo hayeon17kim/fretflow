@@ -8,8 +8,10 @@ import { DailyReviewCard } from '@/components/home/DailyReviewCard';
 import { LevelCardGrid } from '@/components/home/LevelCardGrid';
 import { LevelProgressStats } from '@/components/home/LevelProgressStats';
 import type { LevelId } from '@/config/levels';
+import { LEVELS } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useHomeScreenStats } from '@/hooks/useHomeScreenStats';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -31,10 +33,41 @@ export default function HomeScreen() {
 
   // Get all statistics from hook
   const { dueCount, estimatedMinutes, levelDueCounts, levelProgress } = useHomeScreenStats();
+  const { isLevelLocked } = useSpacedRepetition();
 
   const handleStartReview = useCallback(() => {
-    router.push('/quiz/note');
-  }, [router]);
+    // If no cards are due, navigate to practice screen to add cards
+    if (dueCount === 0) {
+      router.push('/(tabs)/practice');
+      return;
+    }
+
+    // Find the unlocked level with the most due cards
+    let targetLevel: LevelId = 'note'; // fallback to Lv.1
+    let maxDueCount = 0;
+
+    // Iterate through levels in priority order (note -> interval -> scale -> ear)
+    const levelOrder: LevelId[] = ['note', 'interval', 'scale', 'ear'];
+
+    for (const levelId of levelOrder) {
+      const levelNum = LEVELS.find((lv) => lv.id === levelId)?.num;
+      if (!levelNum) continue;
+
+      // Skip locked levels
+      if (isLevelLocked(levelNum as 1 | 2 | 3 | 4)) continue;
+
+      const dueCount = levelDueCounts[levelId];
+
+      // Select level with most due cards (ties go to earlier level due to iteration order)
+      if (dueCount > maxDueCount) {
+        maxDueCount = dueCount;
+        targetLevel = levelId;
+      }
+    }
+
+    // Route to the selected level
+    router.push(QUIZ_ROUTES[targetLevel]);
+  }, [router, dueCount, levelDueCounts, isLevelLocked]);
 
   const handleLevelPress = useCallback(
     (levelId: LevelId) => {
