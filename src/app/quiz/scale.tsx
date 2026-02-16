@@ -1,39 +1,66 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useQuizSession } from '@/hooks/useQuizSession';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import type { FretPosition, StringNumber } from '@/types/music';
+import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-// ─── Mock data ───
-const MOCK_SCALES = [
-  {
-    id: 'scale-1',
-    name: 'Am 펜타토닉',
+const SESSION_SIZE = 10;
+
+// ─── Scale name translations ───
+const SCALE_NAMES_KO: Record<string, string> = {
+  'major': '메이저',
+  'pentatonic-major': '펜타토닉 메이저',
+  'pentatonic-minor': '펜타토닉 마이너',
+};
+
+// ─── Pattern hints ───
+const SCALE_PATTERN_HINTS: Record<string, string> = {
+  'major': '메이저 스케일은 밝고 긍정적인 느낌의 7음 음계예요. 도레미파솔라시도!',
+  'pentatonic-major': '펜타토닉 메이저는 5음 음계로 밝은 느낌이에요. 블루스와 록에서 자주 쓰여요.',
+  'pentatonic-minor': '펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!',
+};
+
+// ─── Adapt generated cards to tap-based format ───
+interface TapScaleQuestion {
+  id: string;
+  name: string;           // e.g., "C 펜타토닉 마이너"
+  position: string;       // "1포지션"
+  scaleName: string;
+  rootNote: string;
+  rootPosition: FretPosition;
+  positions: FretPosition[];
+  fretRange: [number, number];
+  hint: string;
+}
+
+function adaptScaleCard(card: ScaleQuestionCard): TapScaleQuestion {
+  const scaleNameKo = SCALE_NAMES_KO[card.scaleName] || card.scaleName;
+  const hint = SCALE_PATTERN_HINTS[card.scaleName] || '';
+
+  // Calculate fret range from correctPositions
+  const frets = card.correctPositions.map(p => p.fret);
+  const minFret = Math.min(...frets);
+  const maxFret = Math.min(Math.max(...frets) + 2, 15);
+
+  return {
+    id: card.id,
+    name: `${card.rootNote} ${scaleNameKo}`,
     position: '1포지션',
-    fretRange: [0, 4] as [number, number],
-    positions: [
-      { string: 1 as StringNumber, fret: 0 },
-      { string: 1 as StringNumber, fret: 3 },
-      { string: 2 as StringNumber, fret: 0 },
-      { string: 2 as StringNumber, fret: 2 },
-      { string: 3 as StringNumber, fret: 0 },
-      { string: 3 as StringNumber, fret: 2 },
-      { string: 4 as StringNumber, fret: 0 },
-      { string: 4 as StringNumber, fret: 2 },
-      { string: 5 as StringNumber, fret: 0 },
-      { string: 5 as StringNumber, fret: 2 },
-      { string: 6 as StringNumber, fret: 0 },
-      { string: 6 as StringNumber, fret: 3 },
-    ],
-    notes: 'A, C, D, E, G',
-    hint: 'Am 펜타토닉 1포지션은 0~3프렛 안에서 A, C, D, E, G 5개 음이 반복되는 "박스" 모양이에요.',
-  },
-];
+    scaleName: card.scaleName,
+    rootNote: card.rootNote,
+    rootPosition: card.rootPosition,
+    positions: card.correctPositions,
+    fretRange: [minFret, maxFret],
+    hint,
+  };
+}
 
 interface Score {
   correct: number;
@@ -46,6 +73,13 @@ interface Score {
 export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { addCard, recordReview } = useSpacedRepetition();
+
+  // Generate cards for this session
+  const questions = useMemo(() => {
+    const generatedCards = generateCardBatch('scale', SESSION_SIZE) as ScaleQuestionCard[];
+    return generatedCards.map(adaptScaleCard);
+  }, []);
 
   const {
     currentCard: q,
@@ -54,9 +88,8 @@ export default function QuizScaleScreen() {
     progress,
     recordAnswer,
     nextCard,
-    resetCard,
   } = useQuizSession({
-    cards: MOCK_SCALES,
+    cards: questions,
   });
   const [selected, setSelected] = useState<FretPosition[]>([]);
   const [score, setScore] = useState<Score | null>(null);
@@ -91,11 +124,26 @@ export default function QuizScaleScreen() {
     });
 
     const correct = accuracy >= 80 && wrongSelections === 0;
-    recordAnswer(correct);
+
+    // Record answer and get response time
+    const responseTime = recordAnswer(correct);
+
+    // Add card to spaced repetition system
+    addCard({
+      id: q.id,
+      type: 'scale',
+      question: {
+        scaleName: q.scaleName,
+        positions: q.positions,
+      } as any,
+    });
+
+    // Record this review in SM-2 algorithm
+    recordReview(q.id, correct, responseTime);
   };
 
-  const retry = () => {
-    resetCard();
+  const handleNext = () => {
+    nextCard(() => router.back());
     setSelected([]);
     setScore(null);
   };
@@ -248,7 +296,7 @@ export default function QuizScaleScreen() {
             </Text>
           </Pressable>
         ) : (
-          <NextButton onPress={retry} correct={state === 'correct'} />
+          <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
     </View>
