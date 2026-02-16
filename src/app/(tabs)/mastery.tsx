@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { getLevelLabel, LEVELS } from '@/config/levels';
+import { getLevelLabel, LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -22,17 +22,17 @@ export default function MasteryScreen() {
   );
 
   // Overall statistics
-  const totalCards = getCardCount();
   const totalMastered = getMasteredCards().length;
   const totalWeak = getWeakCards().length;
-  const overallProgress = totalCards > 0 ? Math.round((totalMastered / totalCards) * 100) : 0;
+  const totalTarget = LEVELS.length * TARGET_CARDS_PER_LEVEL; // 4 levels × 60 = 240
+  const overallProgress = Math.min(100, Math.round((totalMastered / totalTarget) * 100));
 
   // Statistics by level
   const levelStats = LEVELS.map((lv) => {
     const total = getCardCount(lv.id);
     const mastered = getMasteredCards(lv.id).length;
     const weak = getWeakCards(lv.id).length;
-    const progress = total > 0 ? Math.round((mastered / total) * 100) : 0;
+    const progress = Math.min(100, Math.round((mastered / TARGET_CARDS_PER_LEVEL) * 100));
     return { ...lv, total, mastered, weak, progress };
   });
 

@@ -28,7 +28,7 @@ export default function PracticeScreen() {
   const { t } = useTranslation();
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
   const [_refreshKey, setRefreshKey] = useState(0);
-  const { getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
+  const { isLevelLocked, getLevelProgress } = useSpacedRepetition();
 
   // Refresh on screen focus
   useFocusEffect(
@@ -50,8 +50,7 @@ export default function PracticeScreen() {
 
         {/* Level cards */}
         {LEVELS.map((lv) => {
-          const cardCount = getCardCount(lv.id);
-          const progress = Math.min(100, Math.round((cardCount / TARGET_CARDS_PER_LEVEL) * 100));
+          const progress = getLevelProgress(lv.id);
           const isExpanded = expandedLevel === lv.id;
           const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
 

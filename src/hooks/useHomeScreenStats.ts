@@ -15,7 +15,7 @@ interface HomeScreenStats {
  * Centralizes all stats logic with memoization for performance
  */
 export function useHomeScreenStats(): HomeScreenStats {
-  const { getDueCards, getCardCount } = useSpacedRepetition();
+  const { getDueCards, getMasteredCards } = useSpacedRepetition();
 
   // Get all cards due today
   const dueCards = useMemo(() => getDueCards(), [getDueCards]);
@@ -35,18 +35,27 @@ export function useHomeScreenStats(): HomeScreenStats {
     );
   }, [dueCards]);
 
-  // Per-level progress percentage (0-100)
+  // Per-level progress percentage (0-100) based on mastered cards
   const levelProgress = useMemo(
     () => ({
-      note: Math.min(100, Math.round((getCardCount('note') / TARGET_CARDS_PER_LEVEL) * 100)),
+      note: Math.min(
+        100,
+        Math.round((getMasteredCards('note').length / TARGET_CARDS_PER_LEVEL) * 100),
+      ),
       interval: Math.min(
         100,
-        Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100),
+        Math.round((getMasteredCards('interval').length / TARGET_CARDS_PER_LEVEL) * 100),
       ),
-      scale: Math.min(100, Math.round((getCardCount('scale') / TARGET_CARDS_PER_LEVEL) * 100)),
-      ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_CARDS_PER_LEVEL) * 100)),
+      scale: Math.min(
+        100,
+        Math.round((getMasteredCards('scale').length / TARGET_CARDS_PER_LEVEL) * 100),
+      ),
+      ear: Math.min(
+        100,
+        Math.round((getMasteredCards('ear').length / TARGET_CARDS_PER_LEVEL) * 100),
+      ),
     }),
-    [getCardCount],
+    [getMasteredCards],
   );
 
   return {
