@@ -72,7 +72,7 @@ export default function QuizNoteScreen() {
       {/* Card */}
       <QuizCard state={state}>
         <Text style={s.positionLabel}>
-          {q.stringLabel} · {q.fretLabel}
+          {q.string}번줄 · {q.fret}프렛
         </Text>
         <Fretboard
           startFret={Math.max(0, q.fret - 2)}
