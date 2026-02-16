@@ -1,10 +1,12 @@
 import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { type EarQuestionCard, generateCardBatch } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
@@ -77,22 +79,23 @@ function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => voi
   );
 }
 
-// ─── Mock data ───
-const MOCK_QUESTIONS = [
-  { answer: 'E', options: ['E', 'A', 'D', 'G'], answerIdx: 0 },
-  { answer: 'A', options: ['D', 'A', 'G', 'B'], answerIdx: 1 },
-  { answer: 'D', options: ['E', 'G', 'D', 'A'], answerIdx: 2 },
-];
+const SESSION_SIZE = 10;
 
 export default function QuizEarScreen() {
   const router = useRouter();
-  const total = MOCK_QUESTIONS.length;
+  const { addCard, recordReview } = useSpacedRepetition();
+
+  // 세션 시작 시 카드 생성
+  const questions = useMemo(() => generateCardBatch('ear', SESSION_SIZE) as EarQuestionCard[], []);
+  const total = questions.length;
+
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [startTime, setStartTime] = useState(Date.now());
   const [state, setState] = useState<QuizState>('question');
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
 
-  const q = MOCK_QUESTIONS[currentIdx];
+  const q = questions[currentIdx];
 
   // Setup audio
   useEffect(() => {
