@@ -11,6 +11,8 @@ export function useQuizSession<T extends { id: string }>(config: UseQuizSessionC
   const [currentIdx, setCurrentIdx] = useState(0);
   const [startTime, setStartTime] = useState(Date.now());
   const [state, setState] = useState<QuizState>('question');
+  const [correctCount, setCorrectCount] = useState(0);
+  const [wrongCount, setWrongCount] = useState(0);
 
   const currentCard = cards[currentIdx];
   const total = cards.length;
@@ -18,6 +20,11 @@ export function useQuizSession<T extends { id: string }>(config: UseQuizSessionC
 
   const recordAnswer = (correct: boolean) => {
     setState(correct ? 'correct' : 'wrong');
+    if (correct) {
+      setCorrectCount((prev) => prev + 1);
+    } else {
+      setWrongCount((prev) => prev + 1);
+    }
     return Date.now() - startTime;
   };
 
@@ -43,6 +50,8 @@ export function useQuizSession<T extends { id: string }>(config: UseQuizSessionC
     setState,
     total,
     progress,
+    correctCount,
+    wrongCount,
     recordAnswer,
     nextCard,
     resetCard,
