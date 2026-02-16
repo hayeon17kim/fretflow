@@ -1,80 +1,61 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import { Fretboard } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
-import type { StringNumber } from '@/types/music';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
 
-// ─── Mock quiz data ───
-const MOCK_QUESTIONS = [
-  {
-    string: 5 as StringNumber,
-    fret: 7,
-    answer: 'E',
-    options: ['A', 'E', 'D', 'B'],
-    stringLabel: '5번줄',
-    fretLabel: '7프렛',
-  },
-  {
-    string: 6 as StringNumber,
-    fret: 3,
-    answer: 'G',
-    options: ['G', 'A', 'F', 'E'],
-    stringLabel: '6번줄',
-    fretLabel: '3프렛',
-  },
-  {
-    string: 3 as StringNumber,
-    fret: 5,
-    answer: 'E',
-    options: ['D', 'C', 'E', 'F'],
-    stringLabel: '3번줄',
-    fretLabel: '5프렛',
-  },
-  {
-    string: 1 as StringNumber,
-    fret: 1,
-    answer: 'F',
-    options: ['F', 'G', 'E', 'D'],
-    stringLabel: '1번줄',
-    fretLabel: '1프렛',
-  },
-  {
-    string: 4 as StringNumber,
-    fret: 2,
-    answer: 'E',
-    options: ['A', 'B', 'E', 'D'],
-    stringLabel: '4번줄',
-    fretLabel: '2프렛',
-  },
-];
+const SESSION_SIZE = 10; // 한 세션당 카드 수
 
 export default function QuizNoteScreen() {
   const router = useRouter();
-  const total = MOCK_QUESTIONS.length;
+  const { addCard, recordReview } = useSpacedRepetition();
+
+  // 세션 시작 시 카드 생성 (한 번만)
+  const questions = useMemo(
+    () => generateCardBatch('note', SESSION_SIZE) as NoteQuestionCard[],
+    [],
+  );
+  const total = questions.length;
+
   const [currentIdx, setCurrentIdx] = useState(0);
+  const [startTime, setStartTime] = useState(Date.now());
   const [state, setState] = useState<QuizState>('question');
 
-  const q = MOCK_QUESTIONS[currentIdx];
+  const q = questions[currentIdx];
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
-    setState(q.options[index] === q.answer ? 'correct' : 'wrong');
+    const correct = q.options[index] === q.answer;
+    setState(correct ? 'correct' : 'wrong');
+
+    // 응답 시간 기록
+    const responseTime = Date.now() - startTime;
+
+    // 카드 추가 (아직 없으면) & 리뷰 기록
+    addCard({
+      id: q.id,
+      type: 'note',
+      question: { string: q.string, fret: q.fret } as any,
+    });
+    recordReview(q.id, correct, responseTime);
   };
 
   const nextCard = () => {
     if (currentIdx + 1 >= total) {
-      // Session complete — go back for now
+      // 세션 완료
       router.back();
       return;
     }
     setCurrentIdx((prev) => prev + 1);
     setState('question');
+    setStartTime(Date.now()); // 다음 카드 시작 시간 리셋
   };
 
   return (
