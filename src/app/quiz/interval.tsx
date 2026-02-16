@@ -5,20 +5,16 @@ import { useTranslation } from 'react-i18next';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
-import type { StringNumber } from '@/types/music';
+import { useQuizSession } from '@/hooks/useQuizSession';
+import type { FretPosition, StringNumber } from '@/types/music';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-type QuizState = 'question' | 'correct' | 'wrong';
-interface Pos {
-  s: StringNumber;
-  f: number;
-}
 
 // ─── Mock data ───
 const MOCK_QUESTIONS = [
   {
-    root: { s: 5 as StringNumber, f: 0 },
-    correct: { s: 5 as StringNumber, f: 7 },
+    id: 'interval-1',
+    root: { string: 5 as StringNumber, fret: 0 },
+    correct: { string: 5 as StringNumber, fret: 7 },
     rootNote: 'A',
     answerNote: 'E',
     intervalName: '완전5도 ↑',
@@ -27,8 +23,9 @@ const MOCK_QUESTIONS = [
     fretRange: [0, 9] as [number, number],
   },
   {
-    root: { s: 4 as StringNumber, f: 2 },
-    correct: { s: 4 as StringNumber, f: 7 },
+    id: 'interval-2',
+    root: { string: 4 as StringNumber, fret: 2 },
+    correct: { string: 4 as StringNumber, fret: 7 },
     rootNote: 'E',
     answerNote: 'B',
     intervalName: '완전5도 ↑',
@@ -40,42 +37,43 @@ const MOCK_QUESTIONS = [
 export default function QuizIntervalScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const total = MOCK_QUESTIONS.length;
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [state, setState] = useState<QuizState>('question');
-  const [tapped, setTapped] = useState<Pos | null>(null);
 
-  const q = MOCK_QUESTIONS[currentIdx];
+  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
+    cards: MOCK_QUESTIONS,
+  });
+  const [tapped, setTapped] = useState<FretPosition | null>(null);
 
-  const handleTap = (pos: { string: StringNumber; fret: number }) => {
+  const handleTap = (pos: FretPosition) => {
     if (state !== 'question') return;
-    if (tapped?.s === pos.string && tapped?.f === pos.fret) {
+    if (tapped?.string === pos.string && tapped?.fret === pos.fret) {
       setTapped(null);
     } else {
-      setTapped({ s: pos.string, f: pos.fret });
+      setTapped(pos);
     }
   };
 
   const confirmAnswer = () => {
     if (!tapped) return;
-    if (tapped.s === q.correct.s && tapped.f === q.correct.f) {
-      setState('correct');
-    } else {
-      setState('wrong');
-    }
+    const correct = tapped.string === q.correct.string && tapped.fret === q.correct.fret;
+    recordAnswer(correct);
+  };
+
+  const handleNext = () => {
+    nextCard(() => router.back());
+    setTapped(null);
   };
 
   const buildHighlights = (): FretHighlight[] => {
     const highlights: FretHighlight[] = [
       // Root position (always shown)
-      { string: q.root.s, fret: q.root.f, color: COLORS.correct, label: q.rootNote },
+      { string: q.root.string, fret: q.root.fret, color: COLORS.correct, label: q.rootNote },
     ];
 
     // Show user's current selection (before confirming)
     if (state === 'question' && tapped) {
       highlights.push({
-        string: tapped.s,
-        fret: tapped.f,
+        string: tapped.string,
+        fret: tapped.fret,
         color: COLORS.level2,
         label: '?',
         textColor: '#fff',
@@ -86,8 +84,8 @@ export default function QuizIntervalScreen() {
     // Show correct answer after submission
     if (state === 'correct') {
       highlights.push({
-        string: q.correct.s,
-        fret: q.correct.f,
+        string: q.correct.string,
+        fret: q.correct.fret,
         color: COLORS.correct,
         label: q.answerNote,
       });
@@ -97,16 +95,16 @@ export default function QuizIntervalScreen() {
     if (state === 'wrong') {
       if (tapped) {
         highlights.push({
-          string: tapped.s,
-          fret: tapped.f,
+          string: tapped.string,
+          fret: tapped.fret,
           color: COLORS.wrong,
           label: '✕',
           textColor: '#fff',
         });
       }
       highlights.push({
-        string: q.correct.s,
-        fret: q.correct.f,
+        string: q.correct.string,
+        fret: q.correct.fret,
         color: COLORS.correct,
         label: q.answerNote,
         border: COLORS.correct,
@@ -116,23 +114,13 @@ export default function QuizIntervalScreen() {
     return highlights;
   };
 
-  const nextCard = () => {
-    if (currentIdx + 1 >= total) {
-      router.back();
-      return;
-    }
-    setCurrentIdx((prev) => prev + 1);
-    setState('question');
-    setTapped(null);
-  };
-
   return (
     <View style={s.container}>
       <QuizHeader
         label={t('quiz.interval.title')}
         levelNum={2}
         color={COLORS.level2}
-        progress={currentIdx + (state !== 'question' ? 1 : 0)}
+        progress={progress}
         total={total}
         onBack={() => router.back()}
       />
@@ -190,8 +178,8 @@ export default function QuizIntervalScreen() {
           {state === 'wrong' && (
             <Text style={s.resultWrong}>
               {t('quiz.interval.wrongAnswer', {
-                string: q.correct.s + 1,
-                fret: q.correct.f,
+                string: q.correct.string + 1,
+                fret: q.correct.fret,
                 answerNote: q.answerNote,
               })}
             </Text>
@@ -216,7 +204,7 @@ export default function QuizIntervalScreen() {
             </Text>
           </Pressable>
         ) : (
-          <NextButton onPress={nextCard} correct={state === 'correct'} />
+          <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
     </View>
