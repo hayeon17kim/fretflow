@@ -1,6 +1,6 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
 import Svg, { Circle, Path } from 'react-native-svg';
@@ -53,20 +53,24 @@ export default function HomeScreen() {
   const estimatedMinutes = Math.max(1, Math.ceil(dueCount * 0.35));
 
   // Per-level due card count
-  const levelDueCounts = {
-    note: dueCards.filter((c) => c.type === 'note').length,
-    interval: dueCards.filter((c) => c.type === 'interval').length,
-    scale: dueCards.filter((c) => c.type === 'scale').length,
-    ear: dueCards.filter((c) => c.type === 'ear').length,
-  };
+  const levelDueCounts = dueCards.reduce(
+    (acc, card) => {
+      acc[card.type]++;
+      return acc;
+    },
+    { note: 0, interval: 0, scale: 0, ear: 0 } as Record<string, number>,
+  );
 
   // Per-level progress (mastered cards / total target per level)
-  const levelProgress = {
-    note: Math.min(100, Math.round((getCardCount('note') / TARGET_CARDS_PER_LEVEL) * 100)),
-    interval: Math.min(100, Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100)),
-    scale: Math.min(100, Math.round((getCardCount('scale') / TARGET_CARDS_PER_LEVEL) * 100)),
-    ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_CARDS_PER_LEVEL) * 100)),
-  };
+  const levelProgress = useMemo(
+    () => ({
+      note: Math.min(100, Math.round((getCardCount('note') / TARGET_CARDS_PER_LEVEL) * 100)),
+      interval: Math.min(100, Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100)),
+      scale: Math.min(100, Math.round((getCardCount('scale') / TARGET_CARDS_PER_LEVEL) * 100)),
+      ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_CARDS_PER_LEVEL) * 100)),
+    }),
+    [getCardCount],
+  );
 
   return (
     <View style={s.container}>
