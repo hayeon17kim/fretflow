@@ -1,4 +1,5 @@
 import { StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS } from '@/utils/constants';
 
 interface OnboardingOverlayProps {
@@ -6,14 +7,16 @@ interface OnboardingOverlayProps {
 }
 
 export function OnboardingOverlay({ visible }: OnboardingOverlayProps) {
+  const { t } = useTranslation();
+
   if (!visible) return null;
 
   return (
     <View style={s.overlay}>
       <Text style={s.emoji}>👆</Text>
-      <Text style={s.title}>프렛보드를 직접 탭하세요!</Text>
-      <Text style={s.sub}>○ 표시된 위치를 눌러 답을 선택해요</Text>
-      <Text style={s.hint}>탭하여 시작</Text>
+      <Text style={s.title}>{t('onboarding.title')}</Text>
+      <Text style={s.sub}>{t('onboarding.subtitle')}</Text>
+      <Text style={s.hint}>{t('onboarding.hint')}</Text>
     </View>
   );
 }

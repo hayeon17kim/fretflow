@@ -1,4 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { COLORS } from '@/utils/constants';
@@ -37,6 +38,7 @@ export function Fretboard({
   compact = false,
   showOnboarding = false,
 }: FretboardProps) {
+  const { t } = useTranslation();
   const [pressedCell, setPressedCell] = useState<string | null>(null);
 
   // Calculations
@@ -93,7 +95,7 @@ export function Fretboard({
         />
       </View>
 
-      {tappable && <Text style={s.hint}>○ = 탭 가능한 위치</Text>}
+      {tappable && <Text style={s.hint}>{t('fretboard.tappableHint')}</Text>}
     </View>
   );
 }

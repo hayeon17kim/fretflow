@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import Svg, { Path } from 'react-native-svg';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -21,6 +22,7 @@ export function QuizHeader({
   onBack,
   badge,
 }: QuizHeaderProps) {
+  const { t } = useTranslation();
   const pct = total > 0 ? (progress / total) * 100 : 0;
 
   return (
@@ -32,8 +34,8 @@ export function QuizHeader({
           hitSlop={12}
           style={s.backBtn}
           accessibilityRole="button"
-          accessibilityLabel="뒤로 가기"
-          accessibilityHint={`${label} 화면으로 돌아갑니다`}
+          accessibilityLabel={t('accessibility.back')}
+          accessibilityHint={t('accessibility.backTo', { screen: label })}
         >
           <Svg
             width={18}
@@ -69,7 +71,7 @@ export function QuizHeader({
       <View
         style={s.barTrack}
         accessibilityRole="progressbar"
-        accessibilityLabel="퀴즈 진행 상태"
+        accessibilityLabel={t('accessibility.quizProgress')}
         accessibilityValue={{ min: 0, max: total, now: progress, text: `${progress}/${total}` }}
       >
         <View style={[s.barFill, { width: `${pct}%`, backgroundColor: color }]} />

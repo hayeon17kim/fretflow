@@ -1,4 +1,5 @@
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { COLORS, FONT_SIZE } from '@/utils/constants';
 
 interface AnswerGridProps {
@@ -8,6 +9,8 @@ interface AnswerGridProps {
 }
 
 export function AnswerGrid({ options, onSelect, disabled }: AnswerGridProps) {
+  const { t } = useTranslation();
+
   return (
     <View style={s.grid}>
       {options.map((opt, i) => (
@@ -17,8 +20,8 @@ export function AnswerGrid({ options, onSelect, disabled }: AnswerGridProps) {
           style={({ pressed }) => [s.btn, pressed && !disabled && s.pressed]}
           disabled={disabled}
           accessibilityRole="button"
-          accessibilityLabel={`답안 ${opt}`}
-          accessibilityHint="이 답을 선택하려면 탭하세요"
+          accessibilityLabel={t('accessibility.answer', { option: opt })}
+          accessibilityHint={t('accessibility.selectAnswer')}
           accessibilityState={{ disabled }}
         >
           <Text style={s.btnText}>{opt}</Text>
@@ -34,6 +37,8 @@ interface NextButtonProps {
 }
 
 export function NextButton({ onPress, correct }: NextButtonProps) {
+  const { t } = useTranslation();
+
   return (
     <Pressable
       onPress={onPress}
@@ -43,12 +48,12 @@ export function NextButton({ onPress, correct }: NextButtonProps) {
         pressed && { opacity: 0.8 },
       ]}
       accessibilityRole="button"
-      accessibilityLabel="다음 문제"
-      accessibilityHint={
-        correct ? '정답입니다. 다음 문제로 이동합니다' : '오답입니다. 다음 문제로 이동합니다'
-      }
+      accessibilityLabel={t('accessibility.nextQuestion')}
+      accessibilityHint={correct ? t('accessibility.correctHint') : t('accessibility.wrongHint')}
     >
-      <Text style={[s.nextText, { color: correct ? COLORS.bg : COLORS.textPrimary }]}>다음 →</Text>
+      <Text style={[s.nextText, { color: correct ? COLORS.bg : COLORS.textPrimary }]}>
+        {t('common.next')} →
+      </Text>
     </Pressable>
   );
 }
