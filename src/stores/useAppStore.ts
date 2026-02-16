@@ -1,6 +1,8 @@
 import { Platform } from 'react-native';
 import { create, type StateCreator } from 'zustand';
 import { appStorage } from '@/utils/storage';
+import type { LevelId } from '@/config/levels';
+import type { BadgeLevel } from '@/utils/badges';
 
 // Only import persist on native platforms to avoid import.meta issues on web
 let persist: any;
@@ -55,6 +57,24 @@ interface AppState {
     vibrationEnabled: boolean;
   };
   updateSettings: (settings: Partial<AppState['settings']>) => void;
+
+  // Badge tracking (for level-up detection) - Issue #22
+  badgeLevels: {
+    note: BadgeLevel;
+    interval: BadgeLevel;
+    scale: BadgeLevel;
+    ear: BadgeLevel;
+  };
+  updateBadgeLevel: (levelId: LevelId, badge: BadgeLevel) => void;
+
+  // First visit tracking for soft guide - Issue #22
+  levelFirstVisit: {
+    note: boolean;
+    interval: boolean;
+    scale: boolean;
+    ear: boolean;
+  };
+  markLevelVisited: (levelId: LevelId) => void;
 }
 
 // Store implementation
@@ -148,6 +168,30 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
   updateSettings: (newSettings) =>
     set((state) => ({
       settings: { ...state.settings, ...newSettings },
+    })),
+
+  // Badge tracking - Issue #22
+  badgeLevels: {
+    note: 'none',
+    interval: 'none',
+    scale: 'none',
+    ear: 'none',
+  },
+  updateBadgeLevel: (levelId, badge) =>
+    set((state) => ({
+      badgeLevels: { ...state.badgeLevels, [levelId]: badge },
+    })),
+
+  // First visit tracking - Issue #22
+  levelFirstVisit: {
+    note: true, // Default levels treated as visited
+    interval: true,
+    scale: false, // Will show soft guide
+    ear: false,
+  },
+  markLevelVisited: (levelId) =>
+    set((state) => ({
+      levelFirstVisit: { ...state.levelFirstVisit, [levelId]: true },
     })),
 });
 
