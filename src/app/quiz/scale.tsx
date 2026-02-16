@@ -1,13 +1,15 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { SoftGuideModal } from '@/components/SoftGuideModal';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
+import { QUIZ_ROUTES } from '@/config/levels';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -87,6 +89,28 @@ export default function QuizScaleScreen() {
   });
   const [selected, setSelected] = useState<FretPosition[]>([]);
   const [score, setScore] = useState<Score | null>(null);
+
+  // Soft guide for first visit (Issue #22)
+  const levelFirstVisit = useAppStore((s) => s.levelFirstVisit);
+  const markLevelVisited = useAppStore((s) => s.markLevelVisited);
+  const [showGuide, setShowGuide] = useState(false);
+
+  useEffect(() => {
+    if (!levelFirstVisit.scale) {
+      setShowGuide(true);
+    }
+  }, [levelFirstVisit.scale]);
+
+  const handleContinue = () => {
+    markLevelVisited('scale');
+    setShowGuide(false);
+  };
+
+  const handleGoToLevel1 = () => {
+    markLevelVisited('scale');
+    setShowGuide(false);
+    router.replace(QUIZ_ROUTES.note);
+  };
 
   const isSelected = (s: StringNumber, f: number) =>
     selected.some((p) => p.string === s && p.fret === f);
@@ -305,6 +329,14 @@ export default function QuizScaleScreen() {
           <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
+
+      {/* Soft guide modal for first visit (Issue #22) */}
+      <SoftGuideModal
+        visible={showGuide}
+        levelId="scale"
+        onContinue={handleContinue}
+        onGoToLevel1={handleGoToLevel1}
+      />
     </View>
   );
 }

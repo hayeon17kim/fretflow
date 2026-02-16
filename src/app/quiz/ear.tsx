@@ -6,9 +6,11 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { SoftGuideModal } from '@/components/SoftGuideModal';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
+import { QUIZ_ROUTES } from '@/config/levels';
 import { type EarQuestionCard, generateCardBatch } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -109,6 +111,28 @@ export default function QuizEarScreen() {
   });
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+
+  // Soft guide for first visit (Issue #22)
+  const levelFirstVisit = useAppStore((s) => s.levelFirstVisit);
+  const markLevelVisited = useAppStore((s) => s.markLevelVisited);
+  const [showGuide, setShowGuide] = useState(false);
+
+  useEffect(() => {
+    if (!levelFirstVisit.ear) {
+      setShowGuide(true);
+    }
+  }, [levelFirstVisit.ear]);
+
+  const handleContinue = () => {
+    markLevelVisited('ear');
+    setShowGuide(false);
+  };
+
+  const handleGoToLevel1 = () => {
+    markLevelVisited('ear');
+    setShowGuide(false);
+    router.replace(QUIZ_ROUTES.note);
+  };
 
   // Setup audio
   useEffect(() => {
@@ -273,6 +297,14 @@ export default function QuizEarScreen() {
           <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
+
+      {/* Soft guide modal for first visit (Issue #22) */}
+      <SoftGuideModal
+        visible={showGuide}
+        levelId="ear"
+        onContinue={handleContinue}
+        onGoToLevel1={handleGoToLevel1}
+      />
     </View>
   );
 }
