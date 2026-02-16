@@ -153,6 +153,11 @@ export function useSpacedRepetition() {
   // 레벨 잠금 여부 체크
   const isLevelLocked = useCallback(
     (level: 1 | 2 | 3 | 4): boolean => {
+      // Feature disabled - all levels unlocked (Issue #22)
+      // Function kept for potential future use
+      return false;
+
+      /* Original logic preserved:
       if (level === 1) return false; // Lv.1은 항상 해금
 
       const levelTypeMap: Record<number, FlashCard['type']> = {
@@ -168,6 +173,7 @@ export function useSpacedRepetition() {
       const prevProgress = getLevelProgress(prevLevelType);
 
       return prevProgress < 80; // 80% 미만이면 잠금
+      */
     },
     [getLevelProgress],
   );
