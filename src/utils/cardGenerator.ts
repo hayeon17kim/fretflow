@@ -52,7 +52,7 @@ export function generateNoteCard(): NoteQuestionCard {
   const options = shuffle([answer, ...selectedWrong]);
 
   return {
-    id: `note-${string}-${fret}-${Date.now()}`,
+    id: `note-${answer}-${string}-${fret}`,
     type: 'note',
     string,
     fret,
@@ -125,8 +125,12 @@ export function generateIntervalCard(): IntervalQuestionCard {
   const selectedWrong = shuffle(wrongIntervals).slice(0, 3);
   const options = shuffle([answer, ...selectedWrong]);
 
+  // Get note names for deterministic ID
+  const rootNote = getNoteAtPosition({ string: rootString, fret: rootFret });
+  const targetNote = getNoteAtPosition(targetPosition);
+
   return {
-    id: `interval-${rootString}-${rootFret}-${Date.now()}`,
+    id: `interval-${rootNote}-${targetNote}-${answer}`,
     type: 'interval',
     rootPosition: { string: rootString, fret: rootFret },
     targetPosition,
@@ -182,7 +186,7 @@ export function generateScaleCard(): ScaleQuestionCard {
   }
 
   return {
-    id: `scale-${scaleName}-${rootNote}-${Date.now()}`,
+    id: `scale-${scaleName}-${rootNote}-pos1`,
     type: 'scale',
     scaleName,
     rootNote,
@@ -212,7 +216,7 @@ export function generateEarCard(): EarQuestionCard {
   const options = shuffle([answer, ...selectedWrong]);
 
   return {
-    id: `ear-${answer}-${Date.now()}`,
+    id: `ear-${answer}`,
     type: 'ear',
     answer,
     options,
