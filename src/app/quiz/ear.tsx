@@ -1,5 +1,6 @@
+import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
@@ -7,6 +8,31 @@ import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 type QuizState = 'question' | 'correct' | 'wrong';
+
+// ─── Audio file mapping ───
+// NOTE: 개방현 5음 (기초 모드)
+// E2 = 6번줄, A2 = 5번줄, D3 = 4번줄, G3 = 3번줄, B3 = 2번줄
+const BASIC_MODE_SOUNDS: Record<string, number | null> = {
+  E: null,
+  A: null,
+  D: null,
+  G: null,
+  B: null,
+};
+
+// Try to load basic mode audio files
+try {
+  BASIC_MODE_SOUNDS.E = require('../../../assets/sounds/E2.wav');
+  BASIC_MODE_SOUNDS.A = require('../../../assets/sounds/A2.wav');
+  BASIC_MODE_SOUNDS.D = require('../../../assets/sounds/D3.wav');
+  BASIC_MODE_SOUNDS.G = require('../../../assets/sounds/G3.wav');
+  BASIC_MODE_SOUNDS.B = require('../../../assets/sounds/B3.wav');
+} catch (_error) {
+  console.warn('[QuizEar] Audio files not found in assets/sounds/');
+}
+
+// 현재 사용 중인 사운드 맵 (나중에 전체 모드로 확장 가능)
+const SOUND_FILES = BASIC_MODE_SOUNDS;
 
 // ─── Sound wave bars (playing indicator) ───
 function WaveBars({ color }: { color: string }) {
@@ -64,8 +90,59 @@ export default function QuizEarScreen() {
   const [currentIdx, setCurrentIdx] = useState(0);
   const [state, setState] = useState<QuizState>('question');
   const [playing, setPlaying] = useState(false);
+  const soundRef = useRef<Audio.Sound | null>(null);
 
   const q = MOCK_QUESTIONS[currentIdx];
+
+  // Setup audio
+  useEffect(() => {
+    (async () => {
+      await Audio.setAudioModeAsync({
+        playsInSilentModeIOS: true,
+        staysActiveInBackground: false,
+      });
+    })();
+
+    return () => {
+      if (soundRef.current) {
+        soundRef.current.unloadAsync();
+      }
+    };
+  }, []);
+
+  // Play sound
+  const playSound = async () => {
+    try {
+      // Unload previous sound
+      if (soundRef.current) {
+        await soundRef.current.unloadAsync();
+        soundRef.current = null;
+      }
+
+      setPlaying(true);
+
+      // Load and play
+      const soundFile = SOUND_FILES[q.answer];
+      if (!soundFile) {
+        console.warn(`[QuizEar] Sound file not found for: ${q.answer}`);
+        setPlaying(false);
+        return;
+      }
+
+      const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: true });
+      soundRef.current = sound;
+
+      // Set callback when finished
+      sound.setOnPlaybackStatusUpdate((status) => {
+        if (status.isLoaded && status.didJustFinish) {
+          setPlaying(false);
+        }
+      });
+    } catch (error) {
+      console.error('[QuizEar] Failed to play sound:', error);
+      setPlaying(false);
+    }
+  };
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
@@ -73,7 +150,13 @@ export default function QuizEarScreen() {
     setPlaying(false);
   };
 
-  const nextCard = () => {
+  const nextCard = async () => {
+    // Stop current sound
+    if (soundRef.current) {
+      await soundRef.current.unloadAsync();
+      soundRef.current = null;
+    }
+
     if (currentIdx + 1 >= total) {
       router.back();
       return;
@@ -114,7 +197,7 @@ export default function QuizEarScreen() {
         </View>
         <Text style={s.modeDesc}>개방현 5음 (E, A, D, G, B) 중 하나</Text>
 
-        <PlayButton playing={playing} onPress={() => setPlaying(!playing)} />
+        <PlayButton playing={playing} onPress={playSound} />
 
         <Text style={s.playLabel}>{playing ? '듣고 있어요...' : '탭하여 소리 듣기'}</Text>
 
