@@ -47,7 +47,8 @@
     "weakCardsCount": "약점 카드가 {{count}}장 있습니다",
     "weakCardsDesc": "EF 점수가 낮거나 반복 실수가 많은 카드입니다. 집중 복습을 통해 마스터하세요.",
     "emptyTitle": "아직 학습 카드가 없습니다",
-    "emptyDesc": "홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다"
+    "emptyDesc": "홈 탭에서 복습을 시작하면 여기에 진행도가 표시됩니다",
+    "cardUnit": "장"
   },
   "quiz": {
     "note": {
@@ -68,7 +69,37 @@
       "correctAnswer": "🔊 정답! {{rootNote}} → {{answerNote}} ({{intervalName}})",
       "wrongAnswer": "정답은 {{string}}번줄 {{fret}}프렛 ({{answerNote}})예요",
       "confirmButton": "이 위치로 확인 →",
-      "selectPosition": "프렛보드에서 위치를 선택하세요"
+      "selectPosition": "프렛보드에서 위치를 선택하세요",
+      "intervalNames": {
+        "P1": "완전1도",
+        "m2": "단2도",
+        "M2": "장2도",
+        "m3": "단3도",
+        "M3": "장3도",
+        "P4": "완전4도",
+        "TT": "증4도",
+        "P5": "완전5도",
+        "m6": "단6도",
+        "M6": "장6도",
+        "m7": "단7도",
+        "M7": "장7도",
+        "P8": "완전8도"
+      },
+      "patternHints": {
+        "P1": "같은 위치 = 같은 음! 옥타브 패턴의 기준점이에요.",
+        "m2": "같은 줄에서 1프렛 위 = 반음! 가장 작은 음정 간격이에요.",
+        "M2": "같은 줄에서 2프렛 위 = 온음! 도레미파 중 대부분의 간격이에요.",
+        "m3": "같은 줄에서 3프렛 위 = 단3도! 단조 화음의 핵심 음정이에요.",
+        "M3": "같은 줄에서 4프렛 위 = 장3도! 밝은 느낌의 장조 화음이에요.",
+        "P4": "같은 줄에서 5프렛 위 = 완전4도! 코드 구성의 기본이 되는 음정이에요.",
+        "TT": "같은 줄에서 6프렛 위 = 증4도(감5도)! 블루스와 록의 텐션 사운드예요.",
+        "P5": "같은 줄에서 7프렛 위 = 완전5도! 가장 안정적이고 조화로운 음정이에요.",
+        "m6": "같은 줄에서 8프렛 위 = 단6도! 슬픈 느낌을 주는 음정이에요.",
+        "M6": "같은 줄에서 9프렛 위 = 장6도! 밝고 따뜻한 느낌의 음정이에요.",
+        "m7": "같은 줄에서 10프렛 위 = 단7도! 재즈와 블루스의 필수 음정이에요.",
+        "M7": "같은 줄에서 11프렛 위 = 장7도! 부드럽고 세련된 느낌의 음정이에요.",
+        "P8": "같은 줄에서 12프렛 위 = 완전8도(옥타브)! 같은 음의 높은 버전이에요."
+      }
     },
     "scale": {
       "title": "스케일 패턴",
@@ -81,7 +112,18 @@
       "wrongCount": "{{count}}개 오답",
       "missedCount": "{{count}}개 누락",
       "scoreSub": "점선 원(○) = 놓친 음 · 80% 이상이면 통과",
-      "confirmButton": "확인 ({{count}}개 선택)"
+      "confirmButton": "확인 ({{count}}개 선택)",
+      "scaleNames": {
+        "major": "메이저",
+        "pentatonic-major": "펜타토닉 메이저",
+        "pentatonic-minor": "펜타토닉 마이너"
+      },
+      "patternHints": {
+        "major": "메이저 스케일은 밝고 긍정적인 느낌의 7음 음계예요. 도레미파솔라시도!",
+        "pentatonic-major": "펜타토닉 메이저는 5음 음계로 밝은 느낌이에요. 블루스와 록에서 자주 쓰여요.",
+        "pentatonic-minor": "펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!"
+      },
+      "position": "{{number}}포지션"
     },
     "ear": {
       "title": "귀 훈련",
@@ -144,6 +186,52 @@
       "developerName": "FretFlow Team"
     },
     "footer": "Made with 💚 for guitar learners"
+  },
+  "levels": {
+    "note": {
+      "label": "음 위치",
+      "desc": "프렛보드의 음 이름 외우기",
+      "example": "\"5번줄 7프렛의 음은?\" → 4지선다"
+    },
+    "interval": {
+      "label": "인터벌",
+      "desc": "프렛보드 위에서 음정 거리 찾기",
+      "example": "\"A에서 완전5도\" → 프렛보드에서 탭"
+    },
+    "scale": {
+      "label": "스케일 패턴",
+      "desc": "프렛보드에서 스케일 음 짚기",
+      "example": "\"Am 펜타토닉 1포지션\" → 프렛보드에서 음 짚기"
+    },
+    "ear": {
+      "label": "귀 훈련",
+      "desc": "소리를 듣고 음 맞추기",
+      "example": "\"이 소리는?\" → 개방현 5음 중 선택"
+    }
+  },
+  "tabs": {
+    "home": "홈",
+    "practice": "연습",
+    "mastery": "마스터리",
+    "settings": "설정"
+  },
+  "fretboard": {
+    "tappableHint": "○ = 탭 가능한 위치"
+  },
+  "onboarding": {
+    "title": "프렛보드를 직접 탭하세요!",
+    "subtitle": "○ 표시된 위치를 눌러 답을 선택해요",
+    "hint": "탭하여 시작"
+  },
+  "accessibility": {
+    "back": "뒤로 가기",
+    "backTo": "{{screen}} 화면으로 돌아갑니다",
+    "quizProgress": "퀴즈 진행 상태",
+    "answer": "답안 {{option}}",
+    "selectAnswer": "이 답을 선택하려면 탭하세요",
+    "nextQuestion": "다음 문제",
+    "correctHint": "정답입니다. 다음 문제로 이동합니다",
+    "wrongHint": "오답입니다. 다음 문제로 이동합니다"
   },
   "common": {
     "next": "다음",

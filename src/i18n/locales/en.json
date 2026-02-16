@@ -47,7 +47,8 @@
     "weakCardsCount": "You have {{count}} weak cards",
     "weakCardsDesc": "Cards with low EF scores or repeated mistakes. Master them through focused review.",
     "emptyTitle": "No learning cards yet",
-    "emptyDesc": "Start reviewing from the Home tab to see your progress here"
+    "emptyDesc": "Start reviewing from the Home tab to see your progress here",
+    "cardUnit": "cards"
   },
   "quiz": {
     "note": {
@@ -68,7 +69,37 @@
       "correctAnswer": "🔊 Correct! {{rootNote}} → {{answerNote}} ({{intervalName}})",
       "wrongAnswer": "The answer is string {{string}}, fret {{fret}} ({{answerNote}})",
       "confirmButton": "Confirm this position →",
-      "selectPosition": "Select a position on the fretboard"
+      "selectPosition": "Select a position on the fretboard",
+      "intervalNames": {
+        "P1": "Perfect Unison",
+        "m2": "Minor 2nd",
+        "M2": "Major 2nd",
+        "m3": "Minor 3rd",
+        "M3": "Major 3rd",
+        "P4": "Perfect 4th",
+        "TT": "Tritone",
+        "P5": "Perfect 5th",
+        "m6": "Minor 6th",
+        "M6": "Major 6th",
+        "m7": "Minor 7th",
+        "M7": "Major 7th",
+        "P8": "Perfect Octave"
+      },
+      "patternHints": {
+        "P1": "Same position = same note! The reference point for octave patterns.",
+        "m2": "1 fret up on the same string = half step! The smallest interval.",
+        "M2": "2 frets up on the same string = whole step! Most intervals in do-re-mi.",
+        "m3": "3 frets up on the same string = minor 3rd! Core interval in minor chords.",
+        "M3": "4 frets up on the same string = major 3rd! Bright sound in major chords.",
+        "P4": "5 frets up on the same string = perfect 4th! Foundation of chord construction.",
+        "TT": "6 frets up on the same string = tritone! Blues and rock tension sound.",
+        "P5": "7 frets up on the same string = perfect 5th! Most stable and harmonious interval.",
+        "m6": "8 frets up on the same string = minor 6th! Creates a melancholic feeling.",
+        "M6": "9 frets up on the same string = major 6th! Bright and warm sound.",
+        "m7": "10 frets up on the same string = minor 7th! Essential in jazz and blues.",
+        "M7": "11 frets up on the same string = major 7th! Smooth and sophisticated sound.",
+        "P8": "12 frets up on the same string = perfect octave! Higher version of the same note."
+      }
     },
     "scale": {
       "title": "Scale Pattern",
@@ -81,7 +112,18 @@
       "wrongCount": "{{count}} wrong",
       "missedCount": "{{count}} missed",
       "scoreSub": "Dashed circle (○) = missed note · 80%+ to pass",
-      "confirmButton": "Confirm ({{count}} selected)"
+      "confirmButton": "Confirm ({{count}} selected)",
+      "scaleNames": {
+        "major": "Major",
+        "pentatonic-major": "Pentatonic Major",
+        "pentatonic-minor": "Pentatonic Minor"
+      },
+      "patternHints": {
+        "major": "Major scale is a bright 7-note scale. Do-Re-Mi-Fa-Sol-La-Ti-Do!",
+        "pentatonic-major": "Pentatonic major is a 5-note scale with a bright feel. Widely used in blues and rock.",
+        "pentatonic-minor": "Pentatonic minor is a 5-note scale with intense emotion. Foundation of rock solos!"
+      },
+      "position": "Position {{number}}"
     },
     "ear": {
       "title": "Ear Training",
@@ -144,6 +186,52 @@
       "developerName": "FretFlow Team"
     },
     "footer": "Made with 💚 for guitar learners"
+  },
+  "levels": {
+    "note": {
+      "label": "Note Position",
+      "desc": "Memorize note names on the fretboard",
+      "example": "\"What note is on string 5, fret 7?\" → Multiple choice"
+    },
+    "interval": {
+      "label": "Intervals",
+      "desc": "Find interval distances on the fretboard",
+      "example": "\"Perfect 5th from A\" → Tap on fretboard"
+    },
+    "scale": {
+      "label": "Scale Patterns",
+      "desc": "Tap scale notes on the fretboard",
+      "example": "\"Am Pentatonic Position 1\" → Tap notes on fretboard"
+    },
+    "ear": {
+      "label": "Ear Training",
+      "desc": "Identify notes by sound",
+      "example": "\"What is this sound?\" → Choose from 5 open strings"
+    }
+  },
+  "tabs": {
+    "home": "Home",
+    "practice": "Practice",
+    "mastery": "Mastery",
+    "settings": "Settings"
+  },
+  "fretboard": {
+    "tappableHint": "○ = Tappable position"
+  },
+  "onboarding": {
+    "title": "Tap directly on the fretboard!",
+    "subtitle": "Tap the marked positions (○) to select your answer",
+    "hint": "Tap to start"
+  },
+  "accessibility": {
+    "back": "Back",
+    "backTo": "Return to {{screen}} screen",
+    "quizProgress": "Quiz progress",
+    "answer": "Answer {{option}}",
+    "selectAnswer": "Tap to select this answer",
+    "nextQuestion": "Next question",
+    "correctHint": "Correct. Moving to next question",
+    "wrongHint": "Incorrect. Moving to next question"
   },
   "common": {
     "next": "Next",
