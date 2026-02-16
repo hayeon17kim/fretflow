@@ -10,9 +10,8 @@
     "dailyGoal": "오늘의 목표",
     "startReview": "복습 시작 →",
     "addCards": "새 카드 추가하기 →",
-    "firstTimeTitle": "프렛보드를 정복해볼까요? 🎸",
-    "firstTimeDesc": "매일 조금씩 연습하면 프렛보드의 모든 음을 외울 수 있어요.",
-    "firstTimeCta": "첫 학습 시작하기",
+    "firstTimeTitle": "프렛보드 학습 시작하기 🎸",
+    "firstTimeCta": "학습 시작",
     "reviewDone": "오늘 복습 완료! 🎉",
     "reviewDoneDesc": "수고했어요! 새로운 카드를 배워서 내일 복습할 카드를 늘려보세요.",
     "learnNew": "새로운 카드 배우기",
@@ -262,5 +261,39 @@
     "message": "이 레벨은 기본 음 위치를 알면 더 쉬워요. 바로 시작할까요?",
     "continue": "네, 시작",
     "goToLevel1": "Lv.1부터 할래요"
+  },
+  "onboardingFlow": {
+    "skip": "건너뛰기",
+    "intro": {
+      "title": "기타 프렛보드,\n얼마나 알고 계신가요?",
+      "subtitle": "간단한 3문제로 실력을 확인하고\n맞춤 학습을 시작해보세요",
+      "start": "시작하기",
+      "duration": "약 1분 소요"
+    },
+    "miniQuiz": {
+      "correct": "정답이에요!",
+      "wrongFeedback": "이 음은 {{answer}}예요.\n내일 다시 만나요!",
+      "seeResult": "결과 보기"
+    },
+    "result": {
+      "score": "{{correct}}/{{total}}",
+      "perfect": "완벽해요! 프렛보드를 잘 알고 계시네요",
+      "great": "좋은 실력이에요! 조금만 더 연습하면 완벽해져요",
+      "good": "좋은 시작이에요! 매일 조금씩 연습하면 금방 익숙해져요",
+      "keepGoing": "괜찮아요! FretFlow와 함께 하나씩 익혀봐요",
+      "insight": "틀린 문제는 내일 자동으로 다시 나와요. 까먹기 전에 복습하면 기억이 오래 남아요!",
+      "continue": "계속하기"
+    },
+    "goal": {
+      "title": "하루 목표를 정해볼까요?",
+      "subtitle": "매일 꾸준히 하는 게 가장 중요해요",
+      "light": "가볍게",
+      "lightDesc": "하루 {{count}}장 · 약 3분",
+      "moderate": "적당히",
+      "moderateDesc": "하루 {{count}}장 · 약 7분",
+      "intense": "집중적으로",
+      "intenseDesc": "하루 {{count}}장 · 약 10분",
+      "confirm": "학습 시작하기"
+    }
   }
 }

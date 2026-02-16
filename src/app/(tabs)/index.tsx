@@ -6,7 +6,6 @@ import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { DailyReviewCard } from '@/components/home/DailyReviewCard';
 import { LevelCardGrid } from '@/components/home/LevelCardGrid';
-import { LevelProgressStats } from '@/components/home/LevelProgressStats';
 import type { LevelId } from '@/config/levels';
 import { LEVELS } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
@@ -99,9 +98,6 @@ export default function HomeScreen() {
           onStartReview={handleStartReview}
           onLearnNew={handleLearnNew}
         />
-
-        {/* ─── Quick stats row ─── */}
-        <LevelProgressStats levelProgress={levelProgress} />
 
         {/* ─── Level cards ─── */}
         <LevelCardGrid levelProgress={levelProgress} onLevelPress={handleLevelPress} />

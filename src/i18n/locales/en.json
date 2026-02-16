@@ -10,9 +10,8 @@
     "dailyGoal": "Today's Goal",
     "startReview": "Start Review →",
     "addCards": "Add New Cards →",
-    "firstTimeTitle": "Ready to master the fretboard? 🎸",
-    "firstTimeDesc": "Practice a little each day and you'll memorize every note on the fretboard.",
-    "firstTimeCta": "Start First Lesson",
+    "firstTimeTitle": "Start Learning the Fretboard 🎸",
+    "firstTimeCta": "Start Learning",
     "reviewDone": "Today's Review Done! 🎉",
     "reviewDoneDesc": "Great work! Learn new cards to build up tomorrow's review.",
     "learnNew": "Learn New Cards",
@@ -262,5 +261,39 @@
     "message": "This level is easier if you know basic note positions. Start now?",
     "continue": "Yes, Start",
     "goToLevel1": "Start from Lv.1"
+  },
+  "onboardingFlow": {
+    "skip": "Skip",
+    "intro": {
+      "title": "How well do you know\nthe guitar fretboard?",
+      "subtitle": "Take a quick 3-question quiz\nand start your personalized learning",
+      "start": "Let's Go",
+      "duration": "Takes about 1 minute"
+    },
+    "miniQuiz": {
+      "correct": "Correct!",
+      "wrongFeedback": "This note is {{answer}}.\nSee you again tomorrow!",
+      "seeResult": "See Results"
+    },
+    "result": {
+      "score": "{{correct}}/{{total}}",
+      "perfect": "Perfect! You know the fretboard well",
+      "great": "Great job! A bit more practice and you'll master it",
+      "good": "Good start! Daily practice will make it second nature",
+      "keepGoing": "No worries! Let's learn together with FretFlow",
+      "insight": "Incorrect items reappear tomorrow automatically. Reviewing before you forget maximizes retention!",
+      "continue": "Continue"
+    },
+    "goal": {
+      "title": "Set your daily goal",
+      "subtitle": "Consistency is the key to mastery",
+      "light": "Light",
+      "lightDesc": "{{count}} cards/day · ~3 min",
+      "moderate": "Moderate",
+      "moderateDesc": "{{count}} cards/day · ~7 min",
+      "intense": "Intense",
+      "intenseDesc": "{{count}} cards/day · ~10 min",
+      "confirm": "Start Learning"
+    }
   }
 }

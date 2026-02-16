@@ -48,8 +48,8 @@ export function DailyReviewCard({
   const recommendedLevelLabel = getLevelLabel(recommendedLevel, t);
 
   const hasDueCards = dueCount > 0;
-  const isFirstTime = cardsReviewed === 0 && !hasDueCards;
-  const isReviewDone = cardsReviewed > 0 && !hasDueCards;
+  // First-time user: never reviewed anything AND nothing scheduled yet
+  const isFirstTime = cardsReviewed === 0 && dueCount === 0;
 
   return (
     <View style={s.ctaCard}>
@@ -68,31 +68,47 @@ export function DailyReviewCard({
         )}
       </View>
 
-      {/* Daily goal progress */}
-      <View style={s.goalSection}>
-        <View style={s.goalTextRow}>
-          <Text style={s.goalLabel}>{t('home.dailyGoal')}</Text>
-          <Text style={[s.goalProgress, { color: progressColor }]}>
-            {cardsReviewed} / {dailyGoal}
+      {/* Daily goal progress — hide for first-time users (all zeros) */}
+      {!isFirstTime && (
+        <View style={s.goalSection}>
+          <View style={s.goalTextRow}>
+            <Text style={s.goalLabel}>{t('home.dailyGoal')}</Text>
+            <Text style={[s.goalProgress, { color: progressColor }]}>
+              {cardsReviewed} / {dailyGoal}
+            </Text>
+          </View>
+          <View style={s.progressBarContainer}>
+            <View
+              style={[
+                s.progressBar,
+                {
+                  width: `${progressPercent}%`,
+                  backgroundColor: progressColor,
+                },
+              ]}
+            />
+          </View>
+          <Text style={[s.progressPercent, { color: progressColor }]}>
+            {progressPercent}%{progressPercent >= 100 && ' 🎉'}
           </Text>
         </View>
-        <View style={s.progressBarContainer}>
-          <View
-            style={[
-              s.progressBar,
-              {
-                width: `${progressPercent}%`,
-                backgroundColor: progressColor,
-              },
-            ]}
-          />
-        </View>
-        <Text style={[s.progressPercent, { color: progressColor }]}>
-          {progressPercent}%{progressPercent >= 100 && ' 🎉'}
-        </Text>
-      </View>
+      )}
 
-      {hasDueCards ? (
+      {isFirstTime ? (
+        <>
+          {/* ── First-time user: start learning ── */}
+          <Text style={s.ctaTitle}>{t('home.firstTimeTitle')}</Text>
+
+          <Pressable
+            style={({ pressed }) => [s.ctaBtn, pressed && s.ctaBtnPressed]}
+            onPress={onLearnNew}
+            accessibilityRole="button"
+            accessibilityLabel={t('home.firstTimeCta')}
+          >
+            <Text style={s.ctaBtnText}>{t('home.firstTimeCta')} →</Text>
+          </Pressable>
+        </>
+      ) : hasDueCards ? (
         <>
           {/* ── Due cards exist: review mode ── */}
           <Text style={s.ctaTitle}>
@@ -124,40 +140,20 @@ export function DailyReviewCard({
             <Text style={s.ctaBtnText}>{t('home.startReview')}</Text>
           </Pressable>
         </>
-      ) : isFirstTime ? (
-        <>
-          {/* ── First time user: welcome state ── */}
-          <Text style={s.ctaTitle}>{t('home.firstTimeTitle')}</Text>
-          <Text style={s.doneDesc}>{t('home.firstTimeDesc')}</Text>
-
-          {/* Start first lesson — filled button for strong CTA */}
-          <Pressable
-            style={({ pressed }) => [s.ctaBtn, pressed && s.ctaBtnPressed]}
-            onPress={onLearnNew}
-            accessibilityRole="button"
-            accessibilityLabel={t('home.firstTimeCta')}
-          >
-            <Text style={s.ctaBtnText}>
-              {t('home.firstTimeCta')}: {recommendedLevelLabel} →
-            </Text>
-          </Pressable>
-        </>
       ) : (
         <>
-          {/* ── Review done: completed state ── */}
+          {/* ── No due cards: review done ── */}
           <Text style={s.ctaTitle}>{t('home.reviewDone')}</Text>
           <Text style={s.doneDesc}>{t('home.reviewDoneDesc')}</Text>
 
-          {/* Learn new cards CTA — outline button (secondary action) */}
+          {/* Learn new cards — outline button (secondary action) */}
           <Pressable
             style={({ pressed }) => [s.learnBtn, pressed && s.ctaBtnPressed]}
             onPress={onLearnNew}
             accessibilityRole="button"
             accessibilityLabel={t('home.learnNew')}
           >
-            <Text style={s.learnBtnText}>
-              {t('home.learnNew')}: {recommendedLevelLabel} →
-            </Text>
+            <Text style={s.learnBtnText}>{t('home.learnNew')} →</Text>
           </Pressable>
         </>
       )}
