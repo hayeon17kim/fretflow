@@ -7,13 +7,25 @@ import { cardStorage } from '@/utils/storage';
 const CARDS_KEY = 'cards';
 
 function getCards(): FlashCard[] {
-  const raw = cardStorage.getString(CARDS_KEY);
-  if (!raw) return [];
-  return JSON.parse(raw) as FlashCard[];
+  try {
+    const raw = cardStorage.getString(CARDS_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as FlashCard[];
+  } catch (error) {
+    console.error('[useSpacedRepetition] Failed to parse cards:', error);
+    // 손상된 데이터는 삭제하고 빈 배열 반환
+    cardStorage.delete(CARDS_KEY);
+    return [];
+  }
 }
 
 function saveCards(cards: FlashCard[]): void {
-  cardStorage.set(CARDS_KEY, JSON.stringify(cards));
+  try {
+    cardStorage.set(CARDS_KEY, JSON.stringify(cards));
+  } catch (error) {
+    console.error('[useSpacedRepetition] Failed to save cards:', error);
+    throw error; // 저장 실패는 상위로 전파
+  }
 }
 
 /**
