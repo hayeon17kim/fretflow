@@ -90,11 +90,12 @@ Code quality enforced with:
 
 ## Roadmap
 
-- [ ] Audio playback for ear training
-- [ ] Cloud sync with Supabase
+- [x] Audio playback for ear training
+- [x] Practice statistics and insights
+- [ ] Cloud sync with Supabase (user auth, card sync, stats backup)
 - [ ] Achievement system
-- [ ] Practice statistics and insights
-- [ ] Daily review reminders
+- [ ] Daily review reminders (push notifications)
+- [ ] Mix mode (combine multiple levels in one session)
 
 ---
 

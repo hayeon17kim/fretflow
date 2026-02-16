@@ -286,23 +286,31 @@ const s = StyleSheet.create({
 
 ### 🚧 TODO
 
-**Screens:**
-- Mastery tab - Statistics, charts, weakness analysis
-- Settings tab - Profile, preferences, accessibility
-
 **Features:**
-- [ ] Audio playback (expo-av integration)
 - [ ] Supabase backend integration
   - User authentication
   - Card sync
   - Stats backup
-- [ ] Level unlock system (Lv.2+ requires 80% on previous level)
-- [ ] Statistics & analytics
-- [ ] Daily review notifications
+- [ ] Daily review notifications (push notifications)
+- [ ] Achievement system (badges, milestones)
+- [ ] Mix mode implementation (currently redirects to note quiz only)
 
 **Components:**
-- Reusable Fretboard component
-- TabIcon components
+- [ ] Reusable Fretboard component (reduce duplication across quiz screens)
+
+### ✅ Recently Completed
+
+**Screens:**
+- [x] Mastery tab - Statistics, weak cards, level progress
+- [x] Settings tab - Profile, learning goals, accessibility, language
+
+**Features:**
+- [x] Audio playback (43 sound files in `assets/sounds/`)
+- [x] Level unlock system (Lv.2+ requires 80% on previous level)
+- [x] Statistics & analytics (mastery screen)
+
+**Components:**
+- [x] TabIcon components
 
 ## Key Files Reference
 
