@@ -149,8 +149,20 @@ export default function QuizEarScreen() {
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
-    setState(q.options[index] === q.answer ? 'correct' : 'wrong');
+    const correct = q.options[index] === q.answer;
+    setState(correct ? 'correct' : 'wrong');
     setPlaying(false);
+
+    // 응답 시간 기록
+    const responseTime = Date.now() - startTime;
+
+    // 카드 추가 & 리뷰 기록
+    addCard({
+      id: q.id,
+      type: 'ear',
+      question: { note: q.answer } as any,
+    });
+    recordReview(q.id, correct, responseTime);
   };
 
   const nextCard = async () => {
@@ -167,6 +179,7 @@ export default function QuizEarScreen() {
     setCurrentIdx((prev) => prev + 1);
     setState('question');
     setPlaying(false);
+    setStartTime(Date.now());
   };
 
   return (
