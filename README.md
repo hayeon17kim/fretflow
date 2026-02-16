@@ -1,6 +1,6 @@
 # 🎸 FretFlow
 
-> Master the guitar fretboard faster with science-backed spaced repetition
+> Master the guitar fretboard with science-backed spaced repetition
 
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 [![React Native](https://img.shields.io/badge/React%20Native-0.76-61dafb.svg)](https://reactnative.dev/)
@@ -8,24 +8,21 @@
 
 ## What is FretFlow?
 
-Learning guitar means memorizing hundreds of note positions across the fretboard. FretFlow makes this process faster and more efficient using the **SM-2 spaced repetition algorithm** - the same technique used by apps like Anki and Duolingo.
-
-The app analyzes what you're struggling with and schedules reviews at the perfect moment, just before you forget.
+Learning guitar means memorizing hundreds of note positions across the fretboard. FretFlow makes this faster and more efficient using the **SM-2 spaced repetition algorithm** - the same technique used by Anki and Duolingo.
 
 ## Features
 
 ### 🎯 4-Level Learning Path
-Progress through increasingly complex concepts:
-- **Level 1**: Find notes on the fretboard
-- **Level 2**: Learn interval patterns
-- **Level 3**: Master scale shapes
-- **Level 4**: Train your ear
+- **Lv.1** Note Position - Find notes on the fretboard
+- **Lv.2** Intervals - Learn interval patterns
+- **Lv.3** Scales - Master scale shapes
+- **Lv.4** Ear Training - Train your ear with audio
 
 ### 🧠 Smart Review System
-- Cards you find easy appear less often
-- Difficult cards come back more frequently
-- Automatic difficulty adjustment based on your response time
-- Track your daily progress and study streaks
+- SM-2 algorithm schedules reviews at optimal moments
+- Cards you find easy appear less often, difficult ones more frequently
+- Auto-adjusts based on response time
+- Track progress and study streaks
 
 ### 📱 Interactive Fretboard
 - Touch-responsive fretboard for hands-on practice
@@ -34,16 +31,10 @@ Progress through increasingly complex concepts:
 
 ## Tech Stack
 
-Built with **React Native** + **TypeScript** + **Expo** for cross-platform mobile development.
-
-**Key technologies:**
-- Expo Router for navigation
-- Zustand for state management
-- MMKV for high-performance local storage (30x faster than AsyncStorage)
-- React Native SVG for fretboard visualizations
-- React Native Reanimated for smooth animations
-
-**Planned:** Supabase backend for cloud sync and user accounts
+**Core**: Expo 54 + React Native 0.76 + TypeScript 5.9
+**State**: Zustand + MMKV (30x faster than AsyncStorage)
+**UI**: React Native SVG + Reanimated
+**i18n**: i18next (Korean/English support)
 
 ## Quick Start
 
@@ -51,55 +42,54 @@ Built with **React Native** + **TypeScript** + **Expo** for cross-platform mobil
 npm install
 npm start
 
-# Run on your platform
-npm run ios     # iOS simulator
-npm run android # Android emulator
-npm run web     # Web browser
+# Run on platform
+npm run ios       # iOS simulator
+npm run android   # Android emulator
+npm run web       # Web browser
+```
+
+## Development
+
+```bash
+npm run lint          # Biome lint check
+npm run lint:fix      # Auto-fix issues
+npm run typecheck     # TypeScript check
+npm run format        # Format code
 ```
 
 ## Project Structure
 
 ```
 src/
-├── app/
-│   ├── (tabs)/          # Home, Practice, Mastery, Settings
-│   └── quiz/            # Note, Interval, Scale, Ear quizzes
-├── components/          # Reusable UI components
-├── hooks/               # useSpacedRepetition (SM-2 implementation)
-├── stores/              # Global state management
-├── utils/
-│   ├── sm2.ts          # Spaced repetition algorithm
-│   ├── music.ts        # Music theory calculations
-│   └── constants.ts    # Design tokens
-└── i18n/               # Internationalization
+├── app/              # Expo Router screens
+│   ├── (tabs)/      # Home, Practice, Mastery, Settings
+│   └── quiz/        # Note, Interval, Scale, Ear quizzes
+├── components/      # Reusable UI components
+├── hooks/           # useSpacedRepetition (SM-2)
+├── stores/          # Zustand global state
+├── utils/           # SM-2, music theory, constants
+└── i18n/            # Internationalization
 ```
 
-## Development
+## Documentation
 
-```bash
-npm run lint       # Check code style
-npm run lint:fix   # Auto-fix issues
-npm run typecheck  # Type checking
-npm run format     # Format code
-```
-
-Code quality enforced with:
-- **Biome** for fast linting and formatting
-- **TypeScript** strict mode
-- **Zod** for runtime validation
+- **[Development Guide](docs/DEVELOPMENT.md)** - Technical details, architecture, coding conventions
+- **[Handoff Document](docs/handoff.md)** - Project overview for new developers (Korean)
+- **[BM/PM Analysis](docs/FretFlow_BM_PM_Analysis.md)** - Business & product analysis
 
 ## Roadmap
 
+- [x] 4-level progressive learning system
+- [x] SM-2 spaced repetition algorithm
 - [x] Audio playback for ear training
-- [x] Practice statistics and insights
-- [ ] Cloud sync with Supabase (user auth, card sync, stats backup)
+- [x] Statistics and progress tracking
+- [ ] Supabase backend integration
+- [ ] Push notifications
 - [ ] Achievement system
-- [ ] Daily review reminders (push notifications)
-- [ ] Mix mode (combine multiple levels in one session)
 
 ---
 
-**Status**: Active development
-**Last updated**: Feb 2026
+**Status**: MVP Complete
+**Last Updated**: Feb 2026
 
-For detailed architecture and development docs, see `handoff.md`
+For detailed information, see [docs/DEVELOPMENT.md](docs/DEVELOPMENT.md)
