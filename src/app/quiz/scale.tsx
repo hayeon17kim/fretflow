@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useTranslation } from 'react-i18next';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
@@ -46,6 +47,7 @@ interface Score {
 
 export default function QuizScaleScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const [state, setState] = useState<QuizState>('question');
   const [selected, setSelected] = useState<Pos[]>([]);
   const [score, setScore] = useState<Score | null>(null);
@@ -137,7 +139,7 @@ export default function QuizScaleScreen() {
   return (
     <View style={s.container}>
       <QuizHeader
-        label="스케일 패턴"
+        label={t('quiz.scale.title')}
         levelNum={3}
         color={COLORS.level3}
         progress={state !== 'question' ? 1 : 0}
@@ -159,13 +161,17 @@ export default function QuizScaleScreen() {
         ]}
       >
         <View style={s.quizBadge}>
-          <Text style={s.quizBadgeText}>🎼 스케일 퀴즈</Text>
+          <Text style={s.quizBadgeText}>{t('quiz.scale.badge')}</Text>
         </View>
 
         <Text style={s.questionMain}>
+          {t('quiz.scale.questionMain', {
+            scaleName: MOCK_SCALE.name,
+            position: MOCK_SCALE.position,
+          }).split(MOCK_SCALE.position)[0]}
           {MOCK_SCALE.name} <Text style={{ color: COLORS.level3 }}>{MOCK_SCALE.position}</Text>
         </Text>
-        <Text style={s.questionSub}>스케일에 속하는 음을 모두 탭하세요</Text>
+        <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
 
         <Fretboard
           startFret={MOCK_SCALE.fretRange[0]}
@@ -178,7 +184,7 @@ export default function QuizScaleScreen() {
         {/* Pattern hint */}
         {state !== 'question' && (
           <View style={s.hintBox}>
-            <Text style={s.hintTitle}>💡 패턴 팁</Text>
+            <Text style={s.hintTitle}>{t('quiz.scale.patternTip')}</Text>
             <Text style={s.hintText}>{MOCK_SCALE.hint}</Text>
           </View>
         )}
@@ -187,17 +193,21 @@ export default function QuizScaleScreen() {
         <View style={s.scoreArea}>
           {state === 'correct' && score && (
             <Text style={s.resultCorrect}>
-              정답! {score.correct}/{score.total}개 맞음 ({score.accuracy}%)
+              {t('quiz.scale.correctAnswer', {
+                correct: score.correct,
+                total: score.total,
+                accuracy: score.accuracy,
+              })}
             </Text>
           )}
           {state === 'wrong' && score && (
             <View style={{ alignItems: 'center' }}>
               <Text style={s.resultWrong}>
-                {score.correct}/{score.total}개 맞음
-                {score.wrong > 0 ? ` · ${score.wrong}개 오답` : ''}
-                {score.missed > 0 ? ` · ${score.missed}개 누락` : ''}
+                {t('quiz.scale.wrongAnswer', { correct: score.correct, total: score.total })}
+                {score.wrong > 0 ? ` · ${t('quiz.scale.wrongCount', { count: score.wrong })}` : ''}
+                {score.missed > 0 ? ` · ${t('quiz.scale.missedCount', { count: score.missed })}` : ''}
               </Text>
-              <Text style={s.scoreSub}>점선 원(○) = 놓친 음 · 80% 이상이면 통과</Text>
+              <Text style={s.scoreSub}>{t('quiz.scale.scoreSub')}</Text>
             </View>
           )}
         </View>
@@ -218,7 +228,7 @@ export default function QuizScaleScreen() {
             <Text
               style={[s.confirmText, { color: selected.length > 0 ? '#fff' : COLORS.textTertiary }]}
             >
-              확인 ({selected.length}개 선택)
+              {t('quiz.scale.confirmButton', { count: selected.length })}
             </Text>
           </Pressable>
         ) : (
