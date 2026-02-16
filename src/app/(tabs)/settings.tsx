@@ -10,6 +10,8 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { useTranslation } from 'react-i18next';
+import i18n from '@/i18n';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -114,6 +116,7 @@ function ChevronRightIcon({ size = 18 }: { size?: number }) {
 }
 
 export default function SettingsScreen() {
+  const { t } = useTranslation();
   const { settings, updateSettings } = useAppStore();
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState(settings.username);
@@ -136,15 +139,15 @@ export default function SettingsScreen() {
       <ScrollView contentContainerStyle={s.scroll} showsVerticalScrollIndicator={false}>
         {/* ─── Header ─── */}
         <View style={s.header}>
-          <Text style={s.title}>설정</Text>
-          <Text style={s.subtitle}>앱 환경을 맞춤 설정하세요</Text>
+          <Text style={s.title}>{t('settings.title')}</Text>
+          <Text style={s.subtitle}>{t('settings.subtitle')}</Text>
         </View>
 
         {/* ─── Profile section ─── */}
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <UserIcon size={20} />
-            <Text style={s.sectionTitle}>프로필</Text>
+            <Text style={s.sectionTitle}>{t('settings.profile.title')}</Text>
           </View>
 
           <View style={s.card}>
@@ -170,7 +173,7 @@ export default function SettingsScreen() {
                     <Text style={s.username}>{settings.username}</Text>
                   </Pressable>
                 )}
-                <Text style={s.profileLabel}>사용자 이름</Text>
+                <Text style={s.profileLabel}>{t('settings.profile.username')}</Text>
               </View>
               <Pressable
                 onPress={() => {
@@ -182,7 +185,9 @@ export default function SettingsScreen() {
                 }}
                 style={s.editBtn}
               >
-                <Text style={s.editBtnText}>{isEditingUsername ? '저장' : '수정'}</Text>
+                <Text style={s.editBtnText}>
+                  {isEditingUsername ? t('settings.profile.save') : t('settings.profile.edit')}
+                </Text>
               </Pressable>
             </View>
           </View>
@@ -192,17 +197,17 @@ export default function SettingsScreen() {
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <TargetIcon size={20} />
-            <Text style={s.sectionTitle}>학습 목표</Text>
+            <Text style={s.sectionTitle}>{t('settings.goals.title')}</Text>
           </View>
 
           <View style={s.card}>
             {/* Daily goal */}
             <View style={s.settingRow}>
               <View>
-                <Text style={s.settingLabel}>일일 목표</Text>
-                <Text style={s.settingDesc}>하루에 복습할 카드 수</Text>
+                <Text style={s.settingLabel}>{t('settings.goals.daily')}</Text>
+                <Text style={s.settingDesc}>{t('settings.goals.dailyDesc')}</Text>
               </View>
-              <Text style={s.settingValue}>{settings.dailyGoal}장</Text>
+              <Text style={s.settingValue}>{t('settings.goals.cards', { count: settings.dailyGoal })}</Text>
             </View>
 
             {/* Goal options */}
@@ -223,7 +228,7 @@ export default function SettingsScreen() {
                       settings.dailyGoal === goal && { color: COLORS.level2 },
                     ]}
                   >
-                    {goal}장
+                    {t('settings.goals.cards', { count: goal })}
                   </Text>
                 </Pressable>
               ))}
@@ -235,15 +240,63 @@ export default function SettingsScreen() {
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <AccessibilityIcon size={20} />
-            <Text style={s.sectionTitle}>접근성</Text>
+            <Text style={s.sectionTitle}>{t('settings.accessibility.title')}</Text>
           </View>
 
           <View style={s.card}>
+            {/* Language */}
+            <View style={s.settingRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.settingLabel}>{t('settings.accessibility.language')}</Text>
+                <Text style={s.settingDesc}>{t('settings.accessibility.languageDesc')}</Text>
+              </View>
+            </View>
+
+            {/* Language options */}
+            <View style={s.languageOptions}>
+              <Pressable
+                style={[
+                  s.languageOption,
+                  i18n.language === 'ko' && s.languageOptionActive,
+                  i18n.language === 'ko' && { borderColor: COLORS.level3 },
+                ]}
+                onPress={() => i18n.changeLanguage('ko')}
+              >
+                <Text
+                  style={[
+                    s.languageOptionText,
+                    i18n.language === 'ko' && { color: COLORS.level3 },
+                  ]}
+                >
+                  {t('common.korean')}
+                </Text>
+              </Pressable>
+              <Pressable
+                style={[
+                  s.languageOption,
+                  i18n.language === 'en' && s.languageOptionActive,
+                  i18n.language === 'en' && { borderColor: COLORS.level3 },
+                ]}
+                onPress={() => i18n.changeLanguage('en')}
+              >
+                <Text
+                  style={[
+                    s.languageOptionText,
+                    i18n.language === 'en' && { color: COLORS.level3 },
+                  ]}
+                >
+                  {t('common.english')}
+                </Text>
+              </Pressable>
+            </View>
+
+            <View style={s.divider} />
+
             {/* Vibration */}
             <View style={s.settingRow}>
               <View style={{ flex: 1 }}>
-                <Text style={s.settingLabel}>진동 피드백</Text>
-                <Text style={s.settingDesc}>정답/오답 시 진동으로 알림</Text>
+                <Text style={s.settingLabel}>{t('settings.accessibility.vibration')}</Text>
+                <Text style={s.settingDesc}>{t('settings.accessibility.vibrationDesc')}</Text>
               </View>
               <Switch
                 value={settings.vibrationEnabled}
@@ -259,7 +312,7 @@ export default function SettingsScreen() {
         <View style={s.section}>
           <View style={s.sectionHeader}>
             <InfoIcon size={20} />
-            <Text style={s.sectionTitle}>앱 정보</Text>
+            <Text style={s.sectionTitle}>{t('settings.appInfo.title')}</Text>
           </View>
 
           <View style={s.card}>
@@ -267,10 +320,10 @@ export default function SettingsScreen() {
             <Pressable
               style={({ pressed }) => [s.infoRow, pressed && { opacity: 0.7 }]}
               onPress={() => {
-                Alert.alert('버전 정보', 'FretFlow v1.0.0\n\n기타 프렛보드 마스터하기');
+                Alert.alert(t('settings.appInfo.versionAlert'), t('settings.appInfo.versionMessage'));
               }}
             >
-              <Text style={s.infoLabel}>버전</Text>
+              <Text style={s.infoLabel}>{t('settings.appInfo.version')}</Text>
               <View style={s.infoRight}>
                 <Text style={s.infoValue}>1.0.0</Text>
                 <ChevronRightIcon />
@@ -284,12 +337,12 @@ export default function SettingsScreen() {
               style={({ pressed }) => [s.infoRow, pressed && { opacity: 0.7 }]}
               onPress={() => {
                 Alert.alert(
-                  '라이선스',
-                  'MIT License\n\nCopyright (c) 2026 FretFlow\n\n오픈소스 라이브러리:\n- React Native\n- Expo\n- Zustand\n- React Query',
+                  t('settings.appInfo.licenseAlert'),
+                  t('settings.appInfo.licenseMessage'),
                 );
               }}
             >
-              <Text style={s.infoLabel}>라이선스</Text>
+              <Text style={s.infoLabel}>{t('settings.appInfo.license')}</Text>
               <View style={s.infoRight}>
                 <Text style={s.infoValue}>MIT</Text>
                 <ChevronRightIcon />
@@ -300,14 +353,14 @@ export default function SettingsScreen() {
 
             {/* Developer */}
             <View style={s.infoRow}>
-              <Text style={s.infoLabel}>개발자</Text>
-              <Text style={s.infoValue}>FretFlow Team</Text>
+              <Text style={s.infoLabel}>{t('settings.appInfo.developer')}</Text>
+              <Text style={s.infoValue}>{t('settings.appInfo.developerName')}</Text>
             </View>
           </View>
         </View>
 
         {/* ─── Footer ─── */}
-        <Text style={s.footer}>Made with 💚 for guitar learners</Text>
+        <Text style={s.footer}>{t('settings.footer')}</Text>
       </ScrollView>
     </View>
   );
@@ -461,6 +514,31 @@ const s = StyleSheet.create({
     backgroundColor: `${COLORS.level2}15`,
   },
   goalOptionText: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '600',
+    color: COLORS.textSecondary,
+  },
+
+  // Language options
+  languageOptions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.lg,
+    marginBottom: SPACING.md,
+  },
+  languageOption: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: 10,
+    borderWidth: 1.5,
+    borderColor: COLORS.border,
+    backgroundColor: COLORS.bg,
+    alignItems: 'center',
+  },
+  languageOptionActive: {
+    backgroundColor: `${COLORS.level3}15`,
+  },
+  languageOptionText: {
     fontSize: FONT_SIZE.sm,
     fontWeight: '600',
     color: COLORS.textSecondary,
