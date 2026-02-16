@@ -43,7 +43,7 @@ export function useSpacedRepetition() {
     });
   }, []);
 
-  // 카드 추가
+  // 카드 추가 (중복 체크)
   const addCard = useCallback(
     (
       card: Omit<
@@ -53,6 +53,12 @@ export function useSpacedRepetition() {
     ) => {
       const cards = getCards();
       const today = new Date().toISOString().split('T')[0];
+
+      // 이미 존재하는 카드인지 확인
+      const existingCard = cards.find((c) => c.id === card.id);
+      if (existingCard) {
+        return existingCard; // 이미 있으면 그냥 반환
+      }
 
       const newCard: FlashCard = {
         ...card,
