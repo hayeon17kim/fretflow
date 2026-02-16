@@ -105,16 +105,6 @@ export default function HomeScreen() {
 
         {/* ─── Level cards ─── */}
         <LevelCardGrid levelProgress={levelProgress} onLevelPress={handleLevelPress} />
-
-        {/* ─── Practice shortcut ─── */}
-        <Pressable
-          style={({ pressed }) => [s.practiceBtn, pressed && { opacity: 0.7 }]}
-          onPress={() => router.push('/(tabs)/practice')}
-          accessibilityRole="button"
-          accessibilityLabel={t('home.practiceShortcut')}
-        >
-          <Text style={s.practiceBtnText}>{t('home.practiceShortcut')}</Text>
-        </Pressable>
       </ScrollView>
     </View>
   );
@@ -160,20 +150,4 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
 
-  // Practice shortcut button
-  practiceBtn: {
-    height: 46,
-    borderRadius: 23,
-    borderWidth: 1,
-    borderColor: COLORS.border,
-    backgroundColor: COLORS.surface,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginTop: SPACING.sm,
-  },
-  practiceBtnText: {
-    fontSize: FONT_SIZE.sm,
-    fontWeight: '500',
-    color: COLORS.textSecondary,
-  },
 });
