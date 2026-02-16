@@ -1,4 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { FireIcon } from '@/components/icons/FireIcon';
@@ -32,6 +34,16 @@ export default function HomeScreen() {
   const router = useRouter();
   const todayStats = useAppStore((s) => s.todayStats);
   const { getDueCards, getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
+
+  // 화면 포커스 시 리렌더링을 위한 상태
+  const [_refreshKey, setRefreshKey] = useState(0);
+
+  // 화면이 포커스될 때마다 데이터 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, []),
+  );
 
   const dueCards = getDueCards();
   const _totalCards = getCardCount();

@@ -1,5 +1,6 @@
+import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
+import { useCallback, useState } from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { CircularProgress } from '@/components/progress/CircularProgress';
@@ -37,7 +38,15 @@ function LockIcon({ size = 18 }: { size?: number }) {
 export default function PracticeScreen() {
   const router = useRouter();
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
+  const [_refreshKey, setRefreshKey] = useState(0);
   const { getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
+
+  // 화면 포커스 시 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, []),
+  );
 
   const toggleExpand = (id: string) => {
     setExpandedLevel((prev) => (prev === id ? null : id));

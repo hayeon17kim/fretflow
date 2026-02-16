@@ -1,3 +1,5 @@
+import { useFocusEffect } from '@react-navigation/native';
+import { useCallback, useState } from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
@@ -8,6 +10,14 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 export default function MasteryScreen() {
   const { getCardCount, getMasteredCards, getWeakCards } = useSpacedRepetition();
+  const [_refreshKey, setRefreshKey] = useState(0);
+
+  // 화면 포커스 시 새로고침
+  useFocusEffect(
+    useCallback(() => {
+      setRefreshKey((prev) => prev + 1);
+    }, []),
+  );
 
   // 전체 통계
   const totalCards = getCardCount();
