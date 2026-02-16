@@ -8,7 +8,7 @@ import ko from './locales/ko.json';
 const deviceLanguage = getLocales()[0]?.languageCode || 'ko';
 
 i18n.use(initReactI18next).init({
-  compatibilityJSON: 'v3',
+  compatibilityJSON: 'v4',
   resources: {
     en: { translation: en },
     ko: { translation: ko },
