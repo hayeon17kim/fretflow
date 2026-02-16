@@ -1,4 +1,5 @@
 // 기타 프렛보드 기본 타입
+import type { QuizQuestion } from './quiz';
 
 export type NoteName = 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
 
@@ -42,7 +43,7 @@ export interface ScalePattern {
 export interface FlashCard {
   id: string;
   type: 'note' | 'interval' | 'scale' | 'ear';
-  question: unknown; // 레벨별로 다른 타입 — 추후 유니온으로 구체화
+  question: QuizQuestion; // Discriminated union으로 타입 안정성 보장
   easeFactor: number; // SM-2 EF, 기본 2.5
   interval: number; // 일 단위
   repetitions: number;
