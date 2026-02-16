@@ -5,37 +5,35 @@ import { useTranslation } from 'react-i18next';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
-import type { StringNumber } from '@/types/music';
+import { useQuizSession } from '@/hooks/useQuizSession';
+import type { FretPosition, StringNumber } from '@/types/music';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-type QuizState = 'question' | 'correct' | 'wrong';
-interface Pos {
-  s: StringNumber;
-  f: number;
-}
-
 // ─── Mock data ───
-const MOCK_SCALE = {
-  name: 'Am 펜타토닉',
-  position: '1포지션',
-  fretRange: [0, 4] as [number, number],
-  positions: [
-    { s: 1 as StringNumber, f: 0 },
-    { s: 1 as StringNumber, f: 3 },
-    { s: 2 as StringNumber, f: 0 },
-    { s: 2 as StringNumber, f: 2 },
-    { s: 3 as StringNumber, f: 0 },
-    { s: 3 as StringNumber, f: 2 },
-    { s: 4 as StringNumber, f: 0 },
-    { s: 4 as StringNumber, f: 2 },
-    { s: 5 as StringNumber, f: 0 },
-    { s: 5 as StringNumber, f: 2 },
-    { s: 6 as StringNumber, f: 0 },
-    { s: 6 as StringNumber, f: 3 },
-  ],
-  notes: 'A, C, D, E, G',
-  hint: 'Am 펜타토닉 1포지션은 0~3프렛 안에서 A, C, D, E, G 5개 음이 반복되는 "박스" 모양이에요.',
-};
+const MOCK_SCALES = [
+  {
+    id: 'scale-1',
+    name: 'Am 펜타토닉',
+    position: '1포지션',
+    fretRange: [0, 4] as [number, number],
+    positions: [
+      { string: 1 as StringNumber, fret: 0 },
+      { string: 1 as StringNumber, fret: 3 },
+      { string: 2 as StringNumber, fret: 0 },
+      { string: 2 as StringNumber, fret: 2 },
+      { string: 3 as StringNumber, fret: 0 },
+      { string: 3 as StringNumber, fret: 2 },
+      { string: 4 as StringNumber, fret: 0 },
+      { string: 4 as StringNumber, fret: 2 },
+      { string: 5 as StringNumber, fret: 0 },
+      { string: 5 as StringNumber, fret: 2 },
+      { string: 6 as StringNumber, fret: 0 },
+      { string: 6 as StringNumber, fret: 3 },
+    ],
+    notes: 'A, C, D, E, G',
+    hint: 'Am 펜타토닉 1포지션은 0~3프렛 안에서 A, C, D, E, G 5개 음이 반복되는 "박스" 모양이에요.',
+  },
+];
 
 interface Score {
   correct: number;
@@ -48,28 +46,31 @@ interface Score {
 export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [state, setState] = useState<QuizState>('question');
-  const [selected, setSelected] = useState<Pos[]>([]);
+
+  const { currentCard: q, state, total, progress, recordAnswer, nextCard, resetCard } = useQuizSession({
+    cards: MOCK_SCALES,
+  });
+  const [selected, setSelected] = useState<FretPosition[]>([]);
   const [score, setScore] = useState<Score | null>(null);
 
-  const isSelected = (s: StringNumber, f: number) => selected.some((p) => p.s === s && p.f === f);
+  const isSelected = (s: StringNumber, f: number) => selected.some((p) => p.string === s && p.fret === f);
   const isScalePos = (s: StringNumber, f: number) =>
-    MOCK_SCALE.positions.some((p) => p.s === s && p.f === f);
+    q.positions.some((p) => p.string === s && p.fret === f);
 
-  const handleTap = (pos: { string: StringNumber; fret: number }) => {
+  const handleTap = (pos: FretPosition) => {
     if (state !== 'question') return;
     if (isSelected(pos.string, pos.fret)) {
-      setSelected((prev) => prev.filter((p) => !(p.s === pos.string && p.f === pos.fret)));
+      setSelected((prev) => prev.filter((p) => !(p.string === pos.string && p.fret === pos.fret)));
     } else {
-      setSelected((prev) => [...prev, { s: pos.string, f: pos.fret }]);
+      setSelected((prev) => [...prev, pos]);
     }
   };
 
   const checkAnswer = () => {
-    const correctSelections = selected.filter((p) => isScalePos(p.s, p.f)).length;
-    const wrongSelections = selected.filter((p) => !isScalePos(p.s, p.f)).length;
-    const missedPositions = MOCK_SCALE.positions.filter((p) => !isSelected(p.s, p.f)).length;
-    const totalScale = MOCK_SCALE.positions.length;
+    const correctSelections = selected.filter((p) => isScalePos(p.string, p.fret)).length;
+    const wrongSelections = selected.filter((p) => !isScalePos(p.string, p.fret)).length;
+    const missedPositions = q.positions.filter((p) => !isSelected(p.string, p.fret)).length;
+    const totalScale = q.positions.length;
     const accuracy = Math.round((correctSelections / totalScale) * 100);
 
     setScore({
@@ -79,11 +80,13 @@ export default function QuizScaleScreen() {
       total: totalScale,
       accuracy,
     });
-    setState(accuracy >= 80 && wrongSelections === 0 ? 'correct' : 'wrong');
+
+    const correct = accuracy >= 80 && wrongSelections === 0;
+    recordAnswer(correct);
   };
 
   const retry = () => {
-    setState('question');
+    resetCard();
     setSelected([]);
     setScore(null);
   };
@@ -142,8 +145,8 @@ export default function QuizScaleScreen() {
         label={t('quiz.scale.title')}
         levelNum={3}
         color={COLORS.level3}
-        progress={state !== 'question' ? 1 : 0}
-        total={1}
+        progress={progress}
+        total={total}
         onBack={() => router.back()}
       />
 
@@ -166,16 +169,16 @@ export default function QuizScaleScreen() {
 
         <Text style={s.questionMain}>
           {t('quiz.scale.questionMain', {
-            scaleName: MOCK_SCALE.name,
-            position: MOCK_SCALE.position,
-          }).split(MOCK_SCALE.position)[0]}
-          {MOCK_SCALE.name} <Text style={{ color: COLORS.level3 }}>{MOCK_SCALE.position}</Text>
+            scaleName: q.name,
+            position: q.position,
+          }).split(q.position)[0]}
+          {q.name} <Text style={{ color: COLORS.level3 }}>{q.position}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
 
         <Fretboard
-          startFret={MOCK_SCALE.fretRange[0]}
-          endFret={MOCK_SCALE.fretRange[1]}
+          startFret={q.fretRange[0]}
+          endFret={q.fretRange[1]}
           highlights={buildHighlights()}
           tappable={state === 'question'}
           onTap={handleTap}
@@ -185,7 +188,7 @@ export default function QuizScaleScreen() {
         {state !== 'question' && (
           <View style={s.hintBox}>
             <Text style={s.hintTitle}>{t('quiz.scale.patternTip')}</Text>
-            <Text style={s.hintText}>{MOCK_SCALE.hint}</Text>
+            <Text style={s.hintText}>{q.hint}</Text>
           </View>
         )}
 
