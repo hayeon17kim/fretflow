@@ -1,35 +1,17 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useMemo, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { FireIcon } from '@/components/icons/FireIcon';
+import { LockIcon } from '@/components/icons/LockIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-// ─── Lock icon ───
-function LockIcon({ size = 20 }: { size?: number }) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={COLORS.textSecondary}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
-      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </Svg>
-  );
-}
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -65,7 +47,10 @@ export default function HomeScreen() {
   const levelProgress = useMemo(
     () => ({
       note: Math.min(100, Math.round((getCardCount('note') / TARGET_CARDS_PER_LEVEL) * 100)),
-      interval: Math.min(100, Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100)),
+      interval: Math.min(
+        100,
+        Math.round((getCardCount('interval') / TARGET_CARDS_PER_LEVEL) * 100),
+      ),
       scale: Math.min(100, Math.round((getCardCount('scale') / TARGET_CARDS_PER_LEVEL) * 100)),
       ear: Math.min(100, Math.round((getCardCount('ear') / TARGET_CARDS_PER_LEVEL) * 100)),
     }),

@@ -1,9 +1,9 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
-import Svg, { Path } from 'react-native-svg';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { LockIcon } from '@/components/icons/LockIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
@@ -16,25 +16,6 @@ const SESSION_OPTIONS = [
   { key: 'focus', cards: 25 },
   { key: 'deep', cards: 50 },
 ] as const;
-
-// ─── Lock icon ───
-function LockIcon({ size = 18 }: { size?: number }) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={COLORS.textSecondary}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
-      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </Svg>
-  );
-}
 
 export default function PracticeScreen() {
   const router = useRouter();
@@ -119,7 +100,9 @@ export default function PracticeScreen() {
                     )}
                     {'basic' in lv && lv.basic && !locked && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                        <Text style={[s.chipText, { color: lv.color }]}>{t('practice.basicMode')}</Text>
+                        <Text style={[s.chipText, { color: lv.color }]}>
+                          {t('practice.basicMode')}
+                        </Text>
                       </View>
                     )}
                   </View>
