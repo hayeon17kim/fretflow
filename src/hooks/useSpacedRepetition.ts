@@ -134,6 +134,38 @@ export function useSpacedRepetition() {
     return cards.filter((c) => c.type === level);
   }, []);
 
+  // 레벨별 마스터리 진도율 (0-100)
+  const getLevelProgress = useCallback(
+    (level: FlashCard['type']) => {
+      const TARGET_PER_LEVEL = 60; // 목표: 각 레벨당 60장
+      const mastered = getMasteredCards(level).length;
+      return Math.min(100, Math.round((mastered / TARGET_PER_LEVEL) * 100));
+    },
+    [getMasteredCards],
+  );
+
+  // 레벨 잠금 여부 체크
+  const isLevelLocked = useCallback(
+    (level: 1 | 2 | 3 | 4): boolean => {
+      if (level === 1) return false; // Lv.1은 항상 해금
+
+      const levelTypeMap: Record<number, FlashCard['type']> = {
+        1: 'note',
+        2: 'interval',
+        3: 'scale',
+        4: 'ear',
+      };
+
+      // 이전 레벨 진도율 체크
+      const prevLevel = (level - 1) as 1 | 2 | 3;
+      const prevLevelType = levelTypeMap[prevLevel];
+      const prevProgress = getLevelProgress(prevLevelType);
+
+      return prevProgress < 80; // 80% 미만이면 잠금
+    },
+    [getLevelProgress],
+  );
+
   return {
     getDueCards,
     addCard,
@@ -142,5 +174,7 @@ export function useSpacedRepetition() {
     getMasteredCards,
     getWeakCards,
     getAllCards,
+    getLevelProgress,
+    isLevelLocked,
   };
 }

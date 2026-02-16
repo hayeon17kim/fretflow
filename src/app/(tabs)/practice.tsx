@@ -1,6 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import Svg, { Path } from 'react-native-svg';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import { LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { QUIZ_ROUTES } from '@/config/routes';
@@ -14,10 +15,29 @@ const SESSION_OPTIONS = [
   { label: '딥 20분', cards: 50 },
 ] as const;
 
+// ─── Lock icon ───
+function LockIcon({ size = 18 }: { size?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={COLORS.textSecondary}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
+      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </Svg>
+  );
+}
+
 export default function PracticeScreen() {
   const router = useRouter();
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
-  const { getCardCount } = useSpacedRepetition();
+  const { getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
 
   const toggleExpand = (id: string) => {
     setExpandedLevel((prev) => (prev === id ? null : id));
@@ -35,18 +55,36 @@ export default function PracticeScreen() {
           const cardCount = getCardCount(lv.id);
           const progress = Math.min(100, Math.round((cardCount / TARGET_CARDS_PER_LEVEL) * 100));
           const isExpanded = expandedLevel === lv.id;
+          const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
 
           return (
             <Pressable
               key={lv.id}
-              onPress={() => toggleExpand(lv.id)}
-              style={[s.levelCard, { borderColor: `${lv.color}25` }]}
+              onPress={() => {
+                if (locked) {
+                  // 잠금 해제 조건 알림
+                  const prevLevel = lv.num - 1;
+                  const prevLevelProgress = getLevelProgress(
+                    LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
+                  );
+                  Alert.alert(
+                    '🔒 잠긴 레벨',
+                    `Lv.${prevLevel} ${LEVELS[prevLevel - 1].label}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: ${prevLevelProgress}%`,
+                    [{ text: '확인', style: 'default' }],
+                  );
+                } else {
+                  toggleExpand(lv.id);
+                }
+              }}
+              style={[s.levelCard, { borderColor: `${lv.color}25` }, locked && { opacity: 0.5 }]}
               accessibilityRole="button"
               accessibilityLabel={`${lv.label} 레벨`}
               accessibilityHint={
-                isExpanded
-                  ? '세션 옵션을 숨기려면 탭하세요'
-                  : '세션 옵션을 보려면 탭하세요. 진행도는 ' + progress + '퍼센트입니다'
+                locked
+                  ? '잠긴 레벨입니다. 이전 레벨을 80퍼센트 이상 달성해야 합니다'
+                  : isExpanded
+                    ? '세션 옵션을 숨기려면 탭하세요'
+                    : `세션 옵션을 보려면 탭하세요. 진행도는 ${progress}퍼센트입니다`
               }
               accessibilityState={{ expanded: isExpanded }}
             >
@@ -55,24 +93,37 @@ export default function PracticeScreen() {
                 {/* Icon + circular progress */}
                 <View style={s.levelIcon}>
                   <CircularProgress progress={progress} color={lv.color} />
-                  <Text style={s.levelEmoji}>{lv.emoji}</Text>
+                  {locked ? <LockIcon size={18} /> : <Text style={s.levelEmoji}>{lv.emoji}</Text>}
                 </View>
 
                 {/* Info */}
                 <View style={s.levelInfo}>
                   <View style={s.levelNameRow}>
-                    <Text style={s.levelName}>{lv.label}</Text>
-                    {'basic' in lv && lv.basic && (
+                    <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
+                      {lv.label}
+                    </Text>
+                    {locked && (
+                      <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
+                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>잠김</Text>
+                      </View>
+                    )}
+                    {'basic' in lv && lv.basic && !locked && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
                         <Text style={[s.chipText, { color: lv.color }]}>기초 모드</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={s.levelDesc}>{lv.desc}</Text>
+                  <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
+                    {lv.desc}
+                  </Text>
                 </View>
 
                 {/* Progress % */}
-                <Text style={[s.levelProgress, { color: lv.color }]}>{progress}%</Text>
+                <Text
+                  style={[s.levelProgress, { color: locked ? COLORS.textSecondary : lv.color }]}
+                >
+                  {progress}%
+                </Text>
               </View>
 
               {/* Expanded: example + session options */}

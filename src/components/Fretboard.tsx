@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { COLORS, FRETBOARD } from '@/utils/constants';
@@ -100,7 +100,10 @@ export function Fretboard({
         {/* String name column */}
         <View style={styles.stringColumn}>
           {FRETBOARD.standardTuning.map((note, i) => (
-            <View key={i} style={{ height: cellH, justifyContent: 'center', alignItems: 'flex-end' }}>
+            <View
+              key={i}
+              style={{ height: cellH, justifyContent: 'center', alignItems: 'flex-end' }}
+            >
               <Text
                 style={[
                   styles.stringLabel,
@@ -166,9 +169,10 @@ export function Fretboard({
                         ]}
                       >
                         {/* Fret dot inlay markers */}
-                        {si === 2 && dotFrets.includes(fret) && !doubleDotFrets.includes(fret) && !hl && (
-                          <View style={styles.inlayDot} />
-                        )}
+                        {si === 2 &&
+                          dotFrets.includes(fret) &&
+                          !doubleDotFrets.includes(fret) &&
+                          !hl && <View style={styles.inlayDot} />}
 
                         {/* Highlight dot */}
                         {hl ? (
@@ -228,9 +232,7 @@ export function Fretboard({
       </View>
 
       {/* Tap instruction hint for tappable mode */}
-      {tappable && (
-        <Text style={styles.tapHint}>○ = 탭 가능한 위치</Text>
-      )}
+      {tappable && <Text style={styles.tapHint}>○ = 탭 가능한 위치</Text>}
     </View>
   );
 }

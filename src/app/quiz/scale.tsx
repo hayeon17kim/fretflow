@@ -97,7 +97,13 @@ export default function QuizScaleScreen() {
 
         if (state === 'question') {
           if (sel) {
-            highlights.push({ string: str, fret: f, color: COLORS.level3, label: '●', textColor: '#fff' });
+            highlights.push({
+              string: str,
+              fret: f,
+              color: COLORS.level3,
+              label: '●',
+              textColor: '#fff',
+            });
           }
         } else {
           if (isScale && sel) {
@@ -113,7 +119,13 @@ export default function QuizScaleScreen() {
               opacity: 0.6,
             });
           } else if (!isScale && sel) {
-            highlights.push({ string: str, fret: f, color: COLORS.wrong, label: '✕', textColor: '#fff' });
+            highlights.push({
+              string: str,
+              fret: f,
+              color: COLORS.wrong,
+              label: '✕',
+              textColor: '#fff',
+            });
           }
         }
       }

@@ -44,7 +44,9 @@ export function NextButton({ onPress, correct }: NextButtonProps) {
       ]}
       accessibilityRole="button"
       accessibilityLabel="다음 문제"
-      accessibilityHint={correct ? '정답입니다. 다음 문제로 이동합니다' : '오답입니다. 다음 문제로 이동합니다'}
+      accessibilityHint={
+        correct ? '정답입니다. 다음 문제로 이동합니다' : '오답입니다. 다음 문제로 이동합니다'
+      }
     >
       <Text style={[s.nextText, { color: correct ? COLORS.bg : COLORS.textPrimary }]}>다음 →</Text>
     </Pressable>

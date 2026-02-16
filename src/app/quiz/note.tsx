@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
-import { Fretboard, type FretHighlight } from '@/components/Fretboard';
+import { Fretboard } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
@@ -100,7 +100,12 @@ export default function QuizNoteScreen() {
             {
               string: q.string,
               fret: q.fret,
-              color: state === 'correct' ? COLORS.correct : state === 'wrong' ? COLORS.wrong : COLORS.accent,
+              color:
+                state === 'correct'
+                  ? COLORS.correct
+                  : state === 'wrong'
+                    ? COLORS.wrong
+                    : COLORS.accent,
               label: state !== 'question' ? q.answer : '?',
             },
           ]}

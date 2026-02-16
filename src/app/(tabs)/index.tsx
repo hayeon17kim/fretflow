@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { FireIcon } from '@/components/icons/FireIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
@@ -9,10 +9,29 @@ import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
+// ─── Lock icon ───
+function LockIcon({ size = 20 }: { size?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={COLORS.textSecondary}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
+      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </Svg>
+  );
+}
+
 export default function HomeScreen() {
   const router = useRouter();
   const todayStats = useAppStore((s) => s.todayStats);
-  const { getDueCards, getCardCount } = useSpacedRepetition();
+  const { getDueCards, getCardCount, isLevelLocked, getLevelProgress } = useSpacedRepetition();
 
   const dueCards = getDueCards();
   const _totalCards = getCardCount();
@@ -135,43 +154,76 @@ export default function HomeScreen() {
         <Text style={s.sectionTitle}>레벨별 연습</Text>
         {LEVELS.map((lv) => {
           const progress = levelProgress[lv.id];
+          const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
+
           return (
             <Pressable
               key={lv.id}
               style={({ pressed }) => [
                 s.levelCard,
                 { borderColor: `${lv.color}25` },
-                pressed && { opacity: 0.85 },
+                pressed && !locked && { opacity: 0.85 },
+                locked && { opacity: 0.5 },
               ]}
               onPress={() => {
-                router.push(QUIZ_ROUTES[lv.id]);
+                if (locked) {
+                  // 잠금 해제 조건 알림
+                  const prevLevel = lv.num - 1;
+                  const prevLevelProgress = getLevelProgress(
+                    LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
+                  );
+                  Alert.alert(
+                    '🔒 잠긴 레벨',
+                    `Lv.${prevLevel} ${LEVELS[prevLevel - 1].label}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: ${prevLevelProgress}%`,
+                    [{ text: '확인', style: 'default' }],
+                  );
+                } else {
+                  router.push(QUIZ_ROUTES[lv.id]);
+                }
               }}
               accessibilityRole="button"
               accessibilityLabel={`${lv.label} 연습`}
-              accessibilityHint={`${lv.desc}. 현재 진행도 ${progress}퍼센트`}
+              accessibilityHint={
+                locked
+                  ? `잠긴 레벨입니다. 이전 레벨을 80퍼센트 이상 달성해야 합니다`
+                  : `${lv.desc}. 현재 진행도 ${progress}퍼센트`
+              }
             >
               <View style={s.levelCardInner}>
                 {/* Icon with circular progress */}
                 <View style={s.levelIcon}>
                   <CircularProgress progress={progress} color={lv.color} />
-                  <Text style={s.levelEmoji}>{lv.emoji}</Text>
+                  {locked ? <LockIcon size={20} /> : <Text style={s.levelEmoji}>{lv.emoji}</Text>}
                 </View>
 
                 {/* Info */}
                 <View style={s.levelInfo}>
                   <View style={s.levelNameRow}>
-                    <Text style={s.levelName}>{lv.label}</Text>
-                    {'basic' in lv && lv.basic && (
+                    <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
+                      {lv.label}
+                    </Text>
+                    {locked && (
+                      <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
+                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>잠김</Text>
+                      </View>
+                    )}
+                    {'basic' in lv && lv.basic && !locked && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
                         <Text style={[s.chipText, { color: lv.color }]}>기초 모드</Text>
                       </View>
                     )}
                   </View>
-                  <Text style={s.levelDesc}>{lv.desc}</Text>
+                  <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
+                    {lv.desc}
+                  </Text>
                 </View>
 
                 {/* Progress number */}
-                <Text style={[s.levelProgress, { color: lv.color }]}>{progress}%</Text>
+                <Text
+                  style={[s.levelProgress, { color: locked ? COLORS.textSecondary : lv.color }]}
+                >
+                  {progress}%
+                </Text>
               </View>
             </Pressable>
           );
