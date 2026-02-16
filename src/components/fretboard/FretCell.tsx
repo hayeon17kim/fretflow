@@ -1,10 +1,10 @@
 import { memo, useCallback } from 'react';
 import { Pressable, StyleSheet, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
+import { COLORS } from '@/utils/constants';
 import type { FretHighlight } from '../Fretboard';
 import { HighlightDot } from './HighlightDot';
 import { InlayMarker } from './InlayMarker';
-import { COLORS } from '@/utils/constants';
 
 interface FretCellProps {
   stringNum: StringNumber;

@@ -1,7 +1,7 @@
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
@@ -47,13 +47,22 @@ export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
 
-  const { currentCard: q, state, total, progress, recordAnswer, nextCard, resetCard } = useQuizSession({
+  const {
+    currentCard: q,
+    state,
+    total,
+    progress,
+    recordAnswer,
+    nextCard,
+    resetCard,
+  } = useQuizSession({
     cards: MOCK_SCALES,
   });
   const [selected, setSelected] = useState<FretPosition[]>([]);
   const [score, setScore] = useState<Score | null>(null);
 
-  const isSelected = (s: StringNumber, f: number) => selected.some((p) => p.string === s && p.fret === f);
+  const isSelected = (s: StringNumber, f: number) =>
+    selected.some((p) => p.string === s && p.fret === f);
   const isScalePos = (s: StringNumber, f: number) =>
     q.positions.some((p) => p.string === s && p.fret === f);
 
@@ -168,10 +177,12 @@ export default function QuizScaleScreen() {
         </View>
 
         <Text style={s.questionMain}>
-          {t('quiz.scale.questionMain', {
-            scaleName: q.name,
-            position: q.position,
-          }).split(q.position)[0]}
+          {
+            t('quiz.scale.questionMain', {
+              scaleName: q.name,
+              position: q.position,
+            }).split(q.position)[0]
+          }
           {q.name} <Text style={{ color: COLORS.level3 }}>{q.position}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
@@ -208,7 +219,9 @@ export default function QuizScaleScreen() {
               <Text style={s.resultWrong}>
                 {t('quiz.scale.wrongAnswer', { correct: score.correct, total: score.total })}
                 {score.wrong > 0 ? ` · ${t('quiz.scale.wrongCount', { count: score.wrong })}` : ''}
-                {score.missed > 0 ? ` · ${t('quiz.scale.missedCount', { count: score.missed })}` : ''}
+                {score.missed > 0
+                  ? ` · ${t('quiz.scale.missedCount', { count: score.missed })}`
+                  : ''}
               </Text>
               <Text style={s.scoreSub}>{t('quiz.scale.scoreSub')}</Text>
             </View>

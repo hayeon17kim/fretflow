@@ -1,10 +1,10 @@
 import { useCallback } from 'react';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Path } from 'react-native-svg';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { LEVELS } from '@/config/levels';
 import type { LevelId } from '@/config/levels';
+import { LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 

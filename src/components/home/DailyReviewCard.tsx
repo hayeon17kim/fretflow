@@ -1,8 +1,8 @@
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
-import { LEVELS } from '@/config/levels';
 import type { LevelId } from '@/config/levels';
+import { LEVELS } from '@/config/levels';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface DailyReviewCardProps {

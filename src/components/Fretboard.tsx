@@ -1,11 +1,11 @@
 import { useCallback, useMemo, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
-import { OnboardingOverlay } from './fretboard/OnboardingOverlay';
-import { FretHeader } from './fretboard/FretHeader';
-import { StringColumn } from './fretboard/StringColumn';
-import { FretGrid } from './fretboard/FretGrid';
 import { COLORS } from '@/utils/constants';
+import { FretGrid } from './fretboard/FretGrid';
+import { FretHeader } from './fretboard/FretHeader';
+import { OnboardingOverlay } from './fretboard/OnboardingOverlay';
+import { StringColumn } from './fretboard/StringColumn';
 
 // 프렛보드 하이라이트 정보
 export interface FretHighlight {

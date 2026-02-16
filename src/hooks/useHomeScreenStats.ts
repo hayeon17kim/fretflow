@@ -1,6 +1,6 @@
 import { useMemo } from 'react';
-import { TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import type { LevelId } from '@/config/levels';
+import { TARGET_CARDS_PER_LEVEL } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 
 interface HomeScreenStats {
@@ -22,10 +22,7 @@ export function useHomeScreenStats(): HomeScreenStats {
   const dueCount = dueCards.length;
 
   // Estimate review time (0.35 min per card heuristic)
-  const estimatedMinutes = useMemo(
-    () => Math.max(1, Math.ceil(dueCount * 0.35)),
-    [dueCount],
-  );
+  const estimatedMinutes = useMemo(() => Math.max(1, Math.ceil(dueCount * 0.35)), [dueCount]);
 
   // Per-level due card counts
   const levelDueCounts = useMemo(() => {

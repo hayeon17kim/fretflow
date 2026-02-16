@@ -1,9 +1,9 @@
 import { useMemo } from 'react';
 import { StyleSheet, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
+import { COLORS, FRETBOARD } from '@/utils/constants';
 import type { FretHighlight } from '../Fretboard';
 import { FretCell } from './FretCell';
-import { COLORS, FRETBOARD } from '@/utils/constants';
 
 const DOT_FRETS = [3, 5, 7, 9, 12, 15];
 const DOUBLE_DOT_FRETS = [12];

@@ -24,7 +24,14 @@ export default function QuizNoteScreen() {
     [],
   );
 
-  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
+  const {
+    currentCard: q,
+    state,
+    total,
+    progress,
+    recordAnswer,
+    nextCard,
+  } = useQuizSession({
     cards: questions,
   });
 

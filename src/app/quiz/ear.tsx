@@ -1,8 +1,8 @@
 import { Audio } from 'expo-av';
 import { useRouter } from 'expo-router';
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
@@ -89,7 +89,14 @@ export default function QuizEarScreen() {
   // 세션 시작 시 카드 생성
   const questions = useMemo(() => generateCardBatch('ear', SESSION_SIZE) as EarQuestionCard[], []);
 
-  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
+  const {
+    currentCard: q,
+    state,
+    total,
+    progress,
+    recordAnswer,
+    nextCard,
+  } = useQuizSession({
     cards: questions,
   });
   const [playing, setPlaying] = useState(false);

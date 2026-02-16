@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Alert,
   Pressable,
@@ -10,7 +11,6 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
-import { useTranslation } from 'react-i18next';
 import i18n from '@/i18n';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -207,7 +207,9 @@ export default function SettingsScreen() {
                 <Text style={s.settingLabel}>{t('settings.goals.daily')}</Text>
                 <Text style={s.settingDesc}>{t('settings.goals.dailyDesc')}</Text>
               </View>
-              <Text style={s.settingValue}>{t('settings.goals.cards', { count: settings.dailyGoal })}</Text>
+              <Text style={s.settingValue}>
+                {t('settings.goals.cards', { count: settings.dailyGoal })}
+              </Text>
             </View>
 
             {/* Goal options */}
@@ -263,10 +265,7 @@ export default function SettingsScreen() {
                 onPress={() => i18n.changeLanguage('ko')}
               >
                 <Text
-                  style={[
-                    s.languageOptionText,
-                    i18n.language === 'ko' && { color: COLORS.level3 },
-                  ]}
+                  style={[s.languageOptionText, i18n.language === 'ko' && { color: COLORS.level3 }]}
                 >
                   {t('common.korean')}
                 </Text>
@@ -280,10 +279,7 @@ export default function SettingsScreen() {
                 onPress={() => i18n.changeLanguage('en')}
               >
                 <Text
-                  style={[
-                    s.languageOptionText,
-                    i18n.language === 'en' && { color: COLORS.level3 },
-                  ]}
+                  style={[s.languageOptionText, i18n.language === 'en' && { color: COLORS.level3 }]}
                 >
                   {t('common.english')}
                 </Text>
@@ -320,7 +316,10 @@ export default function SettingsScreen() {
             <Pressable
               style={({ pressed }) => [s.infoRow, pressed && { opacity: 0.7 }]}
               onPress={() => {
-                Alert.alert(t('settings.appInfo.versionAlert'), t('settings.appInfo.versionMessage'));
+                Alert.alert(
+                  t('settings.appInfo.versionAlert'),
+                  t('settings.appInfo.versionMessage'),
+                );
               }}
             >
               <Text style={s.infoLabel}>{t('settings.appInfo.version')}</Text>

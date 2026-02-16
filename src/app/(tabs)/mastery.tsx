@@ -1,7 +1,7 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useCallback, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { useTranslation } from 'react-i18next';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
@@ -74,7 +74,9 @@ export default function MasteryScreen() {
             <View style={s.progressBarBg}>
               <View style={[s.progressBarFill, { width: `${overallProgress}%` }]} />
             </View>
-            <Text style={s.progressBarText}>{t('mastery.completion', { progress: overallProgress })}</Text>
+            <Text style={s.progressBarText}>
+              {t('mastery.completion', { progress: overallProgress })}
+            </Text>
           </View>
         </View>
 
@@ -82,7 +84,11 @@ export default function MasteryScreen() {
         <Text style={s.sectionTitle}>{t('mastery.levelMastery')}</Text>
         <View style={s.levelGrid}>
           {levelStats.map((lv) => (
-            <View key={lv.id} style={[s.levelBox, { borderColor: `${lv.color}25` }]} accessibilityRole="summary">
+            <View
+              key={lv.id}
+              style={[s.levelBox, { borderColor: `${lv.color}25` }]}
+              accessibilityRole="summary"
+            >
               {/* Icon with circular progress */}
               <View style={s.levelIconContainer}>
                 <CircularProgress progress={lv.progress} color={lv.color} size={60} />
@@ -99,7 +105,9 @@ export default function MasteryScreen() {
               <View style={s.levelBoxStats}>
                 <Text style={s.levelBoxStat}>
                   <Text style={[s.levelBoxStatValue, { color: lv.color }]}>{lv.mastered}</Text>
-                  <Text style={s.levelBoxStatLabel}>/{lv.total} {t('mastery.mastered')}</Text>
+                  <Text style={s.levelBoxStatLabel}>
+                    /{lv.total} {t('mastery.mastered')}
+                  </Text>
                 </Text>
               </View>
             </View>
