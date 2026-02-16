@@ -3,7 +3,7 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
-import { LEVELS } from '@/config/levels';
+import { getLevelLabel, LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -53,7 +53,7 @@ export default function QuizCompletionScreen() {
       <View style={s.header}>
         <View style={[s.levelBadge, { backgroundColor: `${level.color}20` }]}>
           <Text style={s.levelEmoji}>{level.emoji}</Text>
-          <Text style={[s.levelLabel, { color: level.color }]}>{level.label}</Text>
+          <Text style={[s.levelLabel, { color: level.color }]}>{getLevelLabel(level.id, t)}</Text>
         </View>
         <Text style={s.headerTitle}>{t('quiz.completion.sessionComplete')}</Text>
       </View>

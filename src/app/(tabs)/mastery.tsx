@@ -5,7 +5,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { LEVELS } from '@/config/levels';
+import { getLevelLabel, LEVELS } from '@/config/levels';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -14,20 +14,20 @@ export default function MasteryScreen() {
   const { getCardCount, getMasteredCards, getWeakCards } = useSpacedRepetition();
   const [_refreshKey, setRefreshKey] = useState(0);
 
-  // 화면 포커스 시 새로고침
+  // Refresh on screen focus
   useFocusEffect(
     useCallback(() => {
       setRefreshKey((prev) => prev + 1);
     }, []),
   );
 
-  // 전체 통계
+  // Overall statistics
   const totalCards = getCardCount();
   const totalMastered = getMasteredCards().length;
   const totalWeak = getWeakCards().length;
   const overallProgress = totalCards > 0 ? Math.round((totalMastered / totalCards) * 100) : 0;
 
-  // 레벨별 통계
+  // Statistics by level
   const levelStats = LEVELS.map((lv) => {
     const total = getCardCount(lv.id);
     const mastered = getMasteredCards(lv.id).length;
@@ -97,7 +97,7 @@ export default function MasteryScreen() {
 
               {/* Info */}
               <Text style={s.levelBoxName}>
-                {t('common.levelShort', { num: lv.num })} {lv.label}
+                {t('common.levelShort', { num: lv.num })} {getLevelLabel(lv.id, t)}
               </Text>
               <Text style={s.levelBoxProgress}>{lv.progress}%</Text>
 
@@ -125,8 +125,8 @@ export default function MasteryScreen() {
             <View style={s.weakCard} accessibilityRole="alert">
               <Text style={s.weakCardTitle}>
                 {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}`)[0]}
-                <Text style={{ color: COLORS.wrong }}>{totalWeak}장</Text>
-                {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}장`)[1]}
+                <Text style={{ color: COLORS.wrong }}>{totalWeak}{t('mastery.cardUnit')}</Text>
+                {t('mastery.weakCardsCount', { count: totalWeak }).split(`${totalWeak}${t('mastery.cardUnit')}`)[1]}
               </Text>
               <Text style={s.weakCardDesc}>{t('mastery.weakCardsDesc')}</Text>
 
@@ -138,7 +138,7 @@ export default function MasteryScreen() {
                     <View key={lv.id} style={s.weakBreakdownItem}>
                       <View style={[s.weakDot, { backgroundColor: lv.color }]} />
                       <Text style={s.weakBreakdownText}>
-                        {lv.label}: {lv.weak}장
+                        {getLevelLabel(lv.id, t)}: {lv.weak}{t('mastery.cardUnit')}
                       </Text>
                     </View>
                   ))}
