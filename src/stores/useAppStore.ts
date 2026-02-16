@@ -17,6 +17,14 @@ interface AppState {
   // 온보딩 상태
   hasSeenOnboarding: boolean;
   setHasSeenOnboarding: (seen: boolean) => void;
+
+  // 사용자 설정
+  settings: {
+    username: string;
+    dailyGoal: number; // 일일 목표 카드 수
+    vibrationEnabled: boolean;
+  };
+  updateSettings: (settings: Partial<AppState['settings']>) => void;
 }
 
 export const useAppStore = create<AppState>((set) => ({
@@ -40,4 +48,14 @@ export const useAppStore = create<AppState>((set) => ({
 
   hasSeenOnboarding: false,
   setHasSeenOnboarding: (seen) => set({ hasSeenOnboarding: seen }),
+
+  settings: {
+    username: '기타 학습자',
+    dailyGoal: 20,
+    vibrationEnabled: true,
+  },
+  updateSettings: (newSettings) =>
+    set((state) => ({
+      settings: { ...state.settings, ...newSettings },
+    })),
 }));

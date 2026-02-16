@@ -97,5 +97,38 @@ export function useSpacedRepetition() {
     return cards.filter((c) => c.type === level).length;
   }, []);
 
-  return { getDueCards, addCard, recordReview, getCardCount };
+  // 마스터된 카드 (repetitions >= 3 && easeFactor >= 2.5 && interval >= 7)
+  const getMasteredCards = useCallback((level?: FlashCard['type']) => {
+    const cards = getCards();
+    return cards.filter((c) => {
+      if (level && c.type !== level) return false;
+      return c.repetitions >= 3 && c.easeFactor >= 2.5 && c.interval >= 7;
+    });
+  }, []);
+
+  // 약점 카드 (easeFactor < 2.0 또는 repetitions >= 2 && easeFactor < 2.3)
+  const getWeakCards = useCallback((level?: FlashCard['type']) => {
+    const cards = getCards();
+    return cards.filter((c) => {
+      if (level && c.type !== level) return false;
+      return c.easeFactor < 2.0 || (c.repetitions >= 2 && c.easeFactor < 2.3);
+    });
+  }, []);
+
+  // 모든 카드 가져오기
+  const getAllCards = useCallback((level?: FlashCard['type']) => {
+    const cards = getCards();
+    if (!level) return cards;
+    return cards.filter((c) => c.type === level);
+  }, []);
+
+  return {
+    getDueCards,
+    addCard,
+    recordReview,
+    getCardCount,
+    getMasteredCards,
+    getWeakCards,
+    getAllCards,
+  };
 }
