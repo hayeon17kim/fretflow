@@ -1,45 +1,107 @@
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useQuizSession } from '@/hooks/useQuizSession';
-import type { FretPosition, StringNumber } from '@/types/music';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import type { FretPosition, IntervalName } from '@/types/music';
+import { generateCardBatch, type IntervalQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { getNoteAtPosition } from '@/utils/music';
 
-// ─── Mock data ───
-const MOCK_QUESTIONS = [
-  {
-    id: 'interval-1',
-    root: { string: 5 as StringNumber, fret: 0 },
-    correct: { string: 5 as StringNumber, fret: 7 },
-    rootNote: 'A',
-    answerNote: 'E',
-    intervalName: '완전5도 ↑',
-    patternHint:
-      '같은 줄에서 7프렛 위 = 항상 완전5도! 이 모양을 기억하면 어떤 음에서든 5도를 찾을 수 있어요.',
-    fretRange: [0, 9] as [number, number],
-  },
-  {
-    id: 'interval-2',
-    root: { string: 4 as StringNumber, fret: 2 },
-    correct: { string: 4 as StringNumber, fret: 7 },
-    rootNote: 'E',
-    answerNote: 'B',
-    intervalName: '완전5도 ↑',
-    patternHint: '같은 줄에서 7프렛 위 = 항상 완전5도!',
-    fretRange: [0, 9] as [number, number],
-  },
-];
+const SESSION_SIZE = 10;
+
+// ─── Interval name translations ───
+const INTERVAL_NAMES_KO: Record<IntervalName, string> = {
+  P1: '완전1도',
+  m2: '단2도',
+  M2: '장2도',
+  m3: '단3도',
+  M3: '장3도',
+  P4: '완전4도',
+  TT: '증4도',
+  P5: '완전5도',
+  m6: '단6도',
+  M6: '장6도',
+  m7: '단7도',
+  M7: '장7도',
+  P8: '완전8도',
+};
+
+// ─── Pattern hints ───
+const INTERVAL_PATTERN_HINTS: Record<IntervalName, string> = {
+  P1: '같은 위치 = 같은 음! 옥타브 패턴의 기준점이에요.',
+  m2: '같은 줄에서 1프렛 위 = 반음! 가장 작은 음정 간격이에요.',
+  M2: '같은 줄에서 2프렛 위 = 온음! 도레미파 중 대부분의 간격이에요.',
+  m3: '같은 줄에서 3프렛 위 = 단3도! 단조 화음의 핵심 음정이에요.',
+  M3: '같은 줄에서 4프렛 위 = 장3도! 밝은 느낌의 장조 화음이에요.',
+  P4: '같은 줄에서 5프렛 위 = 완전4도! 코드 구성의 기본이 되는 음정이에요.',
+  TT: '같은 줄에서 6프렛 위 = 증4도(감5도)! 블루스와 록의 텐션 사운드예요.',
+  P5: '같은 줄에서 7프렛 위 = 완전5도! 가장 안정적이고 조화로운 음정이에요.',
+  m6: '같은 줄에서 8프렛 위 = 단6도! 슬픈 느낌을 주는 음정이에요.',
+  M6: '같은 줄에서 9프렛 위 = 장6도! 밝고 따뜻한 느낌의 음정이에요.',
+  m7: '같은 줄에서 10프렛 위 = 단7도! 재즈와 블루스의 필수 음정이에요.',
+  M7: '같은 줄에서 11프렛 위 = 장7도! 부드럽고 세련된 느낌의 음정이에요.',
+  P8: '같은 줄에서 12프렛 위 = 완전8도(옥타브)! 같은 음의 높은 버전이에요.',
+};
+
+// ─── Adapt generated cards to tap-based format ───
+interface TapIntervalQuestion {
+  id: string;
+  root: FretPosition;
+  correct: FretPosition;
+  rootNote: string;
+  answerNote: string;
+  intervalName: string;
+  patternHint: string;
+  fretRange: [number, number];
+}
+
+function adaptIntervalCard(card: IntervalQuestionCard): TapIntervalQuestion {
+  const rootNote = getNoteAtPosition(card.rootPosition);
+  const answerNote = getNoteAtPosition(card.targetPosition);
+  const intervalNameKo = INTERVAL_NAMES_KO[card.answer];
+  const patternHint = INTERVAL_PATTERN_HINTS[card.answer];
+
+  // Calculate fret range to show (show root - 1 to target + 2)
+  const minFret = Math.max(0, card.rootPosition.fret - 1);
+  const maxFret = Math.min(card.targetPosition.fret + 2, 15);
+
+  return {
+    id: card.id,
+    root: card.rootPosition,
+    correct: card.targetPosition,
+    rootNote,
+    answerNote,
+    intervalName: `${intervalNameKo} ↑`,
+    patternHint,
+    fretRange: [minFret, maxFret],
+  };
+}
 
 export default function QuizIntervalScreen() {
   const router = useRouter();
   const { t } = useTranslation();
+  const { addCard, recordReview } = useSpacedRepetition();
 
-  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
-    cards: MOCK_QUESTIONS,
+  // Generate cards for this session
+  const questions = useMemo(() => {
+    const generatedCards = generateCardBatch('interval', SESSION_SIZE) as IntervalQuestionCard[];
+    return generatedCards.map(adaptIntervalCard);
+  }, []);
+
+  const {
+    currentCard: q,
+    state,
+    total,
+    progress,
+    recordAnswer,
+    nextCard,
+  } = useQuizSession({
+    cards: questions,
   });
   const [tapped, setTapped] = useState<FretPosition | null>(null);
 
@@ -55,7 +117,19 @@ export default function QuizIntervalScreen() {
   const confirmAnswer = () => {
     if (!tapped) return;
     const correct = tapped.string === q.correct.string && tapped.fret === q.correct.fret;
-    recordAnswer(correct);
+
+    // Record answer time
+    const responseTime = recordAnswer(correct);
+
+    // Add card to spaced repetition system (if not already exists)
+    addCard({
+      id: q.id,
+      type: 'interval',
+      question: { rootPosition: q.root, targetPosition: q.correct } as any,
+    });
+
+    // Record this review in SM-2 algorithm
+    recordReview(q.id, correct, responseTime);
   };
 
   const handleNext = () => {
