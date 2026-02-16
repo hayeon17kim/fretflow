@@ -1,16 +1,15 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { Fretboard } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-type QuizState = 'question' | 'correct' | 'wrong';
 
 const SESSION_SIZE = 10; // 한 세션당 카드 수
 
@@ -24,21 +23,17 @@ export default function QuizNoteScreen() {
     () => generateCardBatch('note', SESSION_SIZE) as NoteQuestionCard[],
     [],
   );
-  const total = questions.length;
 
-  const [currentIdx, setCurrentIdx] = useState(0);
-  const [startTime, setStartTime] = useState(Date.now());
-  const [state, setState] = useState<QuizState>('question');
-
-  const q = questions[currentIdx];
+  const { currentCard: q, state, total, progress, recordAnswer, nextCard } = useQuizSession({
+    cards: questions,
+  });
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
     const correct = q.options[index] === q.answer;
-    setState(correct ? 'correct' : 'wrong');
 
     // 응답 시간 기록
-    const responseTime = Date.now() - startTime;
+    const responseTime = recordAnswer(correct);
 
     // 카드 추가 (아직 없으면) & 리뷰 기록
     addCard({
@@ -49,15 +44,8 @@ export default function QuizNoteScreen() {
     recordReview(q.id, correct, responseTime);
   };
 
-  const nextCard = () => {
-    if (currentIdx + 1 >= total) {
-      // 세션 완료
-      router.back();
-      return;
-    }
-    setCurrentIdx((prev) => prev + 1);
-    setState('question');
-    setStartTime(Date.now()); // 다음 카드 시작 시간 리셋
+  const handleNext = () => {
+    nextCard(() => router.back());
   };
 
   return (
@@ -66,7 +54,7 @@ export default function QuizNoteScreen() {
         label={t('quiz.note.title')}
         levelNum={1}
         color={COLORS.level1}
-        progress={currentIdx + (state !== 'question' ? 1 : 0)}
+        progress={progress}
         total={total}
         onBack={() => router.back()}
       />
@@ -119,7 +107,7 @@ export default function QuizNoteScreen() {
         {state === 'question' ? (
           <AnswerGrid options={q.options} onSelect={handleAnswer} />
         ) : (
-          <NextButton onPress={nextCard} correct={state === 'correct'} />
+          <NextButton onPress={handleNext} correct={state === 'correct'} />
         )}
       </View>
     </View>
