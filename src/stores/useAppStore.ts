@@ -1,9 +1,9 @@
+import * as Haptics from 'expo-haptics';
 import { Platform } from 'react-native';
 import { create, type StateCreator } from 'zustand';
-import * as Haptics from 'expo-haptics';
-import { appStorage } from '@/utils/storage';
 import type { TrackId } from '@/config/tracks';
 import type { BadgeLevel } from '@/utils/badges';
+import { appStorage } from '@/utils/storage';
 
 // Only import persist on native platforms to avoid import.meta issues on web
 let persist: any;

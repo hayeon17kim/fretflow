@@ -45,30 +45,22 @@ export default function OnboardingResultScreen() {
         <Text style={s.emoji}>{emoji}</Text>
 
         {/* Score */}
-        <Text style={s.scoreText}>
-          {t('onboardingFlow.result.score', { correct, total })}
-        </Text>
+        <Text style={s.scoreText}>{t('onboardingFlow.result.score', { correct, total })}</Text>
 
         {/* Encouragement */}
-        <Text style={s.encouragement}>
-          {t(`onboardingFlow.result.${key}`)}
-        </Text>
+        <Text style={s.encouragement}>{t(`onboardingFlow.result.${key}`)}</Text>
 
         {/* Key insight */}
         <View style={s.insightCard}>
           <Text style={s.insightIcon}>💡</Text>
-          <Text style={s.insightText}>
-            {t('onboardingFlow.result.insight')}
-          </Text>
+          <Text style={s.insightText}>{t('onboardingFlow.result.insight')}</Text>
         </View>
       </View>
 
       {/* CTA */}
       <View style={[s.bottomArea, { paddingBottom: insets.bottom + 20 }]}>
         <Pressable style={s.continueButton} onPress={handleContinue}>
-          <Text style={s.continueButtonText}>
-            {t('onboardingFlow.result.continue')}
-          </Text>
+          <Text style={s.continueButtonText}>{t('onboardingFlow.result.continue')}</Text>
         </Pressable>
       </View>
     </View>

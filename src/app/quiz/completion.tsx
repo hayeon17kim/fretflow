@@ -5,7 +5,7 @@ import { FireIcon } from '@/components/icons/FireIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { Toast } from '@/components/Toast';
 import { getTrackLabel, TRACKS } from '@/config/tracks';
-import { useBadgeCheck, getBadgeLevelUpMessage } from '@/hooks/useBadgeCheck';
+import { getBadgeLevelUpMessage, useBadgeCheck } from '@/hooks/useBadgeCheck';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useToast } from '@/hooks/useToast';
 import { useAppStore } from '@/stores/useAppStore';

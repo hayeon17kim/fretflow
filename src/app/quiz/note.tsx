@@ -17,17 +17,20 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 export default function QuizNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview } = useSpacedRepetition();
+  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
   const params = useLocalSearchParams();
   const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
-  // Generate cards at session start (once)
+  // Get mastered count for tier unlocking
+  const masteredCount = getMasteredCards('note').length;
+
+  // Generate cards at session start (once) with tier-based difficulty
   const questions = useMemo(
-    () => generateCardBatch('note', sessionSize) as NoteQuestionCard[],
-    [sessionSize],
+    () => generateCardBatch('note', sessionSize, masteredCount) as NoteQuestionCard[],
+    [sessionSize, masteredCount],
   );
 
   const {

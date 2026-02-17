@@ -6,12 +6,12 @@ import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-n
 import Svg, { Circle, Path } from 'react-native-svg';
 import { DailyReviewCard } from '@/components/home/DailyReviewCard';
 import { TrackCardGrid } from '@/components/home/TrackCardGrid';
+import { QUIZ_ROUTES } from '@/config/routes';
 import type { TrackId } from '@/config/tracks';
 import { TRACKS } from '@/config/tracks';
-import { QUIZ_ROUTES } from '@/config/routes';
 import { useHomeScreenStats } from '@/hooks/useHomeScreenStats';
-import { useSmartRecommendation } from '@/hooks/useSmartRecommendation';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useSmartRecommendation } from '@/hooks/useSmartRecommendation';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -151,5 +151,4 @@ const s = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
-
 });

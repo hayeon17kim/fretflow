@@ -55,18 +55,25 @@ function adaptIntervalCard(
 export default function QuizIntervalScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview } = useSpacedRepetition();
+  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
   const params = useLocalSearchParams();
   const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
-  // Generate cards for this session
+  // Get mastered count for tier unlocking
+  const masteredCount = getMasteredCards('interval').length;
+
+  // Generate cards for this session with tier-based difficulty
   const questions = useMemo(() => {
-    const generatedCards = generateCardBatch('interval', sessionSize) as IntervalQuestionCard[];
+    const generatedCards = generateCardBatch(
+      'interval',
+      sessionSize,
+      masteredCount,
+    ) as IntervalQuestionCard[];
     return generatedCards.map((card) => adaptIntervalCard(card, t));
-  }, [sessionSize, t]);
+  }, [sessionSize, masteredCount, t]);
 
   const {
     currentCard: q,

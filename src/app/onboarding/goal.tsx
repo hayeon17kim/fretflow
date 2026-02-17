@@ -7,9 +7,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import { useAppStore } from '@/stores/useAppStore';
 import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 const GOAL_OPTIONS = [10, 20, 30] as const;
@@ -96,9 +96,7 @@ export default function OnboardingGoalScreen() {
       {/* CTA */}
       <View style={[s.bottomArea, { paddingBottom: insets.bottom + 20 }]}>
         <Pressable style={s.confirmButton} onPress={handleConfirm}>
-          <Text style={s.confirmButtonText}>
-            {t('onboardingFlow.goal.confirm')}
-          </Text>
+          <Text style={s.confirmButtonText}>{t('onboardingFlow.goal.confirm')}</Text>
         </Pressable>
       </View>
     </View>

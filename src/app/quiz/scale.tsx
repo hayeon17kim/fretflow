@@ -7,11 +7,11 @@ import { NextButton } from '@/components/quiz/AnswerGrid';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { SoftGuideModal } from '@/components/SoftGuideModal';
+import { QUIZ_ROUTES } from '@/config/routes';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import { QUIZ_ROUTES } from '@/config/routes';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -65,18 +65,25 @@ interface Score {
 export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview } = useSpacedRepetition();
+  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
   const params = useLocalSearchParams();
   const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
-  // Generate cards for this session
+  // Get mastered count for tier unlocking
+  const masteredCount = getMasteredCards('scale').length;
+
+  // Generate cards for this session with tier-based difficulty
   const questions = useMemo(() => {
-    const generatedCards = generateCardBatch('scale', sessionSize) as ScaleQuestionCard[];
+    const generatedCards = generateCardBatch(
+      'scale',
+      sessionSize,
+      masteredCount,
+    ) as ScaleQuestionCard[];
     return generatedCards.map((card) => adaptScaleCard(card, t));
-  }, [sessionSize, t]);
+  }, [sessionSize, masteredCount, t]);
 
   const {
     currentCard: q,
@@ -264,8 +271,7 @@ export default function QuizScaleScreen() {
               position: q.position,
             }).split(q.position)[0]
           }
-          {q.name}{' '}
-          <Text style={{ color: COLORS.track3 }}>{q.position}</Text>
+          {q.name} <Text style={{ color: COLORS.track3 }}>{q.position}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
 

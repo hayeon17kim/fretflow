@@ -12,14 +12,7 @@ interface QuizHeaderProps {
   badge?: string;
 }
 
-export function QuizHeader({
-  label,
-  color,
-  progress,
-  total,
-  onBack,
-  badge,
-}: QuizHeaderProps) {
+export function QuizHeader({ label, color, progress, total, onBack, badge }: QuizHeaderProps) {
   const { t } = useTranslation();
   const pct = total > 0 ? (progress / total) * 100 : 0;
 

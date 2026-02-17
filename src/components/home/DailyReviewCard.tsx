@@ -111,9 +111,7 @@ export function DailyReviewCard({
       ) : hasDueCards ? (
         <>
           {/* ── Due cards exist: review mode ── */}
-          <Text style={s.ctaTitle}>
-            {`${t('home.todayReview')}: ${recommendedTrackLabel}`}
-          </Text>
+          <Text style={s.ctaTitle}>{`${t('home.todayReview')}: ${recommendedTrackLabel}`}</Text>
 
           {/* Track composition chips */}
           <View style={s.chipRow}>

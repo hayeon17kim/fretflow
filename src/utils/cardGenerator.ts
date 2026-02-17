@@ -3,13 +3,16 @@
  * MOCK_QUESTIONS를 대체하여 실제 문제를 생성합니다.
  */
 
-import type { FretPosition, IntervalName, NoteName, ScaleName } from '@/types/music';
 import type { NoteWithOctave } from '@/config/earTrainingTiers';
 import {
+  getAdjacentNotes,
   getAvailableSounds,
   parseNoteWithOctave,
-  getAdjacentNotes,
 } from '@/config/earTrainingTiers';
+import { getAvailableIntervals } from '@/config/intervalTiers';
+import { getAvailableFretRange } from '@/config/notePositionTiers';
+import { getAvailableScales } from '@/config/scaleTiers';
+import type { FretPosition, IntervalName, NoteName, ScaleName } from '@/types/music';
 import { getNoteAtPosition } from './music';
 
 // ─── 유틸리티 함수 ───
@@ -42,10 +45,17 @@ export interface NoteQuestionCard {
 
 const ALL_NOTES: NoteName[] = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
-export function generateNoteCard(): NoteQuestionCard {
-  // 랜덤 위치 선택 (0-12 프렛, 모든 현)
+/**
+ * Generate note position card with progressive difficulty
+ * @param masteredCount Number of mastered note position cards (for tier unlocking)
+ */
+export function generateNoteCard(masteredCount: number = 0): NoteQuestionCard {
+  // Get available fret range based on tier
+  const { min, max } = getAvailableFretRange(masteredCount);
+
+  // 랜덤 위치 선택 (티어별 프렛 범위, 모든 현)
   const string = (Math.floor(Math.random() * 6) + 1) as 1 | 2 | 3 | 4 | 5 | 6;
-  const fret = Math.floor(Math.random() * 13); // 0-12 프렛
+  const fret = Math.floor(Math.random() * (max - min + 1)) + min;
 
   const position: FretPosition = { string, fret };
   const answer = getNoteAtPosition(position);
@@ -110,14 +120,25 @@ const INTERVAL_SEMITONES: Record<IntervalName, number> = {
   P8: 12,
 };
 
-export function generateIntervalCard(): IntervalQuestionCard {
+/**
+ * Generate interval card with progressive difficulty
+ * @param masteredCount Number of mastered interval cards (for tier unlocking)
+ */
+export function generateIntervalCard(masteredCount: number = 0): IntervalQuestionCard {
+  // Get available intervals based on tier
+  const availableIntervals = getAvailableIntervals(masteredCount);
+
+  // Fallback if no intervals available
+  if (availableIntervals.length === 0) {
+    throw new Error('[CardGenerator] No intervals available');
+  }
+
   // 루트 음 (3-9 프렛, 4-6번 줄에서 선택)
   const rootString = (Math.floor(Math.random() * 3) + 4) as 4 | 5 | 6;
   const rootFret = Math.floor(Math.random() * 7) + 3; // 3-9
 
-  // 목표 인터벌 선택 (P1 제외)
-  const validIntervals = INTERVAL_NAMES.filter((i) => i !== 'P1');
-  const answer = randomChoice(validIntervals);
+  // 목표 인터벌 선택 (티어별로 제한)
+  const answer = randomChoice(availableIntervals);
   const semitones = INTERVAL_SEMITONES[answer];
 
   // 목표 위치 계산 (같은 줄에서 위로)
@@ -126,8 +147,8 @@ export function generateIntervalCard(): IntervalQuestionCard {
     fret: rootFret + semitones,
   };
 
-  // 오답 생성
-  const wrongIntervals = validIntervals.filter((i) => i !== answer);
+  // 오답 생성 (available intervals에서만 선택)
+  const wrongIntervals = availableIntervals.filter((i) => i !== answer);
   const selectedWrong = shuffle(wrongIntervals).slice(0, 3);
   const options = shuffle([answer, ...selectedWrong]);
 
@@ -165,10 +186,20 @@ const SCALE_PATTERNS: Record<ScaleName, number[]> = {
   blues: [0, 3, 5, 6, 7, 10, 12],
 };
 
-const SCALE_NAMES: ScaleName[] = ['major', 'pentatonic-major', 'pentatonic-minor'];
+/**
+ * Generate scale card with progressive difficulty
+ * @param masteredCount Number of mastered scale cards (for tier unlocking)
+ */
+export function generateScaleCard(masteredCount: number = 0): ScaleQuestionCard {
+  // Get available scales based on tier
+  const availableScales = getAvailableScales(masteredCount);
 
-export function generateScaleCard(): ScaleQuestionCard {
-  const scaleName = randomChoice(SCALE_NAMES);
+  // Fallback if no scales available
+  if (availableScales.length === 0) {
+    throw new Error('[CardGenerator] No scales available');
+  }
+
+  const scaleName = randomChoice(availableScales);
   const pattern = SCALE_PATTERNS[scaleName];
 
   // 루트 음 (5-6번 줄, 3-7 프렛)
@@ -214,10 +245,7 @@ export interface EarQuestionCard {
 /**
  * Generate distractor options for ear training
  */
-function generateDistractors(
-  correct: NoteWithOctave,
-  pool: NoteWithOctave[],
-): NoteWithOctave[] {
+function generateDistractors(correct: NoteWithOctave, pool: NoteWithOctave[]): NoteWithOctave[] {
   const [note, octaveStr] = parseNoteWithOctave(correct);
   const octave = parseInt(octaveStr, 10);
 
@@ -300,16 +328,22 @@ export function generateEarCard(masteredCount: number = 0): EarQuestionCard {
 
 // ─── 배치 생성 ───
 
-/** 특정 레벨의 카드 여러 개 생성 */
+/**
+ * Generate multiple cards with tier-based difficulty
+ * @param type Card type
+ * @param count Number of cards to generate
+ * @param masteredCount Number of mastered cards (for tier unlocking)
+ */
 export function generateCardBatch(
   type: 'note' | 'interval' | 'scale' | 'ear',
   count: number,
+  masteredCount: number = 0,
 ): (NoteQuestionCard | IntervalQuestionCard | ScaleQuestionCard | EarQuestionCard)[] {
   const generators = {
-    note: generateNoteCard,
-    interval: generateIntervalCard,
-    scale: generateScaleCard,
-    ear: generateEarCard,
+    note: () => generateNoteCard(masteredCount),
+    interval: () => generateIntervalCard(masteredCount),
+    scale: () => generateScaleCard(masteredCount),
+    ear: () => generateEarCard(masteredCount),
   };
 
   const generator = generators[type];

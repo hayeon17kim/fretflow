@@ -3,7 +3,7 @@ import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { getTrackLabel, TRACKS, TARGET_CARDS_PER_TRACK } from '@/config/tracks';
+import { getTrackLabel, TARGET_CARDS_PER_TRACK, TRACKS } from '@/config/tracks';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { BADGES, getBadgeForProgress, getProgressToNextBadge } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -110,7 +110,9 @@ export default function MasteryScreen() {
               {/* Stats */}
               <View style={s.trackBoxStats}>
                 <Text style={s.trackBoxStat}>
-                  <Text style={[s.trackBoxStatValue, { color: track.color }]}>{track.mastered}</Text>
+                  <Text style={[s.trackBoxStatValue, { color: track.color }]}>
+                    {track.mastered}
+                  </Text>
                   <Text style={s.trackBoxStatLabel}>
                     /{track.total} {t('mastery.mastered')}
                   </Text>

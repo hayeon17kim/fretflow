@@ -12,11 +12,11 @@ import {
   View,
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
+import { TimePickerRow } from '@/components/settings/TimePickerRow';
+import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
+import { useNotifications } from '@/hooks/useNotifications';
 import i18n from '@/i18n';
 import { useAppStore } from '@/stores/useAppStore';
-import { useNotifications } from '@/hooks/useNotifications';
-import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
-import { TimePickerRow } from '@/components/settings/TimePickerRow';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 // ─── User icon ───
@@ -166,7 +166,7 @@ export default function SettingsScreen() {
       if (status !== 'granted') {
         Alert.alert(
           t('settings.notifications.permissionDenied'),
-          t('settings.notifications.permissionDeniedMessage')
+          t('settings.notifications.permissionDeniedMessage'),
         );
         return;
       }

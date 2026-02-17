@@ -45,9 +45,7 @@ export function TrackCardGrid({ trackProgress, onTrackPress }: TrackCardGridProp
               {/* Info */}
               <View style={s.trackInfo}>
                 <View style={s.trackNameRow}>
-                  <Text style={s.trackName}>
-                    {getTrackLabel(track.id, t)}
-                  </Text>
+                  <Text style={s.trackName}>{getTrackLabel(track.id, t)}</Text>
                   {badge.emoji && (
                     <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
                       <Text style={s.chipText}>{badge.emoji}</Text>
@@ -58,19 +56,17 @@ export function TrackCardGrid({ trackProgress, onTrackPress }: TrackCardGridProp
                   )}
                   {'basic' in track && track.basic && (
                     <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
-                      <Text style={[s.chipText, { color: track.color }]}>{t('home.basicMode')}</Text>
+                      <Text style={[s.chipText, { color: track.color }]}>
+                        {t('home.basicMode')}
+                      </Text>
                     </View>
                   )}
                 </View>
-                <Text style={s.trackDesc}>
-                  {getTrackDesc(track.id, t)}
-                </Text>
+                <Text style={s.trackDesc}>{getTrackDesc(track.id, t)}</Text>
               </View>
 
               {/* Progress number */}
-              <Text style={[s.trackProgress, { color: track.color }]}>
-                {progress}%
-              </Text>
+              <Text style={[s.trackProgress, { color: track.color }]}>{progress}%</Text>
             </View>
           </Pressable>
         );

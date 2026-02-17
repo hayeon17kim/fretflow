@@ -1,9 +1,9 @@
-import React, { useState } from 'react';
-import { View, Text, Pressable, Platform, StyleSheet } from 'react-native';
 import DateTimePicker from '@react-native-community/datetimepicker';
+import React, { useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { COLORS, SPACING, FONT_SIZE } from '@/utils/constants';
-import { parseTime, formatTime } from '@/utils/notifications';
+import { Platform, Pressable, StyleSheet, Text, View } from 'react-native';
+import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { formatTime, parseTime } from '@/utils/notifications';
 
 interface TimePickerRowProps {
   label: string;

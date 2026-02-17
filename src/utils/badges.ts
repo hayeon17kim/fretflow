@@ -48,10 +48,7 @@ export function getNextBadge(currentBadge: BadgeLevel): Badge | null {
  * @param currentBadge - Current badge level
  * @returns Percentage needed to reach next badge, or 0 if already at master
  */
-export function getProgressToNextBadge(
-  currentProgress: number,
-  currentBadge: BadgeLevel,
-): number {
+export function getProgressToNextBadge(currentProgress: number, currentBadge: BadgeLevel): number {
   const nextBadge = getNextBadge(currentBadge);
   if (!nextBadge) return 0;
   return Math.max(0, nextBadge.threshold - currentProgress);

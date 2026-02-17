@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query';
+import * as Notifications from 'expo-notifications';
 import { Redirect, Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
-import * as Notifications from 'expo-notifications';
 import { useEffect, useRef } from 'react';
 import { queryClient } from '@/api/query-client';
 import { useAppStore } from '@/stores/useAppStore';

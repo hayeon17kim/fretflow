@@ -1,13 +1,13 @@
 // Badge level-up detection hook (Issue #22)
 // Checks for badge level increases and triggers feedback (toast + haptic)
 
-import { useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
+import { useEffect, useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import type { TrackId } from '@/config/tracks';
 import { getTrackLabel } from '@/config/tracks';
 import { useAppStore } from '@/stores/useAppStore';
-import { BADGES, getBadgeForProgress, type BadgeLevel } from '@/utils/badges';
+import { BADGES, type BadgeLevel, getBadgeForProgress } from '@/utils/badges';
 
 interface UseBadgeCheckOptions {
   onBadgeLevelUp?: (trackId: TrackId, newBadge: BadgeLevel) => void;

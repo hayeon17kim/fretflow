@@ -8,15 +8,15 @@ import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { SoftGuideModal } from '@/components/SoftGuideModal';
+import type { NoteWithOctave } from '@/config/earTrainingTiers';
+import { getAvailableSounds, getCurrentTier } from '@/config/earTrainingTiers';
+import { QUIZ_ROUTES } from '@/config/routes';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import { QUIZ_ROUTES } from '@/config/routes';
 import { type EarQuestionCard, generateEarCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-import type { NoteWithOctave } from '@/config/earTrainingTiers';
-import { getCurrentTier, getAvailableSounds } from '@/config/earTrainingTiers';
 import { getSoundFile } from '@/utils/earTrainingSounds';
 
 // ─── Sound wave bars (playing indicator) ───

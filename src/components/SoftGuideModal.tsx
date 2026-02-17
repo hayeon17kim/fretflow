@@ -34,21 +34,13 @@ export function SoftGuideModal({
 
           <View style={s.buttons}>
             <Pressable
-              style={({ pressed }) => [
-                s.button,
-                s.buttonSecondary,
-                pressed && s.buttonPressed,
-              ]}
+              style={({ pressed }) => [s.button, s.buttonSecondary, pressed && s.buttonPressed]}
               onPress={onGoToLevel1}
             >
               <Text style={s.buttonSecondaryText}>{t('softGuide.goToLevel1')}</Text>
             </Pressable>
             <Pressable
-              style={({ pressed }) => [
-                s.button,
-                s.buttonPrimary,
-                pressed && s.buttonPressed,
-              ]}
+              style={({ pressed }) => [s.button, s.buttonPrimary, pressed && s.buttonPressed]}
               onPress={onContinue}
             >
               <Text style={s.buttonPrimaryText}>{t('softGuide.continue')}</Text>

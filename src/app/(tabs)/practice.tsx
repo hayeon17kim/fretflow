@@ -3,14 +3,14 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CircularProgress } from '@/components/progress/CircularProgress';
+import { QUIZ_ROUTES } from '@/config/routes';
 import {
   getTrackDesc,
   getTrackExample,
   getTrackLabel,
-  TRACKS,
   TARGET_CARDS_PER_TRACK,
+  TRACKS,
 } from '@/config/tracks';
-import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -63,9 +63,7 @@ export default function PracticeScreen() {
                 {/* Info */}
                 <View style={s.trackInfo}>
                   <View style={s.trackNameRow}>
-                    <Text style={s.trackName}>
-                      {getTrackLabel(track.id, t)}
-                    </Text>
+                    <Text style={s.trackName}>{getTrackLabel(track.id, t)}</Text>
                     {'basic' in track && track.basic && (
                       <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
                         <Text style={[s.chipText, { color: track.color }]}>
@@ -74,15 +72,11 @@ export default function PracticeScreen() {
                       </View>
                     )}
                   </View>
-                  <Text style={s.trackDesc}>
-                    {getTrackDesc(track.id, t)}
-                  </Text>
+                  <Text style={s.trackDesc}>{getTrackDesc(track.id, t)}</Text>
                 </View>
 
                 {/* Progress % */}
-                <Text style={[s.trackProgress, { color: track.color }]}>
-                  {progress}%
-                </Text>
+                <Text style={[s.trackProgress, { color: track.color }]}>{progress}%</Text>
               </View>
 
               {/* Expanded: example + session options */}

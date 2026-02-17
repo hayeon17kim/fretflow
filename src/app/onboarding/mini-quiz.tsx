@@ -4,9 +4,9 @@
  * 완료 후 결과 화면으로 이동, SM-2 카드로 등록
  */
 import { useRouter } from 'expo-router';
-import { useMemo, useState, useRef, useCallback } from 'react';
+import { useCallback, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View, Animated } from 'react-native';
+import { Animated, Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Fretboard } from '@/components/Fretboard';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
@@ -109,12 +109,7 @@ export default function OnboardingMiniQuizScreen() {
       {/* Header */}
       <View style={s.header}>
         <View style={s.progressBarBg}>
-          <View
-            style={[
-              s.progressBarFill,
-              { width: `${(progress / TOTAL_QUESTIONS) * 100}%` },
-            ]}
-          />
+          <View style={[s.progressBarFill, { width: `${(progress / TOTAL_QUESTIONS) * 100}%` }]} />
         </View>
         <Pressable onPress={handleSkip}>
           <Text style={s.skipText}>{t('onboardingFlow.skip')}</Text>
@@ -163,9 +158,7 @@ export default function OnboardingMiniQuizScreen() {
               {t('onboardingFlow.miniQuiz.wrongFeedback', { answer: q.answer })}
             </Text>
           )}
-          {state === 'question' && (
-            <Text style={s.questionText}>{t('quiz.note.question')}</Text>
-          )}
+          {state === 'question' && <Text style={s.questionText}>{t('quiz.note.question')}</Text>}
         </View>
       </Animated.View>
 
@@ -174,11 +167,7 @@ export default function OnboardingMiniQuizScreen() {
         {state === 'question' ? (
           <View style={s.optionsGrid}>
             {q.options.map((opt, i) => (
-              <Pressable
-                key={`${opt}-${i}`}
-                style={s.optionButton}
-                onPress={() => handleAnswer(i)}
-              >
+              <Pressable key={`${opt}-${i}`} style={s.optionButton} onPress={() => handleAnswer(i)}>
                 <Text style={s.optionText}>{opt}</Text>
               </Pressable>
             ))}
