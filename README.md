@@ -79,13 +79,23 @@ src/
 
 ## Roadmap
 
+### Completed (v1.0)
 - [x] 4-level progressive learning system
 - [x] SM-2 spaced repetition algorithm
 - [x] Audio playback for ear training
 - [x] Statistics and progress tracking
+- [x] Smart review recommendation system
+- [x] 4-step onboarding flow
+- [x] Daily goal and streak tracking
+- [x] Push notifications
+- [x] Achievement badges
+
+### Planned (Post-Launch)
+- [ ] Analytics infrastructure
+- [ ] Ear training expansion (intervals, chords, rhythm)
+- [ ] Mix mode (cross-level practice)
+- [ ] Monetization (subscription model)
 - [ ] Supabase backend integration
-- [ ] Push notifications
-- [ ] Achievement system
 
 ---
 

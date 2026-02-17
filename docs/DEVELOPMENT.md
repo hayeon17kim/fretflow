@@ -284,33 +284,46 @@ const s = StyleSheet.create({
 - CircularProgress
 - Icon components
 
-### 🚧 TODO
+### 🚧 Planned (Post-Launch)
 
-**Features:**
+**P2 Features:**
+- [ ] Analytics infrastructure (Mixpanel/Amplitude)
+- [ ] Ear training expansion (intervals, chords, rhythm patterns)
+- [ ] Mix mode implementation (cross-level practice, currently stub)
+- [ ] Monetization (RevenueCat subscription)
 - [ ] Supabase backend integration
   - User authentication
   - Card sync
   - Stats backup
-- [ ] Daily review notifications (push notifications)
-- [ ] Achievement system (badges, milestones)
-- [ ] Mix mode implementation (currently redirects to note quiz only)
 
-**Components:**
+**Technical Improvements:**
 - [ ] Reusable Fretboard component (reduce duplication across quiz screens)
+- [ ] Quiz exit confirmation modal
+- [ ] Global error boundary
+- [ ] Unit tests (SM-2, card generation, progress calculation)
+- [ ] Quiz answer haptic feedback
 
-### ✅ Recently Completed
+### ✅ Recently Completed (v1.0)
 
 **Screens:**
 - [x] Mastery tab - Statistics, weak cards, level progress
 - [x] Settings tab - Profile, learning goals, accessibility, language
+- [x] Onboarding flow - 4-step onboarding
 
 **Features:**
-- [x] Audio playback (43 sound files in `assets/sounds/`)
-- [x] Level unlock system (Lv.2+ requires 80% on previous level)
-- [x] Statistics & analytics (mastery screen)
+- [x] Audio playback (37 sound files in `assets/sounds/`)
+- [x] 5-tier ear training progression system
+- [x] Smart review recommendation system
+- [x] Daily goal and streak tracking
+- [x] Push notifications
+- [x] Achievement badges (5 levels)
+- [x] Session size options (Quick/Focus/Deep)
+- [x] Parallel progression (all levels unlocked)
 
 **Components:**
 - [x] TabIcon components
+- [x] DailyReviewCard with progress visualization
+- [x] CircularProgress (shared across screens)
 
 ## Key Files Reference
 

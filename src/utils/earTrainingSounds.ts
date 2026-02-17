@@ -2,65 +2,52 @@ import type { NoteWithOctave } from '@/config/earTrainingTiers';
 
 type SoundRegistry = Partial<Record<NoteWithOctave, number>>;
 
-export const ALL_SOUNDS: SoundRegistry = {};
-
-// List of all available sound files
-const SOUND_FILES: NoteWithOctave[] = [
+// Explicitly import all sound files (Metro bundler requires static paths)
+const SOUND_IMPORTS: SoundRegistry = {
   // Octave 2
-  'E2',
-  'F2',
-  'F#2',
-  'G2',
-  'G#2',
-  'A2',
-  'A#2',
-  'B2',
+  E2: require('../../assets/sounds/E2.wav'),
+  F2: require('../../assets/sounds/F2.wav'),
+  'F#2': require('../../assets/sounds/F#2.wav'),
+  G2: require('../../assets/sounds/G2.wav'),
+  'G#2': require('../../assets/sounds/G#2.wav'),
+  A2: require('../../assets/sounds/A2.wav'),
+  'A#2': require('../../assets/sounds/A#2.wav'),
+  B2: require('../../assets/sounds/B2.wav'),
   // Octave 3
-  'C3',
-  'C#3',
-  'D3',
-  'D#3',
-  'E3',
-  'F3',
-  'F#3',
-  'G3',
-  'G#3',
-  'A3',
-  'A#3',
-  'B3',
+  C3: require('../../assets/sounds/C3.wav'),
+  'C#3': require('../../assets/sounds/C#3.wav'),
+  D3: require('../../assets/sounds/D3.wav'),
+  'D#3': require('../../assets/sounds/D#3.wav'),
+  E3: require('../../assets/sounds/E3.wav'),
+  F3: require('../../assets/sounds/F3.wav'),
+  'F#3': require('../../assets/sounds/F#3.wav'),
+  G3: require('../../assets/sounds/G3.wav'),
+  'G#3': require('../../assets/sounds/G#3.wav'),
+  A3: require('../../assets/sounds/A3.wav'),
+  'A#3': require('../../assets/sounds/A#3.wav'),
+  B3: require('../../assets/sounds/B3.wav'),
   // Octave 4
-  'C4',
-  'C#4',
-  'D4',
-  'D#4',
-  'E4',
-  'F4',
-  'F#4',
-  'G4',
-  'G#4',
-  'A4',
-  'A#4',
-  'B4',
+  C4: require('../../assets/sounds/C4.wav'),
+  'C#4': require('../../assets/sounds/C#4.wav'),
+  D4: require('../../assets/sounds/D4.wav'),
+  'D#4': require('../../assets/sounds/D#4.wav'),
+  E4: require('../../assets/sounds/E4.wav'),
+  F4: require('../../assets/sounds/F4.wav'),
+  'F#4': require('../../assets/sounds/F#4.wav'),
+  G4: require('../../assets/sounds/G4.wav'),
+  'G#4': require('../../assets/sounds/G#4.wav'),
+  A4: require('../../assets/sounds/A4.wav'),
+  'A#4': require('../../assets/sounds/A#4.wav'),
+  B4: require('../../assets/sounds/B4.wav'),
   // Octave 5
-  'C5',
-  'C#5',
-  'D5',
-  'D#5',
-  'E5',
-];
+  C5: require('../../assets/sounds/C5.wav'),
+  'C#5': require('../../assets/sounds/C#5.wav'),
+  D5: require('../../assets/sounds/D5.wav'),
+  'D#5': require('../../assets/sounds/D#5.wav'),
+  E5: require('../../assets/sounds/E5.wav'),
+};
 
-// Load all sound files at initialization
-try {
-  SOUND_FILES.forEach((note) => {
-    try {
-      ALL_SOUNDS[note] = require(`../../assets/sounds/${note}.wav`);
-    } catch (err) {
-      console.warn(`[EarTraining] Sound file not found: ${note}.wav`);
-    }
-  });
-} catch (error) {
-  console.error('[EarTraining] Failed to initialize sounds:', error);
-}
+export const ALL_SOUNDS: SoundRegistry = SOUND_IMPORTS;
 
 /**
  * Get sound file module for a note

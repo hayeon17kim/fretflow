@@ -268,11 +268,12 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 80% 이상 통과 판정
 - 동적 카드 생성 (cardGenerator.ts)
 
-**퀴즈 - 귀 훈련 (`/quiz/ear.tsx`)**
-- 재생 버튼 (43개 WAV 오디오 파일 중 5개 개방현만 사용 중)
+**퀴즈 - 귀 훈련 (`/quiz/ear.tsx`) ✅**
+- 재생 버튼 (37개 WAV 오디오 파일 전체 사용)
+- 5단계 티어 진행 시스템 (earTrainingTiers.ts)
+- 마스터 카드 수에 따라 점진적 언락 (5 → 14 → 21 → 34 → 37개)
 - 4지선다 + 결과 피드백
 - 동적 카드 생성 (cardGenerator.ts)
-- ⚠️ 38개 추가 음 확장 필요
 
 ### 컴포넌트 (완성)
 
@@ -310,11 +311,27 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 
 ## 6. 남은 작업 상세
 
-### P0 — 런칭 전 필수
+### P2 — 출시 후 데이터 기반 의사결정
+
+**애널리틱스 인프라 구축**
+- 이벤트 트래킹, 세션 기록, 퍼널 분석 전무
+- Mixpanel 또는 Amplitude 연동 필요
+- 유저 행동 데이터 수집 및 분석 필요
+
+**Ear Training 추가 패턴**
+- 현재: 단일 음 듣기 (37개 전체 사용, 5단계 티어)
+- 향후: 인터벌 듣기, 코드 듣기, 리듬 패턴 등 추가 고려
 
 **Mix 모드 실제 구현**
 - Practice 화면에 Mix 버튼이 있지만 `router.push('/quiz/note')`로 하드코딩 (스텁)
 - 모든 모드의 due 카드를 섞어서 출제하는 interleaving practice 구현 필요
+
+**수익화 모델 구현**
+- RevenueCat 연동 (구독 시스템)
+- Free/Pro 기능 게이팅
+- 결제 플로우 구현
+
+### 기술 부채 & 개선사항
 
 **퀴즈 중단 확인 모달**
 - QuizHeader.tsx의 뒤로 버튼이 `router.back()` 직접 호출
@@ -328,14 +345,8 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - `.test.ts`, `.spec.ts`, `__tests__/` 전무
 - SM-2, 카드 생성, 진도 계산 핵심 로직 테스트 필요
 
-### P1 — 런칭 후 1개월 내
-
-**Ear Training 콘텐츠 확장**
-- 43개 WAV 중 5개(개방현)만 사용 → 나머지 38개 음 활성화
-
-**Push Notifications**
-- expo-notifications 통합
-- 일일 복습 리마인더, 스트릭 유지 알림
+**재사용 프렛보드 컴포넌트**
+- 각 퀴즈 화면에 프렛보드 코드 중복 → 통합 컴포넌트 필요
 
 **퀴즈 정답/오답 햅틱 피드백**
 - 배지 달성 시 햅틱은 동작하지만, 퀴즈 정답/오답 시 햅틱 없음
@@ -344,17 +355,8 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 클라이언트 설정만 있음 (`api/supabase.ts`)
 - 카드 데이터 백업, 기기 간 이전 필요
 
-### 기술 부채
-
-**재사용 프렛보드 컴포넌트**
-- 각 퀴즈 화면에 프렛보드 코드 중복 → 통합 컴포넌트 필요
-
 **Dead Supabase 코드 정리**
 - MMKV로 완전 이전했지만 import 참조가 남아 있음
-
-**애널리틱스 인프라**
-- 이벤트 트래킹, 세션 기록, 퍼널 분석 전무
-- Mixpanel 또는 Amplitude 연동 필요
 
 ---
 
@@ -487,26 +489,27 @@ npm run typecheck     # TypeScript 타입 체크
 - [ ] 배지 시스템 이해 (useAppStore 내 badge 관련 로직)
 - [ ] `npm run lint` / `npm run typecheck` 실행 확인
 
-### Phase 2: 기능 완성 (P0)
+### Phase 2: 품질 개선
 
-- [ ] Mix 모드 실제 구현 (Practice 화면 스텁 → 크로스모드 퀴즈)
 - [ ] 퀴즈 중단 확인 모달 추가 (QuizHeader.tsx)
 - [ ] 에러 바운더리 추가 (글로벌 + 폴백 UI)
 - [ ] SM-2 / 카드 생성 / 진도 계산 단위 테스트 작성
-
-### Phase 3: 콘텐츠 & 리텐션
-
-- [ ] Ear Training 전체 음 활성화 (5개 → 43개)
 - [ ] 퀴즈 정답/오답 햅틱 피드백 추가
-- [ ] Push Notifications (expo-notifications 통합)
-- [ ] 스트릭 마일스톤 축하 연출
+- [ ] 재사용 프렛보드 컴포넌트 리팩토링
 
-### Phase 4: 인프라 & 수익화
+### Phase 3: 데이터 & 인프라 (P2)
 
 - [ ] 애널리틱스 연동 (Mixpanel/Amplitude)
+- [ ] Ear Training 전체 음 활성화 (5개 → 43개)
+- [ ] Mix 모드 실제 구현 (크로스모드 퀴즈)
 - [ ] Supabase 클라우드 동기화
+
+### Phase 4: 수익화 (P2)
+
 - [ ] RevenueCat 연동 (구독 시스템)
 - [ ] Free/Pro 기능 게이팅
+- [ ] 결제 플로우 UI/UX
+- [ ] 앱 스토어 심사 준비
 
 ---
 
