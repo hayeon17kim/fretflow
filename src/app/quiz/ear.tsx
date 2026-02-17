@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
@@ -11,38 +11,26 @@ import { getAvailableSounds, getCurrentTier } from '@/config/earTrainingTiers';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useEarTrainingAudio } from '@/hooks/useEarTrainingAudio';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
+import { useQuizInit } from '@/hooks/useQuizInit';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import { type EarQuestionCard, generateEarCard } from '@/utils/cardGenerator';
+import type { EarQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 export default function QuizEarScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
-  const params = useLocalSearchParams();
+  const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
-  // Get session size from params, default to 10
-  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
-
-  // Get mastered count for tier calculation
-  const masteredEarCards = getMasteredCards('ear');
-  const masteredCount = masteredEarCards.length;
+  // Initialize quiz with tier-based progression
+  const { questions, masteredCount } = useQuizInit<EarQuestionCard>({ trackId: 'ear' });
 
   // Calculate current tier
   const currentTier = getCurrentTier(masteredCount);
   const availableSounds = getAvailableSounds(masteredCount);
-
-  // Generate cards with mastery-based progression
-  const questions = useMemo(() => {
-    const batch: EarQuestionCard[] = [];
-    for (let i = 0; i < sessionSize; i++) {
-      batch.push(generateEarCard(masteredCount));
-    }
-    return batch;
-  }, [sessionSize, masteredCount]);
 
   const {
     currentCard: q,
@@ -94,32 +82,21 @@ export default function QuizEarScreen() {
     const correct = q.options[index] === q.answer;
     stopSound();
 
-    // 응답 시간 기록
-    const responseTime = recordAnswer(correct);
-
-    // 카드 추가 & 리뷰 기록
-    addCard({
-      id: q.id,
-      type: 'ear',
-      question: { note: q.answer } as any,
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'ear',
+      isCorrect: correct,
+      questionData: { note: q.answer } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-    recordReview(q.id, correct, responseTime);
-
-    // 일일 통계 업데이트
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = async () => {
     await stopSound();
     nextCard(() => {
-      router.push({
-        pathname: '/quiz/completion',
-        params: {
-          correct: correctCount.toString(),
-          total: total.toString(),
-          trackId: 'ear',
-        },
-      });
+      navigateToQuizCompletion({ router, correctCount, total, trackId: 'ear' });
     });
   };
 

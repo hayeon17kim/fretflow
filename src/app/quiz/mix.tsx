@@ -1,5 +1,5 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
@@ -12,7 +12,6 @@ import { useEarTrainingAudio } from '@/hooks/useEarTrainingAudio';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
-import { useAppStore } from '@/stores/useAppStore';
 import type { FretPosition } from '@/types/music';
 import {
   type EarQuestionCard,
@@ -26,6 +25,7 @@ import {
 } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 import { getNoteAtPosition } from '@/utils/music';
+import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 // ─── Mixed card type ───
 type MixedCard = (
@@ -175,15 +175,15 @@ export default function QuizMixScreen() {
     const correct = q.options[index] === q.answer;
     if (q.type === 'ear') stopSound();
 
-    const responseTime = recordAnswer(correct);
-
-    addCard({
-      id: q.id,
-      type: q.type,
-      question: q.type === 'note' ? { string: q.string, fret: q.fret } : { note: q.answer },
-    } as any);
-    recordReview(q.id, correct, responseTime);
-    useAppStore.getState().incrementReview(correct);
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: q.type,
+      isCorrect: correct,
+      questionData: q.type === 'note' ? { string: q.string, fret: q.fret } : { note: q.answer },
+      recordAnswer,
+      addCard,
+      recordReview,
+    });
   };
 
   const handleTapInterval = (pos: FretPosition) => {
@@ -200,15 +200,15 @@ export default function QuizMixScreen() {
     const correct =
       tapped.string === q.targetPosition.string && tapped.fret === q.targetPosition.fret;
 
-    const responseTime = recordAnswer(correct);
-
-    addCard({
-      id: q.id,
-      type: 'interval',
-      question: { rootPosition: q.rootPosition, targetPosition: q.targetPosition } as any,
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'interval',
+      isCorrect: correct,
+      questionData: { rootPosition: q.rootPosition, targetPosition: q.targetPosition } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-    recordReview(q.id, correct, responseTime);
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleTapScale = (pos: FretPosition) => {
@@ -234,15 +234,15 @@ export default function QuizMixScreen() {
     const accuracy = Math.round((correctSelections / q.correctPositions.length) * 100);
     const correct = accuracy >= 80 && wrongSelections === 0;
 
-    const responseTime = recordAnswer(correct);
-
-    addCard({
-      id: q.id,
-      type: 'scale',
-      question: { scaleName: q.scaleName, positions: q.correctPositions } as any,
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'scale',
+      isCorrect: correct,
+      questionData: { scaleName: q.scaleName, positions: q.correctPositions } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-    recordReview(q.id, correct, responseTime);
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = async () => {
@@ -251,13 +251,11 @@ export default function QuizMixScreen() {
     setSelectedScale([]);
 
     nextCard(() => {
-      router.push({
-        pathname: '/quiz/completion',
-        params: {
-          correct: correctCount.toString(),
-          total: total.toString(),
-          trackId: 'note', // Use 'note' as default for mix mode
-        },
+      navigateToQuizCompletion({
+        router,
+        correctCount,
+        total,
+        trackId: 'note', // Use 'note' as default for mix mode
       });
     });
   };

@@ -1,5 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo } from 'react';
+import { useRouter } from 'expo-router';
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { Fretboard } from '@/components/Fretboard';
@@ -8,30 +7,21 @@ import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
+import { useQuizInit } from '@/hooks/useQuizInit';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
-import { useAppStore } from '@/stores/useAppStore';
-import { generateCardBatch, type NoteQuestionCard } from '@/utils/cardGenerator';
+import type { NoteQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 export default function QuizNoteScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
-  const params = useLocalSearchParams();
+  const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
-  // Get session size from params, default to 10
-  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
-
-  // Get mastered count for tier unlocking
-  const masteredCount = getMasteredCards('note').length;
-
-  // Generate cards at session start (once) with tier-based difficulty
-  const questions = useMemo(
-    () => generateCardBatch('note', sessionSize, masteredCount) as NoteQuestionCard[],
-    [sessionSize, masteredCount],
-  );
+  // Initialize quiz with tier-based progression
+  const { questions } = useQuizInit<NoteQuestionCard>({ trackId: 'note' });
 
   const {
     currentCard: q,
@@ -50,31 +40,20 @@ export default function QuizNoteScreen() {
     if (state !== 'question') return;
     const correct = q.options[index] === q.answer;
 
-    // Record response time
-    const responseTime = recordAnswer(correct);
-
-    // Add card (if not exists) & record review
-    addCard({
-      id: q.id,
-      type: 'note',
-      question: { string: q.string, fret: q.fret } as any,
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'note',
+      isCorrect: correct,
+      questionData: { string: q.string, fret: q.fret } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-    recordReview(q.id, correct, responseTime);
-
-    // Update daily statistics
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = () => {
     nextCard(() => {
-      router.push({
-        pathname: '/quiz/completion',
-        params: {
-          correct: correctCount.toString(),
-          total: total.toString(),
-          trackId: 'note',
-        },
-      });
+      navigateToQuizCompletion({ router, correctCount, total, trackId: 'note' });
     });
   };
 

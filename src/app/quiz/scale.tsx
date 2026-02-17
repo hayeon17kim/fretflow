@@ -1,5 +1,5 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
@@ -9,12 +9,14 @@ import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { SoftGuideModal } from '@/components/SoftGuideModal';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
+import { useQuizInit } from '@/hooks/useQuizInit';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import type { FretPosition, StringNumber } from '@/types/music';
-import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
+import type { ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 // ─── Adapt generated cards to tap-based format ───
 interface TapScaleQuestion {
@@ -65,25 +67,14 @@ interface Score {
 export default function QuizScaleScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
-  const params = useLocalSearchParams();
+  const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
-  // Get session size from params, default to 10
-  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
-
-  // Get mastered count for tier unlocking
-  const masteredCount = getMasteredCards('scale').length;
-
-  // Generate cards for this session with tier-based difficulty
-  const questions = useMemo(() => {
-    const generatedCards = generateCardBatch(
-      'scale',
-      sessionSize,
-      masteredCount,
-    ) as ScaleQuestionCard[];
-    return generatedCards.map((card) => adaptScaleCard(card, t));
-  }, [sessionSize, masteredCount, t]);
+  // Initialize quiz with tier-based progression
+  const { questions } = useQuizInit<TapScaleQuestion>({
+    trackId: 'scale',
+    adaptCard: (card: ScaleQuestionCard) => adaptScaleCard(card, t),
+  });
 
   const {
     currentCard: q,
@@ -153,36 +144,23 @@ export default function QuizScaleScreen() {
 
     const correct = accuracy >= 80 && wrongSelections === 0;
 
-    // Record answer and get response time
-    const responseTime = recordAnswer(correct);
-
-    // Add card to spaced repetition system
-    addCard({
-      id: q.id,
-      type: 'scale',
-      question: {
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'scale',
+      isCorrect: correct,
+      questionData: {
         scaleName: q.scaleName,
         positions: q.positions,
       } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-
-    // Record this review in SM-2 algorithm
-    recordReview(q.id, correct, responseTime);
-
-    // Update daily statistics
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = () => {
     nextCard(() => {
-      router.push({
-        pathname: '/quiz/completion',
-        params: {
-          correct: correctCount.toString(),
-          total: total.toString(),
-          trackId: 'scale',
-        },
-      });
+      navigateToQuizCompletion({ router, correctCount, total, trackId: 'scale' });
     });
     setSelected([]);
     setScore(null);

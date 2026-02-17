@@ -1,4 +1,4 @@
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
@@ -7,13 +7,14 @@ import { NextButton } from '@/components/quiz/AnswerGrid';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
+import { useQuizInit } from '@/hooks/useQuizInit';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
-import { useAppStore } from '@/stores/useAppStore';
-import type { FretPosition, IntervalName } from '@/types/music';
-import { generateCardBatch, type IntervalQuestionCard } from '@/utils/cardGenerator';
+import type { FretPosition } from '@/types/music';
+import type { IntervalQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 import { getNoteAtPosition } from '@/utils/music';
+import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 // ─── Adapt generated cards to tap-based format ───
 interface TapIntervalQuestion {
@@ -55,25 +56,14 @@ function adaptIntervalCard(
 export default function QuizIntervalScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
-  const params = useLocalSearchParams();
+  const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
-  // Get session size from params, default to 10
-  const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
-
-  // Get mastered count for tier unlocking
-  const masteredCount = getMasteredCards('interval').length;
-
-  // Generate cards for this session with tier-based difficulty
-  const questions = useMemo(() => {
-    const generatedCards = generateCardBatch(
-      'interval',
-      sessionSize,
-      masteredCount,
-    ) as IntervalQuestionCard[];
-    return generatedCards.map((card) => adaptIntervalCard(card, t));
-  }, [sessionSize, masteredCount, t]);
+  // Initialize quiz with tier-based progression
+  const { questions } = useQuizInit<TapIntervalQuestion>({
+    trackId: 'interval',
+    adaptCard: (card: IntervalQuestionCard) => adaptIntervalCard(card, t),
+  });
 
   const {
     currentCard: q,
@@ -102,33 +92,20 @@ export default function QuizIntervalScreen() {
     if (!tapped) return;
     const correct = tapped.string === q.correct.string && tapped.fret === q.correct.fret;
 
-    // Record answer time
-    const responseTime = recordAnswer(correct);
-
-    // Add card to spaced repetition system (if not already exists)
-    addCard({
-      id: q.id,
-      type: 'interval',
-      question: { rootPosition: q.root, targetPosition: q.correct } as any,
+    recordQuizAnswer({
+      cardId: q.id,
+      trackId: 'interval',
+      isCorrect: correct,
+      questionData: { rootPosition: q.root, targetPosition: q.correct } as any,
+      recordAnswer,
+      addCard,
+      recordReview,
     });
-
-    // Record this review in SM-2 algorithm
-    recordReview(q.id, correct, responseTime);
-
-    // Update daily statistics
-    useAppStore.getState().incrementReview(correct);
   };
 
   const handleNext = () => {
     nextCard(() => {
-      router.push({
-        pathname: '/quiz/completion',
-        params: {
-          correct: correctCount.toString(),
-          total: total.toString(),
-          trackId: 'interval',
-        },
-      });
+      navigateToQuizCompletion({ router, correctCount, total, trackId: 'interval' });
     });
     setTapped(null);
   };
