@@ -1,17 +1,23 @@
 import { useRouter } from 'expo-router';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
-import { Fretboard } from '@/components/Fretboard';
-import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
+import { StyleSheet, View } from 'react-native';
+import { NextButton } from '@/components/quiz/AnswerGrid';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
+import { PhaseUnlockToast } from '@/components/quiz/PhaseUnlockToast';
+import { NotePhase1View } from '@/components/quiz/NotePhase1View';
+import { NotePhase2View } from '@/components/quiz/NotePhase2View';
+import { NotePhase3View } from '@/components/quiz/NotePhase3View';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizInit } from '@/hooks/useQuizInit';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { usePhaseStore } from '@/stores/usePhaseStore';
+import type { Phase } from '@/stores/usePhaseStore';
 import type { NoteQuestionCard } from '@/utils/cardGenerator';
-import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import { COLORS, SPACING } from '@/utils/constants';
 import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 export default function QuizNoteScreen() {
@@ -24,7 +30,7 @@ export default function QuizNoteScreen() {
   const { questions } = useQuizInit<NoteQuestionCard>({ trackId: 'note' });
 
   const {
-    currentCard: q,
+    currentCard: card,
     state,
     total,
     progress,
@@ -36,20 +42,42 @@ export default function QuizNoteScreen() {
     cards: questions,
   });
 
-  const handleAnswer = (index: number) => {
-    if (state !== 'question') return;
-    const correct = q.options[index] === q.answer;
+  // Phase unlock tracking
+  const currentPhase = usePhaseStore((s) => s.unlockedPhases.note);
+  const [showPhaseUnlock, setShowPhaseUnlock] = useState(false);
+  const [unlockedPhase, setUnlockedPhase] = useState<Phase>(1);
+  const previousPhaseRef = useRef<Phase>(currentPhase);
 
-    recordQuizAnswer({
-      cardId: q.id,
-      trackId: 'note',
-      isCorrect: correct,
-      questionData: { string: q.string, fret: q.fret } as any,
-      recordAnswer,
-      addCard,
-      recordReview,
-    });
-  };
+  // Watch for phase unlocks
+  useEffect(() => {
+    if (currentPhase > previousPhaseRef.current) {
+      setUnlockedPhase(currentPhase);
+      setShowPhaseUnlock(true);
+      previousPhaseRef.current = currentPhase;
+
+      // Hide toast after 3.5 seconds
+      setTimeout(() => setShowPhaseUnlock(false), 3500);
+    }
+  }, [currentPhase]);
+
+  // Handle answer from phase views
+  const handleAnswer = useCallback(
+    (correct: boolean) => {
+      recordQuizAnswer({
+        cardId: card.id,
+        trackId: 'note',
+        isCorrect: correct,
+        questionData: {
+          phase: card.phase,
+          targetNote: card.targetNote || card.answer,
+        } as any,
+        recordAnswer,
+        addCard,
+        recordReview,
+      });
+    },
+    [card, recordAnswer, addCard, recordReview],
+  );
 
   const handleNext = () => {
     nextCard(() => {
@@ -57,16 +85,24 @@ export default function QuizNoteScreen() {
     });
   };
 
-  // Consistent fret window: always show FRET_WINDOW frets, shift left for high positions
-  const FRET_WINDOW = 8;
-  const MAX_FRET = 17;
-  const idealStart = Math.max(0, q.fret - 2);
-  const startFret = Math.min(idealStart, Math.max(0, MAX_FRET - FRET_WINDOW));
-  const endFret = Math.min(startFret + FRET_WINDOW, MAX_FRET);
+  // Render appropriate phase view
+  const renderPhaseView = () => {
+    switch (card.phase) {
+      case 1:
+        return <NotePhase1View card={card} state={state} onAnswer={handleAnswer} />;
+      case 2:
+        return <NotePhase2View card={card} state={state} onAnswer={handleAnswer} />;
+      case 3:
+        return <NotePhase3View card={card} state={state} onAnswer={handleAnswer} />;
+      default:
+        throw new Error(`[QuizNoteScreen] Unknown phase: ${card.phase}`);
+    }
+  };
 
   return (
     <View style={s.container}>
       <GoalAchievedToast visible={showGoalToast} />
+      <PhaseUnlockToast visible={showPhaseUnlock} trackId="note" newPhase={unlockedPhase} />
       <QuizHeader
         label={t('quiz.note.title')}
         color={COLORS.track1}
@@ -76,56 +112,14 @@ export default function QuizNoteScreen() {
       />
 
       {/* Card */}
-      <QuizCard state={state}>
-        <Text style={s.positionLabel}>
-          {t('quiz.note.position', { string: q.string, fret: q.fret })}
-        </Text>
-        <Fretboard
-          startFret={startFret}
-          endFret={endFret}
-          highlights={[
-            {
-              string: q.string,
-              fret: q.fret,
-              color:
-                state === 'correct'
-                  ? COLORS.correct
-                  : state === 'wrong'
-                    ? COLORS.wrong
-                    : COLORS.accent,
-              label: state !== 'question' ? q.answer : '?',
-            },
-          ]}
-        />
-        <View style={s.resultArea}>
-          {state === 'correct' && (
-            <View style={s.resultRow}>
-              <Text style={s.soundTag}>{t('quiz.note.soundPlay')}</Text>
-              <Text style={s.resultCorrect}>{t('quiz.note.correct')}</Text>
-            </View>
-          )}
-          {state === 'wrong' && (
-            <View style={s.resultRow}>
-              <Text
-                style={[s.soundTag, { color: COLORS.wrong, backgroundColor: `${COLORS.wrong}15` }]}
-              >
-                {t('quiz.note.wrongSound')}
-              </Text>
-              <Text style={s.resultWrong}>{t('quiz.note.wrongAnswer', { answer: q.answer })}</Text>
-            </View>
-          )}
-          {state === 'question' && <Text style={s.questionText}>{t('quiz.note.question')}</Text>}
-        </View>
-      </QuizCard>
+      <QuizCard state={state}>{renderPhaseView()}</QuizCard>
 
-      {/* Answer area */}
-      <View style={s.answerArea}>
-        {state === 'question' ? (
-          <AnswerGrid options={q.options} onSelect={handleAnswer} />
-        ) : (
+      {/* Answer area (Next button shown after answer) */}
+      {state !== 'question' && (
+        <View style={s.answerArea}>
           <NextButton onPress={handleNext} correct={state === 'correct'} />
-        )}
-      </View>
+        </View>
+      )}
     </View>
   );
 }
@@ -137,45 +131,6 @@ const s = StyleSheet.create({
     paddingHorizontal: SPACING.xl,
     paddingTop: 54,
     paddingBottom: 40,
-  },
-  positionLabel: {
-    fontSize: FONT_SIZE.xs,
-    color: COLORS.textSecondary,
-    letterSpacing: 1,
-    marginBottom: SPACING.sm,
-  },
-  resultArea: {
-    marginTop: SPACING.md,
-    alignItems: 'center',
-  },
-  resultRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 6,
-  },
-  soundTag: {
-    fontSize: 10,
-    color: COLORS.correct,
-    backgroundColor: `${COLORS.correct}15`,
-    paddingHorizontal: 6,
-    paddingVertical: 2,
-    borderRadius: 4,
-    overflow: 'hidden',
-  },
-  resultCorrect: {
-    fontSize: FONT_SIZE.lg + 1,
-    fontWeight: '700',
-    color: COLORS.correct,
-  },
-  resultWrong: {
-    fontSize: FONT_SIZE.lg + 1,
-    fontWeight: '700',
-    color: COLORS.wrong,
-  },
-  questionText: {
-    fontSize: FONT_SIZE.xl,
-    fontWeight: '800',
-    color: COLORS.textPrimary,
   },
   answerArea: {
     marginTop: SPACING.lg,

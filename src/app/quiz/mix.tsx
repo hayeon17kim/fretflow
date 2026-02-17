@@ -1,28 +1,30 @@
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import { Fretboard, type FretHighlight } from '@/components/Fretboard';
+import { StyleSheet, Text, View } from 'react-native';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
 import { PlayButton } from '@/components/quiz/AudioControls';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
+import { NotePhase1View } from '@/components/quiz/NotePhase1View';
+import { NotePhase2View } from '@/components/quiz/NotePhase2View';
+import { NotePhase3View } from '@/components/quiz/NotePhase3View';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { ScalePhase1View } from '@/components/quiz/ScalePhase1View';
+import { ScalePhase2View } from '@/components/quiz/ScalePhase2View';
+import { ScalePhase3View } from '@/components/quiz/ScalePhase3View';
 import { TRACKS, type TrackId } from '@/config/tracks';
 import { useEarTrainingAudio } from '@/hooks/useEarTrainingAudio';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
-import type { FretPosition } from '@/types/music';
+import { usePhaseStore } from '@/stores/usePhaseStore';
 import {
   type EarQuestionCard,
-  generateEarCard,
-  generateNoteCard,
   type NoteQuestionCard,
-  generateScaleCard,
   type ScaleQuestionCard,
+  generateCardBatch,
 } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-import { getNoteAtPosition } from '@/utils/music';
 import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers';
 
 // ─── Mixed card type ───
@@ -77,11 +79,12 @@ export default function QuizMixScreen() {
   const { addCard, recordReview, getMasteredCards, getDueCards } = useSpacedRepetition();
   const params = useLocalSearchParams();
   const { showGoalToast } = useGoalAchievement();
+  const getCurrentPhase = usePhaseStore((state) => state.getCurrentPhase);
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
-  // Generate mixed cards from all tracks
+  // Generate mixed cards from all tracks with phase support
   const questions = useMemo(() => {
     const cards: MixedCard[] = [];
 
@@ -94,38 +97,25 @@ export default function QuizMixScreen() {
       // Give remainder cards to first few tracks
       const trackCardCount = perTrack + (index < remainder ? 1 : 0);
 
-      for (let i = 0; i < trackCardCount; i++) {
-        let card: MixedCard;
-        switch (track.id) {
-          case 'note':
-            card = {
-              ...generateNoteCard(masteredCount),
-              trackId: track.id,
-              trackColor: track.color,
-            };
-            break;
-          case 'scale':
-            card = {
-              ...generateScaleCard(masteredCount),
-              trackId: track.id,
-              trackColor: track.color,
-            };
-            break;
-          case 'ear':
-            card = {
-              ...generateEarCard(masteredCount),
-              trackId: track.id,
-              trackColor: track.color,
-            };
-            break;
-        }
-        cards.push(card);
-      }
+      // Get current phase for this track
+      const currentPhase =
+        track.id === 'note' || track.id === 'scale' ? getCurrentPhase(track.id) : 1;
+
+      // Generate batch of cards with phase distribution
+      const batchCards = generateCardBatch(track.id, trackCardCount, masteredCount, currentPhase);
+
+      batchCards.forEach((card) => {
+        cards.push({
+          ...card,
+          trackId: track.id,
+          trackColor: track.color,
+        } as MixedCard);
+      });
     });
 
     // Shuffle to avoid 3+ consecutive same track
     return shuffleWithTrackSpread(cards);
-  }, [sessionSize, getMasteredCards]);
+  }, [sessionSize, getMasteredCards, getCurrentPhase]);
 
   const {
     currentCard: q,
@@ -138,9 +128,6 @@ export default function QuizMixScreen() {
   } = useQuizSession({
     cards: questions,
   });
-
-  // ─── State for different quiz types ───
-  const [selectedScale, setSelectedScale] = useState<FretPosition[]>([]);
 
   // Audio hook for ear training cards
   const earCards = useMemo(
@@ -157,11 +144,43 @@ export default function QuizMixScreen() {
 
 
   // ─── Answer handlers ───
+  const handleNoteAnswer = useCallback(
+    (correct: boolean) => {
+      if (q.type !== 'note') return;
+      recordQuizAnswer({
+        cardId: q.id,
+        trackId: 'note',
+        isCorrect: correct,
+        questionData: { phase: q.phase, targetNote: q.targetNote || q.answer },
+        recordAnswer,
+        addCard,
+        recordReview,
+      });
+    },
+    [q, recordAnswer, addCard, recordReview],
+  );
+
+  const handleScaleAnswer = useCallback(
+    (correct: boolean) => {
+      if (q.type !== 'scale') return;
+      recordQuizAnswer({
+        cardId: q.id,
+        trackId: 'scale',
+        isCorrect: correct,
+        questionData: { scaleName: q.scaleName, phase: q.phase },
+        recordAnswer,
+        addCard,
+        recordReview,
+      });
+    },
+    [q, recordAnswer, addCard, recordReview],
+  );
+
   const handleAnswerGrid = (index: number) => {
     if (state !== 'question') return;
     if (q.type !== 'note' && q.type !== 'ear') return;
 
-    const correct = q.options[index] === q.answer;
+    const correct = q.options && q.options[index] === q.answer;
     if (q.type === 'ear') stopSound();
 
     recordQuizAnswer({
@@ -175,43 +194,8 @@ export default function QuizMixScreen() {
     });
   };
 
-  const handleTapScale = (pos: FretPosition) => {
-    if (state !== 'question' || q.type !== 'scale') return;
-    const isSelected = selectedScale.some((p) => p.string === pos.string && p.fret === pos.fret);
-    if (isSelected) {
-      setSelectedScale((prev) =>
-        prev.filter((p) => !(p.string === pos.string && p.fret === pos.fret)),
-      );
-    } else {
-      setSelectedScale((prev) => [...prev, pos]);
-    }
-  };
-
-  const confirmScale = () => {
-    if (q.type !== 'scale') return;
-    const correctSelections = selectedScale.filter((p) =>
-      q.correctPositions.some((cp) => cp.string === p.string && cp.fret === p.fret),
-    ).length;
-    const wrongSelections = selectedScale.filter(
-      (p) => !q.correctPositions.some((cp) => cp.string === p.string && cp.fret === p.fret),
-    ).length;
-    const accuracy = Math.round((correctSelections / q.correctPositions.length) * 100);
-    const correct = accuracy >= 80 && wrongSelections === 0;
-
-    recordQuizAnswer({
-      cardId: q.id,
-      trackId: 'scale',
-      isCorrect: correct,
-      questionData: { scaleName: q.scaleName, positions: q.correctPositions } as any,
-      recordAnswer,
-      addCard,
-      recordReview,
-    });
-  };
-
   const handleNext = async () => {
     await stopSound();
-    setSelectedScale([]);
 
     nextCard(() => {
       navigateToQuizCompletion({
@@ -223,105 +207,37 @@ export default function QuizMixScreen() {
     });
   };
 
-  // ─── Build highlights for fretboard ───
-  const buildHighlights = (): FretHighlight[] => {
+  // Render phase-specific view for Note and Scale tracks
+  const renderPhaseView = () => {
     if (q.type === 'note') {
-      return [
-        {
-          string: q.string,
-          fret: q.fret,
-          color:
-            state === 'correct' ? COLORS.correct : state === 'wrong' ? COLORS.wrong : COLORS.accent,
-          label: state !== 'question' ? q.answer : '?',
-        },
-      ];
-    }
-
-    if (q.type === 'scale') {
-      const highlights: FretHighlight[] = [];
-
-      q.correctPositions.forEach((pos) => {
-        const isSelected = selectedScale.some(
-          (p) => p.string === pos.string && p.fret === pos.fret,
-        );
-
-        if (state === 'question') {
-          if (isSelected) {
-            highlights.push({
-              string: pos.string,
-              fret: pos.fret,
-              color: q.trackColor,
-              label: '●',
-              textColor: '#fff',
-            });
-          }
-        } else {
-          if (isSelected) {
-            highlights.push({
-              string: pos.string,
-              fret: pos.fret,
-              color: COLORS.correct,
-              label: '✓',
-            });
-          } else {
-            highlights.push({
-              string: pos.string,
-              fret: pos.fret,
-              color: `${COLORS.correct}40`,
-              label: '○',
-              textColor: COLORS.correct,
-              border: COLORS.correct,
-              opacity: 0.6,
-            });
-          }
-        }
-      });
-
-      // Show wrong selections
-      if (state !== 'question') {
-        selectedScale.forEach((pos) => {
-          const isCorrect = q.correctPositions.some(
-            (cp) => cp.string === pos.string && cp.fret === pos.fret,
-          );
-          if (!isCorrect) {
-            highlights.push({
-              string: pos.string,
-              fret: pos.fret,
-              color: COLORS.wrong,
-              label: '✕',
-              textColor: '#fff',
-            });
-          }
-        });
+      switch (q.phase) {
+        case 1:
+          return <NotePhase1View card={q} state={state} onAnswer={handleNoteAnswer} />;
+        case 2:
+          return <NotePhase2View card={q} state={state} onAnswer={handleNoteAnswer} />;
+        case 3:
+          return <NotePhase3View card={q} state={state} onAnswer={handleNoteAnswer} />;
+        default:
+          return null;
       }
-
-      return highlights;
     }
 
-    return [];
-  };
-
-  // Get fretboard range based on card type — consistent window size
-  const getFretRange = (): [number, number] => {
-    const MAX_FRET = 15;
-    if (q.type === 'note') {
-      const WINDOW = 10;
-      const ideal = Math.max(0, q.fret - 2);
-      const start = Math.min(ideal, Math.max(0, MAX_FRET - WINDOW));
-      return [start, Math.min(start + WINDOW, MAX_FRET)];
-    }
     if (q.type === 'scale') {
-      const frets = q.correctPositions.map((p) => p.fret);
-      const minFret = Math.min(...frets);
-      const maxFret = Math.min(Math.max(...frets) + 2, MAX_FRET);
-      const WINDOW = Math.max(8, maxFret - minFret);
-      const start = Math.min(minFret, Math.max(0, MAX_FRET - WINDOW));
-      return [start, Math.min(start + WINDOW, MAX_FRET)];
+      switch (q.phase) {
+        case 1:
+          return <ScalePhase1View card={q} state={state} onAnswer={handleScaleAnswer} />;
+        case 2:
+          return <ScalePhase2View card={q} state={state} onAnswer={handleScaleAnswer} />;
+        case 3:
+          return <ScalePhase3View card={q} state={state} onAnswer={handleScaleAnswer} />;
+        default:
+          return null;
+      }
     }
-    return [0, 10];
+
+    return null;
   };
 
-  const [startFret, endFret] = getFretRange();
 
   return (
     <View style={s.container}>
@@ -357,38 +273,7 @@ export default function QuizMixScreen() {
         </View>
 
         {/* Question content based on type */}
-        {q.type === 'note' && (
-          <>
-            <Text style={s.questionLabel}>
-              {t('quiz.note.position', { string: q.string, fret: q.fret })}
-            </Text>
-            <Fretboard startFret={startFret} endFret={endFret} highlights={buildHighlights()} />
-            {state === 'correct' && <Text style={s.resultCorrect}>{t('quiz.note.correct')}</Text>}
-            {state === 'wrong' && (
-              <Text style={s.resultWrong}>{t('quiz.note.wrongAnswer', { answer: q.answer })}</Text>
-            )}
-            {state === 'question' && <Text style={s.questionText}>{t('quiz.note.question')}</Text>}
-          </>
-        )}
-
-        {q.type === 'scale' && (
-          <>
-            <Text style={s.questionMain}>
-              {t('quiz.scale.questionMain', {
-                scaleName: `${q.rootNote} ${t(`quiz.scale.scaleNames.${q.scaleName}`)}`,
-                position: t('quiz.scale.position', { number: 1 }),
-              })}
-            </Text>
-            <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
-            <Fretboard
-              startFret={startFret}
-              endFret={endFret}
-              highlights={buildHighlights()}
-              tappable={state === 'question'}
-              onTap={handleTapScale}
-            />
-          </>
-        )}
+        {(q.type === 'note' || q.type === 'scale') && renderPhaseView()}
 
         {q.type === 'ear' && (
           <>
@@ -417,32 +302,10 @@ export default function QuizMixScreen() {
       <View style={s.answerArea}>
         {state === 'question' ? (
           <>
-            {(q.type === 'note' || q.type === 'ear') && (
+            {q.type === 'ear' && q.options && (
               <AnswerGrid options={q.options} onSelect={handleAnswerGrid} />
             )}
-            {q.type === 'scale' && (
-              <Pressable
-                onPress={confirmScale}
-                disabled={selectedScale.length === 0}
-                style={({ pressed }) => [
-                  s.confirmBtn,
-                  {
-                    backgroundColor:
-                      selectedScale.length > 0 ? q.trackColor : `${q.trackColor}40`,
-                  },
-                  pressed && selectedScale.length > 0 && { opacity: 0.8 },
-                ]}
-              >
-                <Text
-                  style={[
-                    s.confirmText,
-                    { color: selectedScale.length > 0 ? '#fff' : COLORS.textTertiary },
-                  ]}
-                >
-                  {t('quiz.scale.confirmButton', { count: selectedScale.length })}
-                </Text>
-              </Pressable>
-            )}
+            {/* Note and Scale phase views handle their own answer inputs */}
           </>
         ) : (
           <NextButton onPress={handleNext} correct={state === 'correct'} />
