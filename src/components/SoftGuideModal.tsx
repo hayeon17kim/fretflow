@@ -1,4 +1,4 @@
-// Soft guide modal for Lv.3-4 first visit (Issue #22)
+// Soft guide modal for Scale/Ear tracks first visit (Issue #22)
 // Non-blocking guidance to help users understand prerequisites
 
 import { useTranslation } from 'react-i18next';
@@ -21,7 +21,7 @@ export function SoftGuideModal({
 }: SoftGuideModalProps) {
   const { t } = useTranslation();
 
-  // Only show for Lv.3 (scale) or Lv.4 (ear)
+  // Only show for Scale Pattern or Ear Training tracks
   if (levelId !== 'scale' && levelId !== 'ear') return null;
 
   return (

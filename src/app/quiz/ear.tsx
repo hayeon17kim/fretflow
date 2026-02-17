@@ -270,7 +270,6 @@ export default function QuizEarScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.ear.title')}
-        levelNum={4}
         color={COLORS.level4}
         progress={progress}
         total={total}

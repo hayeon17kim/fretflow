@@ -45,7 +45,6 @@ export default function HomeScreen() {
 
   // Get all statistics from hook
   const { dueCount, estimatedMinutes, levelDueCounts, levelProgress } = useHomeScreenStats();
-  const { isLevelLocked } = useSpacedRepetition();
 
   // Smart recommendation for optimal level selection (Issue #22)
   const { recommendedLevel, dueCount: recommendedDueCount } = useSmartRecommendation();

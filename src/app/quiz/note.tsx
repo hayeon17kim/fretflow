@@ -80,7 +80,6 @@ export default function QuizNoteScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.note.title')}
-        levelNum={1}
         color={COLORS.level1}
         progress={progress}
         total={total}

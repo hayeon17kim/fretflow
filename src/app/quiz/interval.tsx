@@ -182,7 +182,6 @@ export default function QuizIntervalScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.interval.title')}
-        levelNum={2}
         color={COLORS.level2}
         progress={progress}
         total={total}

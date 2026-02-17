@@ -5,7 +5,6 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface QuizHeaderProps {
   label: string;
-  levelNum: number;
   color: string;
   progress: number;
   total: number;
@@ -15,7 +14,6 @@ interface QuizHeaderProps {
 
 export function QuizHeader({
   label,
-  levelNum,
   color,
   progress,
   total,
@@ -53,9 +51,6 @@ export function QuizHeader({
         </Pressable>
 
         <View style={s.rightGroup}>
-          <View style={[s.levelBadge, { backgroundColor: `${color}20` }]}>
-            <Text style={[s.levelBadgeText, { color }]}>Lv.{levelNum}</Text>
-          </View>
           {badge ? (
             <View style={[s.modeBadge, { backgroundColor: `${color}20` }]}>
               <Text style={[s.modeBadgeText, { color }]}>{badge}</Text>
@@ -103,15 +98,6 @@ const s = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
-  },
-  levelBadge: {
-    paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 8,
-  },
-  levelBadgeText: {
-    fontSize: FONT_SIZE.xs,
-    fontWeight: '600',
   },
   modeBadge: {
     paddingHorizontal: 6,

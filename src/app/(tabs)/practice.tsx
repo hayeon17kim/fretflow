@@ -2,8 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
-import { LockIcon } from '@/components/icons/LockIcon';
+import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import {
   getLevelDesc,
@@ -28,7 +27,7 @@ export default function PracticeScreen() {
   const { t } = useTranslation();
   const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
   const [_refreshKey, setRefreshKey] = useState(0);
-  const { isLevelLocked, getLevelProgress } = useSpacedRepetition();
+  const { getLevelProgress } = useSpacedRepetition();
 
   // Refresh on screen focus
   useFocusEffect(
@@ -52,32 +51,12 @@ export default function PracticeScreen() {
         {LEVELS.map((lv) => {
           const progress = getLevelProgress(lv.id);
           const isExpanded = expandedLevel === lv.id;
-          const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
 
           return (
             <Pressable
               key={lv.id}
-              onPress={() => {
-                if (locked) {
-                  // Show unlock requirement alert
-                  const prevLevel = lv.num - 1;
-                  const prevLevelProgress = getLevelProgress(
-                    LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
-                  );
-                  Alert.alert(
-                    t('practice.lockedAlert'),
-                    t('practice.lockedMessage', {
-                      level: prevLevel,
-                      name: getLevelLabel(LEVELS[prevLevel - 1].id, t),
-                      progress: prevLevelProgress,
-                    }),
-                    [{ text: t('practice.confirm'), style: 'default' }],
-                  );
-                } else {
-                  toggleExpand(lv.id);
-                }
-              }}
-              style={[s.levelCard, { borderColor: `${lv.color}25` }, locked && { opacity: 0.5 }]}
+              onPress={() => toggleExpand(lv.id)}
+              style={[s.levelCard, { borderColor: `${lv.color}25` }]}
               accessibilityRole="button"
               accessibilityLabel={getLevelLabel(lv.id, t)}
               accessibilityState={{ expanded: isExpanded }}
@@ -87,23 +66,16 @@ export default function PracticeScreen() {
                 {/* Icon + circular progress */}
                 <View style={s.levelIcon}>
                   <CircularProgress progress={progress} color={lv.color} />
-                  {locked ? <LockIcon size={18} /> : <Text style={s.levelEmoji}>{lv.emoji}</Text>}
+                  <Text style={s.levelEmoji}>{lv.emoji}</Text>
                 </View>
 
                 {/* Info */}
                 <View style={s.levelInfo}>
                   <View style={s.levelNameRow}>
-                    <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
+                    <Text style={s.levelName}>
                       {getLevelLabel(lv.id, t)}
                     </Text>
-                    {locked && (
-                      <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
-                        <Text style={[s.chipText, { color: COLORS.textSecondary }]}>
-                          {t('practice.locked')}
-                        </Text>
-                      </View>
-                    )}
-                    {'basic' in lv && lv.basic && !locked && (
+                    {'basic' in lv && lv.basic && (
                       <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
                         <Text style={[s.chipText, { color: lv.color }]}>
                           {t('practice.basicMode')}
@@ -111,15 +83,13 @@ export default function PracticeScreen() {
                       </View>
                     )}
                   </View>
-                  <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
+                  <Text style={s.levelDesc}>
                     {getLevelDesc(lv.id, t)}
                   </Text>
                 </View>
 
                 {/* Progress % */}
-                <Text
-                  style={[s.levelProgress, { color: locked ? COLORS.textSecondary : lv.color }]}
-                >
+                <Text style={[s.levelProgress, { color: lv.color }]}>
                   {progress}%
                 </Text>
               </View>

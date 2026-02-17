@@ -17,7 +17,7 @@ export interface RecommendationResult {
  * Smart level recommendation based on:
  * 1. Priority: Level with most due cards
  * 2. Fallback: Level with lowest progress
- * 3. Default: Lv.1 (note)
+ * 3. Default: Note Position track
  */
 export function useSmartRecommendation(): RecommendationResult {
   const { getDueCards, getLevelProgress } = useSpacedRepetition();
@@ -35,7 +35,7 @@ export function useSmartRecommendation(): RecommendationResult {
     const maxDue = Math.max(...Object.values(levelDueCounts));
 
     if (maxDue > 0) {
-      // Find first level with max due cards (Lv.1 prioritized by iteration order)
+      // Find first level with max due cards (Note Position prioritized by iteration order)
       for (const level of LEVELS) {
         if (levelDueCounts[level.id] === maxDue) {
           return {
@@ -58,7 +58,7 @@ export function useSmartRecommendation(): RecommendationResult {
 
     const minProgress = Math.min(...Object.values(levelProgress));
 
-    // Find first level with min progress (Lv.1 prioritized by iteration order)
+    // Find first level with min progress (Note Position prioritized by iteration order)
     for (const level of LEVELS) {
       if (levelProgress[level.id] === minProgress) {
         return {
@@ -70,7 +70,7 @@ export function useSmartRecommendation(): RecommendationResult {
       }
     }
 
-    // Priority 3: Default to Lv.1
+    // Priority 3: Default to Note Position
     return {
       recommendedLevel: 'note',
       reason: 'default',

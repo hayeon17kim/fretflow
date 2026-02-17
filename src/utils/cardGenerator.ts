@@ -29,7 +29,7 @@ function shuffle<T>(arr: T[]): T[] {
   return result;
 }
 
-// ─── Lv.1: 음 위치 카드 ───
+// ─── 음 위치 (Note Position) 카드 ───
 
 export interface NoteQuestionCard {
   id: string;
@@ -67,7 +67,7 @@ export function generateNoteCard(): NoteQuestionCard {
   };
 }
 
-// ─── Lv.2: 인터벌 카드 ───
+// ─── 인터벌 (Interval) 카드 ───
 
 export interface IntervalQuestionCard {
   id: string;
@@ -145,7 +145,7 @@ export function generateIntervalCard(): IntervalQuestionCard {
   };
 }
 
-// ─── Lv.3: 스케일 카드 ───
+// ─── 스케일 패턴 (Scale Pattern) 카드 ───
 
 export interface ScaleQuestionCard {
   id: string;
@@ -202,7 +202,7 @@ export function generateScaleCard(): ScaleQuestionCard {
   };
 }
 
-// ─── Lv.4: 귀 훈련 카드 ───
+// ─── 귀 훈련 (Ear Training) 카드 ───
 
 export interface EarQuestionCard {
   id: string;

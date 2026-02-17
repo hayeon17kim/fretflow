@@ -17,16 +17,12 @@
     "learnNew": "Learn New Cards",
     "levelPractice": "Practice by Level",
     "practiceShortcut": "Practice Specific Level →",
-    "locked": "Locked",
     "basicMode": "Basic Mode",
-    "lockedAlert": "🔒 Locked Level",
-    "lockedMessage": "Unlock by achieving 80%+ in Lv.{{level}} {{name}}.\n\nCurrent progress: {{progress}}%",
     "confirm": "OK"
   },
   "practice": {
     "title": "Practice",
     "subtitle": "Select a level and start practicing",
-    "locked": "Locked",
     "basicMode": "Basic Mode",
     "exampleProblem": "Example Problem",
     "sessions": {
@@ -36,8 +32,6 @@
       "cardsCount": "{{count}} cards"
     },
     "mixMode": "🎲 All Levels Mix",
-    "lockedAlert": "🔒 Locked Level",
-    "lockedMessage": "Unlock by achieving 80%+ in Lv.{{level}} {{name}}.\n\nCurrent progress: {{progress}}%",
     "confirm": "OK"
   },
   "mastery": {
@@ -253,7 +247,6 @@
   "common": {
     "next": "Next",
     "level": "Level {{num}}",
-    "levelShort": "Lv.{{num}}",
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
     "english": "English",
@@ -282,7 +275,7 @@
     "title": "Hold on!",
     "message": "This level is easier if you know basic note positions. Start now?",
     "continue": "Yes, Start",
-    "goToLevel1": "Start from Lv.1"
+    "goToLevel1": "Start with Note Position"
   },
   "onboardingFlow": {
     "skip": "Skip",

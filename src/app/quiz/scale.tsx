@@ -234,7 +234,6 @@ export default function QuizScaleScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.scale.title')}
-        levelNum={3}
         color={COLORS.level3}
         progress={progress}
         total={total}

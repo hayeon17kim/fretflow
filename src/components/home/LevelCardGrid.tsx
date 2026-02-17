@@ -1,32 +1,11 @@
 import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Alert, Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Path } from 'react-native-svg';
+import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import type { LevelId } from '@/config/levels';
 import { getLevelDesc, getLevelLabel, LEVELS } from '@/config/levels';
-import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { BADGES, getBadgeForProgress } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-// ─── Internal Lock Icon ───
-function LockIcon({ size = 20 }: { size?: number }) {
-  return (
-    <Svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke={COLORS.textSecondary}
-      strokeWidth={2}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-    >
-      <Path d="M19 11H5a2 2 0 0 0-2 2v7a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7a2 2 0 0 0-2-2z" />
-      <Path d="M7 11V7a5 5 0 0 1 10 0v4" />
-    </Svg>
-  );
-}
 
 interface LevelCardGridProps {
   levelProgress: Record<LevelId, number>;
@@ -35,40 +14,12 @@ interface LevelCardGridProps {
 
 export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProps) {
   const { t } = useTranslation();
-  const { isLevelLocked, getLevelProgress } = useSpacedRepetition();
-
-  const handleLevelPress = useCallback(
-    (lv: (typeof LEVELS)[number]) => {
-      const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
-
-      if (locked) {
-        // Show unlock requirement alert
-        const prevLevel = lv.num - 1;
-        const prevLevelProgress = getLevelProgress(
-          LEVELS[prevLevel - 1].id as 'note' | 'interval' | 'scale',
-        );
-        Alert.alert(
-          t('home.lockedAlert'),
-          t('home.lockedMessage', {
-            level: prevLevel,
-            name: getLevelLabel(LEVELS[prevLevel - 1].id, t),
-            progress: prevLevelProgress,
-          }),
-          [{ text: t('home.confirm'), style: 'default' }],
-        );
-      } else {
-        onLevelPress(lv.id);
-      }
-    },
-    [isLevelLocked, getLevelProgress, onLevelPress, t],
-  );
 
   return (
     <>
       <Text style={s.sectionTitle}>{t('home.levelPractice')}</Text>
       {LEVELS.map((lv) => {
         const progress = levelProgress[lv.id];
-        const locked = isLevelLocked(lv.num as 1 | 2 | 3 | 4);
         const badgeLevel = getBadgeForProgress(progress); // Issue #22
         const badge = BADGES[badgeLevel];
 
@@ -78,10 +29,9 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
             style={({ pressed }) => [
               s.levelCard,
               { borderColor: `${lv.color}25` },
-              pressed && !locked && { opacity: 0.85 },
-              locked && { opacity: 0.5 },
+              pressed && { opacity: 0.85 },
             ]}
-            onPress={() => handleLevelPress(lv)}
+            onPress={() => onLevelPress(lv.id)}
             accessibilityRole="button"
             accessibilityLabel={getLevelLabel(lv.id, t)}
           >
@@ -89,23 +39,16 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
               {/* Icon with circular progress */}
               <View style={s.levelIcon}>
                 <CircularProgress progress={progress} color={lv.color} />
-                {locked ? <LockIcon size={20} /> : <Text style={s.levelEmoji}>{lv.emoji}</Text>}
+                <Text style={s.levelEmoji}>{lv.emoji}</Text>
               </View>
 
               {/* Info */}
               <View style={s.levelInfo}>
                 <View style={s.levelNameRow}>
-                  <Text style={[s.levelName, locked && { color: COLORS.textSecondary }]}>
+                  <Text style={s.levelName}>
                     {getLevelLabel(lv.id, t)}
                   </Text>
-                  {locked && (
-                    <View style={[s.chip, { backgroundColor: `${COLORS.textSecondary}15` }]}>
-                      <Text style={[s.chipText, { color: COLORS.textSecondary }]}>
-                        {t('home.locked')}
-                      </Text>
-                    </View>
-                  )}
-                  {!locked && badge.emoji && (
+                  {badge.emoji && (
                     <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
                       <Text style={s.chipText}>{badge.emoji}</Text>
                       <Text style={[s.chipText, { color: lv.color }]}>
@@ -113,19 +56,19 @@ export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProp
                       </Text>
                     </View>
                   )}
-                  {'basic' in lv && lv.basic && !locked && (
+                  {'basic' in lv && lv.basic && (
                     <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
                       <Text style={[s.chipText, { color: lv.color }]}>{t('home.basicMode')}</Text>
                     </View>
                   )}
                 </View>
-                <Text style={[s.levelDesc, locked && { color: COLORS.textTertiary }]}>
+                <Text style={s.levelDesc}>
                   {getLevelDesc(lv.id, t)}
                 </Text>
               </View>
 
               {/* Progress number */}
-              <Text style={[s.levelProgress, { color: locked ? COLORS.textSecondary : lv.color }]}>
+              <Text style={[s.levelProgress, { color: lv.color }]}>
                 {progress}%
               </Text>
             </View>

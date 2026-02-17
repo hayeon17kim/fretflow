@@ -17,16 +17,12 @@
     "learnNew": "새로운 카드 배우기",
     "levelPractice": "레벨별 연습",
     "practiceShortcut": "특정 레벨만 연습하기 →",
-    "locked": "잠김",
     "basicMode": "기초 모드",
-    "lockedAlert": "🔒 잠긴 레벨",
-    "lockedMessage": "Lv.{{level}} {{name}}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: {{progress}}%",
     "confirm": "확인"
   },
   "practice": {
     "title": "연습하기",
     "subtitle": "레벨을 선택하고 연습을 시작하세요",
-    "locked": "잠김",
     "basicMode": "기초 모드",
     "exampleProblem": "예시 문제",
     "sessions": {
@@ -36,8 +32,6 @@
       "cardsCount": "{{count}}장"
     },
     "mixMode": "🎲 전체 레벨 믹스 연습",
-    "lockedAlert": "🔒 잠긴 레벨",
-    "lockedMessage": "Lv.{{level}} {{name}}을(를) 80% 이상 달성하면 해금됩니다.\n\n현재 진행도: {{progress}}%",
     "confirm": "확인"
   },
   "mastery": {
@@ -253,7 +247,6 @@
   "common": {
     "next": "다음",
     "level": "레벨 {{num}}",
-    "levelShort": "Lv.{{num}}",
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
     "english": "English",
@@ -282,7 +275,7 @@
     "title": "잠깐만요!",
     "message": "이 레벨은 기본 음 위치를 알면 더 쉬워요. 바로 시작할까요?",
     "continue": "네, 시작",
-    "goToLevel1": "Lv.1부터 할래요"
+    "goToLevel1": "음 위치부터 할래요"
   },
   "onboardingFlow": {
     "skip": "건너뛰기",
