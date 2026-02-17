@@ -1,10 +1,31 @@
-import { useCallback } from 'react';
+import { useCallback, useSyncExternalStore } from 'react';
 import type { FlashCard } from '@/types/music';
 import { SM2_DEFAULTS } from '@/utils/constants';
 import { calculateSM2, mapResultToQuality } from '@/utils/sm2';
 import { cardStorage } from '@/utils/storage';
 
 const CARDS_KEY = 'cards';
+
+// 전역 리스너 시스템 (데이터 변경 시 모든 구독자에게 알림)
+type Listener = () => void;
+const listeners = new Set<Listener>();
+let cardsVersion = 0;
+
+function subscribe(listener: Listener) {
+  listeners.add(listener);
+  return () => {
+    listeners.delete(listener);
+  };
+}
+
+function notifyListeners() {
+  cardsVersion++;
+  listeners.forEach((listener) => listener());
+}
+
+function getSnapshot() {
+  return cardsVersion;
+}
 
 function getCards(): FlashCard[] {
   try {
@@ -22,6 +43,7 @@ function getCards(): FlashCard[] {
 function saveCards(cards: FlashCard[]): void {
   try {
     cardStorage.set(CARDS_KEY, JSON.stringify(cards));
+    notifyListeners(); // 모든 구독자에게 변경 알림
   } catch (error) {
     console.error('[useSpacedRepetition] Failed to save cards:', error);
     throw error; // 저장 실패는 상위로 전파
@@ -31,8 +53,12 @@ function saveCards(cards: FlashCard[]): void {
 /**
  * SM-2 스페이스드 리피티션 훅
  * MMKV에 카드 데이터를 로컬 저장
+ * useSyncExternalStore로 데이터 변경 시 자동 리렌더링
  */
 export function useSpacedRepetition() {
+  // 외부 스토어 구독 (데이터 변경 시 자동 리렌더링)
+  useSyncExternalStore(subscribe, getSnapshot);
+
   // 오늘 복습할 카드 가져오기
   const getDueCards = useCallback((level?: FlashCard['type']) => {
     const today = new Date().toISOString().split('T')[0];
