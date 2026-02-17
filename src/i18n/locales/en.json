@@ -22,7 +22,7 @@
   },
   "practice": {
     "title": "Practice",
-    "subtitle": "Select a level and start practicing",
+    "subtitle": "Select a track and start practicing",
     "basicMode": "Basic Mode",
     "exampleProblem": "Example Problem",
     "sessions": {
@@ -31,7 +31,7 @@
       "deep": "Deep 20min",
       "cardsCount": "{{count}} cards"
     },
-    "mixMode": "🎲 All Levels Mix",
+    "mixMode": "🎲 All Tracks Mix",
     "confirm": "OK"
   },
   "mastery": {

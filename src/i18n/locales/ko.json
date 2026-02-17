@@ -22,7 +22,7 @@
   },
   "practice": {
     "title": "연습하기",
-    "subtitle": "레벨을 선택하고 연습을 시작하세요",
+    "subtitle": "트랙을 선택하고 연습을 시작하세요",
     "basicMode": "기초 모드",
     "exampleProblem": "예시 문제",
     "sessions": {
@@ -31,7 +31,7 @@
       "deep": "딥 20분",
       "cardsCount": "{{count}}장"
     },
-    "mixMode": "🎲 전체 레벨 믹스 연습",
+    "mixMode": "🎲 전체 트랙 믹스 연습",
     "confirm": "확인"
   },
   "mastery": {
@@ -268,7 +268,7 @@
     "familiar": "익숙함",
     "proficient": "숙련",
     "master": "마스터",
-    "trackUp": "{{track}} 레벨업! {{badge}} 달성",
+    "trackUp": "{{track}} 트랙업! {{badge}} 달성",
     "nextBadge": "다음 뱃지까지 {{percent}}%"
   },
   "softGuide": {

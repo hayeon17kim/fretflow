@@ -125,8 +125,10 @@ export default function PracticeScreen() {
         <Pressable
           style={({ pressed }) => [s.mixBtn, pressed && { opacity: 0.7 }]}
           onPress={() => {
-            // Mix mode — default to note quiz for now
-            router.push('/quiz/note');
+            router.push({
+              pathname: '/quiz/mix',
+              params: { sessionSize: '10' },
+            });
           }}
           accessibilityRole="button"
           accessibilityLabel={t('practice.mixMode')}

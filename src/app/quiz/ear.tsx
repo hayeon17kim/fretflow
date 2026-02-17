@@ -1,6 +1,6 @@
 import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
@@ -179,7 +179,7 @@ export default function QuizEarScreen() {
   }, [questions]);
 
   // Play sound
-  const playSound = async () => {
+  const playSound = useCallback(async () => {
     try {
       // Stop previous sound
       if (soundRef.current) {
@@ -223,7 +223,14 @@ export default function QuizEarScreen() {
       console.error('[QuizEar] Failed to play sound:', error);
       setPlaying(false);
     }
-  };
+  }, [q.answer, preloadedSounds]);
+
+  // Auto-play sound when new question appears
+  useEffect(() => {
+    if (state === 'question' && preloadedSounds.size > 0) {
+      playSound();
+    }
+  }, [q.id, state, preloadedSounds.size, playSound]);
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
