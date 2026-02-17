@@ -1,3 +1,4 @@
+import Slider from '@react-native-community/slider';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
@@ -13,11 +14,22 @@ import {
 } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { TimePickerRow } from '@/components/settings/TimePickerRow';
+import { getCurrentTier as getCurrentEarTrainingTier } from '@/config/earTrainingTiers';
+import { getCurrentIntervalTier } from '@/config/intervalTiers';
+import { getCurrentNotePositionTier } from '@/config/notePositionTiers';
+import { getCurrentScaleTier } from '@/config/scaleTiers';
 import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
 import { useNotifications } from '@/hooks/useNotifications';
+import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import i18n from '@/i18n';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
+import {
+  getMasteredCounts,
+  resetAllCards,
+  resetDevCards,
+  setMasteredCount,
+} from '@/utils/devTools';
 
 // ─── User icon ───
 function UserIcon({ size = 20 }: { size?: number }) {
@@ -137,6 +149,26 @@ function ChevronRightIcon({ size = 18 }: { size?: number }) {
   );
 }
 
+// ─── Code icon (for developer mode) ───
+function CodeIcon({ size = 20 }: { size?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="#FF6B6B"
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="m18 16 4-4-4-4" />
+      <Path d="m6 8-4 4 4 4" />
+      <Path d="m14.5 4-5 16" />
+    </Svg>
+  );
+}
+
 export default function SettingsScreen() {
   const { t } = useTranslation();
   const { settings, updateSettings } = useAppStore();
@@ -144,6 +176,45 @@ export default function SettingsScreen() {
   const [tempUsername, setTempUsername] = useState(settings.username);
   const { scheduleAllNotifications } = useNotifications();
   const { requestPermissions } = useNotificationPermissions();
+
+  // Developer mode state
+  const [devCounts, setDevCounts] = useState(getMasteredCounts());
+  const [_forceRefresh, setForceRefresh] = useState(0);
+
+  const refreshDevCounts = () => {
+    setDevCounts(getMasteredCounts());
+    setForceRefresh((prev) => prev + 1);
+  };
+
+  const handleDevCountChange = (type: 'note' | 'interval' | 'scale' | 'ear', value: number) => {
+    setMasteredCount(type, Math.round(value));
+    refreshDevCounts();
+  };
+
+  const handleResetAllCards = () => {
+    Alert.alert(
+      '⚠️ Reset All Cards',
+      'This will delete ALL cards (including real progress). Are you sure?',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Reset',
+          style: 'destructive',
+          onPress: () => {
+            resetAllCards();
+            refreshDevCounts();
+            Alert.alert('✅ Done', 'All cards have been deleted.');
+          },
+        },
+      ],
+    );
+  };
+
+  const handleResetDevCards = () => {
+    resetDevCards();
+    refreshDevCounts();
+    Alert.alert('✅ Done', 'Dev cards have been removed.');
+  };
 
   // Save username
   const saveUsername = () => {
@@ -472,6 +543,137 @@ export default function SettingsScreen() {
           </View>
         </View>
 
+        {/* ─── Developer Mode section ─── */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <CodeIcon size={20} />
+            <Text style={[s.sectionTitle, { color: '#FF6B6B' }]}>Developer Mode</Text>
+          </View>
+
+          <View style={s.card}>
+            <Text style={[s.settingDesc, { marginBottom: SPACING.lg }]}>
+              Simulate mastered cards to test tier unlocking
+            </Text>
+
+            {/* Note Position */}
+            <View style={s.devRow}>
+              <View style={s.devHeader}>
+                <Text style={s.devTrackLabel}>🎵 Note Position</Text>
+                <Text style={s.devCount}>{Math.round(devCounts.note)} cards</Text>
+              </View>
+              <Text style={s.devTierInfo}>
+                Tier: {getCurrentNotePositionTier(devCounts.note).name} (
+                {getCurrentNotePositionTier(devCounts.note).description})
+              </Text>
+              <Slider
+                style={s.slider}
+                minimumValue={0}
+                maximumValue={60}
+                step={1}
+                value={devCounts.note}
+                onValueChange={(value) => setDevCounts({ ...devCounts, note: value })}
+                onSlidingComplete={(value) => handleDevCountChange('note', value)}
+                minimumTrackTintColor={COLORS.track1}
+                maximumTrackTintColor={COLORS.border}
+                thumbTintColor={COLORS.track1}
+              />
+            </View>
+
+            <View style={s.divider} />
+
+            {/* Intervals */}
+            <View style={s.devRow}>
+              <View style={s.devHeader}>
+                <Text style={s.devTrackLabel}>📏 Intervals</Text>
+                <Text style={s.devCount}>{Math.round(devCounts.interval)} cards</Text>
+              </View>
+              <Text style={s.devTierInfo}>
+                Tier: {getCurrentIntervalTier(devCounts.interval).name} (
+                {getCurrentIntervalTier(devCounts.interval).description})
+              </Text>
+              <Slider
+                style={s.slider}
+                minimumValue={0}
+                maximumValue={60}
+                step={1}
+                value={devCounts.interval}
+                onValueChange={(value) => setDevCounts({ ...devCounts, interval: value })}
+                onSlidingComplete={(value) => handleDevCountChange('interval', value)}
+                minimumTrackTintColor={COLORS.track2}
+                maximumTrackTintColor={COLORS.border}
+                thumbTintColor={COLORS.track2}
+              />
+            </View>
+
+            <View style={s.divider} />
+
+            {/* Scales */}
+            <View style={s.devRow}>
+              <View style={s.devHeader}>
+                <Text style={s.devTrackLabel}>🎼 Scales</Text>
+                <Text style={s.devCount}>{Math.round(devCounts.scale)} cards</Text>
+              </View>
+              <Text style={s.devTierInfo}>
+                Tier: {getCurrentScaleTier(devCounts.scale).name} (
+                {getCurrentScaleTier(devCounts.scale).description})
+              </Text>
+              <Slider
+                style={s.slider}
+                minimumValue={0}
+                maximumValue={60}
+                step={1}
+                value={devCounts.scale}
+                onValueChange={(value) => setDevCounts({ ...devCounts, scale: value })}
+                onSlidingComplete={(value) => handleDevCountChange('scale', value)}
+                minimumTrackTintColor={COLORS.track3}
+                maximumTrackTintColor={COLORS.border}
+                thumbTintColor={COLORS.track3}
+              />
+            </View>
+
+            <View style={s.divider} />
+
+            {/* Ear Training */}
+            <View style={s.devRow}>
+              <View style={s.devHeader}>
+                <Text style={s.devTrackLabel}>👂 Ear Training</Text>
+                <Text style={s.devCount}>{Math.round(devCounts.ear)} cards</Text>
+              </View>
+              <Text style={s.devTierInfo}>
+                Tier: {getCurrentEarTrainingTier(devCounts.ear).name} (
+                {getCurrentEarTrainingTier(devCounts.ear).description})
+              </Text>
+              <Slider
+                style={s.slider}
+                minimumValue={0}
+                maximumValue={60}
+                step={1}
+                value={devCounts.ear}
+                onValueChange={(value) => setDevCounts({ ...devCounts, ear: value })}
+                onSlidingComplete={(value) => handleDevCountChange('ear', value)}
+                minimumTrackTintColor={COLORS.track4}
+                maximumTrackTintColor={COLORS.border}
+                thumbTintColor={COLORS.track4}
+              />
+            </View>
+
+            <View style={s.divider} />
+
+            {/* Action buttons */}
+            <View style={s.devActions}>
+              <Pressable style={s.devButton} onPress={handleResetDevCards}>
+                <Text style={s.devButtonText}>Reset Dev Cards Only</Text>
+              </Pressable>
+              <Pressable
+                style={[s.devButton, { backgroundColor: '#FF6B6B' }]}
+                onPress={handleResetAllCards}
+              >
+                <Text style={s.devButtonText}>⚠️ Reset All Cards</Text>
+              </Pressable>
+            </View>
+          </View>
+        </View>
+
         {/* ─── Footer ─── */}
         <Text style={s.footer}>{t('settings.footer')}</Text>
       </ScrollView>
@@ -700,5 +902,52 @@ const s = StyleSheet.create({
     color: COLORS.textSecondary,
     textAlign: 'center',
     marginTop: SPACING.xl,
+  },
+
+  // Developer Mode
+  devRow: {
+    paddingVertical: SPACING.md,
+  },
+  devHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    marginBottom: SPACING.xs,
+  },
+  devTrackLabel: {
+    fontSize: FONT_SIZE.md,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
+  },
+  devCount: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '700',
+    color: COLORS.textSecondary,
+  },
+  devTierInfo: {
+    fontSize: FONT_SIZE.xs,
+    color: COLORS.textSecondary,
+    marginBottom: SPACING.sm,
+  },
+  slider: {
+    width: '100%',
+    height: 40,
+  },
+  devActions: {
+    flexDirection: 'row',
+    gap: SPACING.sm,
+    marginTop: SPACING.sm,
+  },
+  devButton: {
+    flex: 1,
+    paddingVertical: SPACING.md,
+    borderRadius: 10,
+    backgroundColor: COLORS.track3,
+    alignItems: 'center',
+  },
+  devButtonText: {
+    fontSize: FONT_SIZE.sm,
+    fontWeight: '600',
+    color: COLORS.textPrimary,
   },
 });
