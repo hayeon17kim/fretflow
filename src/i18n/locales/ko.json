@@ -59,7 +59,19 @@
       "correct": "정답!",
       "wrongAnswer": "정답은 {{answer}}",
       "soundPlay": "🔊 소리 재생",
-      "wrongSound": "🔇 오답음"
+      "wrongSound": "🔇 오답음",
+      "phase2": {
+        "question": "다음 음의 위치를 찾으세요",
+        "hint": "4개 중 하나를 탭하세요",
+        "correctAnswer": "정답!",
+        "wrongAnswer": "정답은 {{string}}번줄 {{fret}}프렛"
+      },
+      "phase3": {
+        "question": "다음 음의 위치를 찾으세요",
+        "hint": "프렛보드에서 직접 찾아 탭하세요",
+        "correctAnswer": "정답!",
+        "wrongAnswer": "정답은 {{string}}번줄 {{fret}}프렛"
+      }
     },
     "scale": {
       "title": "스케일 패턴",
@@ -87,7 +99,29 @@
         "pentatonic-minor": "펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!",
         "blues": "블루스 스케일은 펜타토닉 마이너에 블루노트(b5)를 추가한 6음 음계예요. 블루지한 사운드의 핵심!"
       },
-      "position": "{{number}}포지션"
+      "position": "{{number}}포지션",
+      "phase1": {
+        "question": "표시된 음이 이 스케일에 포함되나요?",
+        "inScale": "포함됨 (○)",
+        "notInScale": "미포함 (✕)",
+        "correctAnswer": "정답!",
+        "wrongAnswer": "틀렸어요",
+        "wasInScale": "이 음은 스케일에 포함됩니다",
+        "wasNotInScale": "이 음은 스케일에 포함되지 않습니다"
+      },
+      "phase2": {
+        "question": "빈칸을 채워 스케일을 완성하세요",
+        "confirmButton": "확인 ({{count}}개 선택)",
+        "correctAnswer": "정답! 모든 빈칸을 맞혔어요",
+        "wrongAnswer": "{{correct}}/{{total}}개 맞음",
+        "wrongCount": "{{count}}개 오답",
+        "missedCount": "{{count}}개 누락",
+        "scoreSub": "회색 음 = 미리 표시, 빈칸만 채우면 됩니다",
+        "hint": "루트(●)와 5도를 먼저 찾아보세요"
+      },
+      "phase3": {
+        "question": "스케일에 속하는 음을 모두 탭하세요"
+      }
     },
     "ear": {
       "title": "귀 훈련",
@@ -103,6 +137,10 @@
       "basicMode": "기초 모드"
     },
     "goalAchieved": "오늘 목표 달성! 🎉",
+    "phaseUnlock": {
+      "title": "Phase {{phase}} 해금!",
+      "subtitle": "새로운 문제 형식이 추가됩니다 ✨"
+    },
     "completion": {
       "sessionComplete": "세션 완료!",
       "score": "{{correct}}/{{total}}개 정답",

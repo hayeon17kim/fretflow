@@ -59,7 +59,19 @@
       "correct": "Correct!",
       "wrongAnswer": "The answer is {{answer}}",
       "soundPlay": "🔊 Play Sound",
-      "wrongSound": "🔇 Wrong Sound"
+      "wrongSound": "🔇 Wrong Sound",
+      "phase2": {
+        "question": "Find this note on the fretboard",
+        "hint": "Tap one of the 4 highlighted positions",
+        "correctAnswer": "Correct!",
+        "wrongAnswer": "Correct position: String {{string}}, Fret {{fret}}"
+      },
+      "phase3": {
+        "question": "Find this note on the fretboard",
+        "hint": "Tap anywhere on the fretboard",
+        "correctAnswer": "Correct!",
+        "wrongAnswer": "Correct position: String {{string}}, Fret {{fret}}"
+      }
     },
     "scale": {
       "title": "Scale Pattern",
@@ -87,7 +99,29 @@
         "pentatonic-minor": "Pentatonic minor is a 5-note scale with intense emotion. Foundation of rock solos!",
         "blues": "Blues scale adds a blue note (b5) to pentatonic minor for a 6-note scale. The heart of bluesy sound!"
       },
-      "position": "Position {{number}}"
+      "position": "Position {{number}}",
+      "phase1": {
+        "question": "Is this note in the scale?",
+        "inScale": "In Scale (○)",
+        "notInScale": "Not in Scale (✕)",
+        "correctAnswer": "Correct!",
+        "wrongAnswer": "Wrong",
+        "wasInScale": "This note is in the scale",
+        "wasNotInScale": "This note is not in the scale"
+      },
+      "phase2": {
+        "question": "Fill in the blanks to complete the scale",
+        "confirmButton": "Confirm ({{count}} selected)",
+        "correctAnswer": "Correct! All blanks filled",
+        "wrongAnswer": "{{correct}}/{{total}} correct",
+        "wrongCount": "{{count}} wrong",
+        "missedCount": "{{count}} missed",
+        "scoreSub": "Gray notes = pre-revealed, just fill the blanks",
+        "hint": "Try finding the root (●) and 5th first"
+      },
+      "phase3": {
+        "question": "Tap all notes in the scale"
+      }
     },
     "ear": {
       "title": "Ear Training",
@@ -103,6 +137,10 @@
       "basicMode": "Basic Mode"
     },
     "goalAchieved": "Daily goal achieved! 🎉",
+    "phaseUnlock": {
+      "title": "Phase {{phase}} Unlocked!",
+      "subtitle": "New question format unlocked ✨"
+    },
     "completion": {
       "sessionComplete": "Session Complete!",
       "score": "{{correct}}/{{total}} correct",
