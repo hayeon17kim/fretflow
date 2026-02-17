@@ -1,13 +1,13 @@
 FretFlow 프로젝트 핸드오프 문서
 
-**최종 업데이트: 2026-02-16**
-**상태: MVP 완성 (마스터리/설정/오디오 구현 완료)**
+**최종 업데이트: 2026-02-17**
+**상태: MVP 완성 (핵심 학습 플로우, 스마트 추천, 배지, 온보딩 완료)**
 
 ---
 
 ## 1. 프로젝트 개요
 
-FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 인터벌, 스케일 패턴, 귀 훈련을 단계적으로 학습할 수 있도록 설계됨.
+FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 인터벌, 스케일 패턴, 귀 훈련을 4개 독립 학습 모드로 자유롭게 학습할 수 있도록 설계됨. (레벨 위계가 아닌 독립 영역)
 
 ### 기술 스택
 
@@ -38,12 +38,13 @@ src/
 │   │   ├── practice.tsx      # 연습 화면
 │   │   ├── mastery.tsx       # 마스터리 탭 ✅ 완성
 │   │   └── settings.tsx      # 설정 탭 ✅ 완성
+│   ├── onboarding.tsx       # 온보딩 플로우 (4단계) ✅
 │   ├── quiz/
 │   │   ├── _layout.tsx       # 퀴즈 스택 레이아웃
-│   │   ├── note.tsx          # Lv.1 음 위치 퀴즈
-│   │   ├── interval.tsx      # Lv.2 인터벌 퀴즈
-│   │   ├── scale.tsx         # Lv.3 스케일 퀴즈
-│   │   └── ear.tsx           # Lv.4 귀 훈련
+│   │   ├── note.tsx          # 음 위치 퀴즈
+│   │   ├── interval.tsx      # 인터벌 퀴즈
+│   │   ├── scale.tsx         # 스케일 퀴즈
+│   │   └── ear.tsx           # 귀 훈련
 │
 ├── components/
 │   ├── Fretboard.tsx         # 재사용 프렛보드 (TODO)
@@ -61,7 +62,8 @@ src/
 │   └── levels.ts             # 레벨 설정
 │
 ├── hooks/
-│   └── useSpacedRepetition.ts  # SM-2 카드 관리 + 레벨 잠금
+│   ├── useSpacedRepetition.ts  # SM-2 카드 관리
+│   └── useSmartRecommendation.ts  # 스마트 추천 (due 카드/진행률 기반)
 │
 ├── stores/
 │   └── useAppStore.ts        # Zustand 전역 상태
@@ -186,7 +188,11 @@ FONT_SIZE = {
 - `getDueCards()`: 오늘 복습할 카드 필터링
 - `addCard()`: 새 카드 추가 (기본값: EF=2.5, interval=1, nextReviewDate=today)
 - `recordReview()`: 리뷰 결과 기록 (responseTimeMs 기반 quality 매핑)
-- `isLevelLocked()`: 레벨 잠금 시스템 (이전 레벨 80% 달성 필요)
+
+**스마트 추천 (`useSmartRecommendation.ts`)**:
+- due 카드가 가장 많은 모드를 우선 추천
+- due 카드 없으면 진행률이 가장 낮은 모드 추천
+- 홈 화면 "복습 시작" CTA에 연결
 
 **기본값**:
 - 초기 EF: 2.5
@@ -214,15 +220,22 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 ### 화면 (완성)
 
 **홈 (`/(tabs)/index.tsx`)**
-- 오늘 복습 수 & 예상 시간
+- DailyReviewCard: 일일 목표 시각화 (프로그레스 바, 퍼센티지, 색상 코딩, 100% 달성 시 🎉)
+- 스마트 추천 기반 "복습 시작" CTA (useSmartRecommendation 연결)
 - 연속일수 (스트릭)
-- 레벨별 진도율 (원형 프로그레스)
-- 레벨별 카드 펼침 + 직접 퀴즈 이동
+- 모드별 진도율 (원형 프로그레스, CircularProgress 공유)
+- 모드별 배지 표시
+- 첫 사용자 / 복습 있음 / 복습 완료 3가지 빈 상태 분기
+
+**온보딩 (`/onboarding.tsx`) ✅**
+- 4단계: 인트로 → 미니퀴즈 → 결과 → 목표 설정
+- 스킵 옵션
+- 첫 실행 시 자동 라우팅
 
 **연습 (`/(tabs)/practice.tsx`)**
-- 레벨별 카드로 펼침 (expand/collapse)
+- 모드별 카드로 펼침 (expand/collapse)
 - 예시 문제 표시
-- 세션 옵션 버튼 (퀵/포커스/딥)
+- 세션 크기 옵션: Quick(10) / Focus(25) / Deep(50) — 실제 퀴즈에 전달됨 ✅
 
 **마스터리 (`/(tabs)/mastery.tsx`) ✅ 완성 (382 lines)**
 - 전체 통계 카드 (전체/마스터/약점 카드 수)
@@ -255,24 +268,33 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 80% 이상 통과 판정
 - 동적 카드 생성 (cardGenerator.ts)
 
-**퀴즈 - 귀 훈련 (`/quiz/ear.tsx`) ✅ 오디오 완성**
-- 재생 버튼 (43개 WAV 오디오 파일, `assets/sounds/`)
+**퀴즈 - 귀 훈련 (`/quiz/ear.tsx`)**
+- 재생 버튼 (43개 WAV 오디오 파일 중 5개 개방현만 사용 중)
 - 4지선다 + 결과 피드백
-- 잠금 해제 힌트 (Lv.1 80% 달성 시)
 - 동적 카드 생성 (cardGenerator.ts)
+- ⚠️ 38개 추가 음 확장 필요
 
 ### 컴포넌트 (완성)
 
-- **QuizHeader**: 뒤로, 레벨 배지, 진도바
+- **QuizHeader**: 뒤로, 모드 배지, 진도바
 - **AnswerGrid**: 4지선다 그리드
 - **NextButton**: 정답(초록)/오답(회색) 스타일
 - **QuizCard**: 상태별 테두리 색상
-- **CircularProgress**: 원형 프로그레스 표시
+- **CircularProgress**: 원형 프로그레스 (모든 화면에서 공유)
+- **DailyReviewCard**: 일일 목표 시각화 (프로그레스 바, 색상 코딩)
 - **TabIcon**: 탭 아이콘 컴포넌트 ✅
+
+### 배지 시스템 ✅
+
+- 5단계: 🌱 Beginner → 🌿 Familiar → 🌳 Proficient → 🏅 Master
+- 모드별 독립 추적 (useAppStore에 저장)
+- Mastery 화면, 홈 화면, 퀴즈 완료 토스트에서 표시
+- 배지 달성 시 햅틱 피드백 동작
 
 ### 유틸 & 훅
 
-- **useSpacedRepetition**: SM-2 카드 로직 + 레벨 잠금 시스템
+- **useSpacedRepetition**: SM-2 카드 로직 (카드 CRUD, 리뷰 기록)
+- **useSmartRecommendation**: 스마트 추천 (due 카드 / 진행률 기반 모드 추천)
 - **sm2.ts**: 알고리즘 계산
 - **music.ts**: 음 계산 (MIDI, 위치 찾기 등)
 - **constants.ts**: 모든 디자인 토큰
@@ -281,41 +303,58 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 ### 라우팅
 
 - 탭 네비게이션 (홈/연습/마스터리/설정)
-- 퀴즈 스택 (4개 레벨별)
+- 퀴즈 스택 (4개 모드별: note/interval/scale/ear)
+- 온보딩 플로우 (첫 실행 시)
 
 ---
 
 ## 6. 남은 작업 상세
 
-### 미완성 컴포넌트
+### P0 — 런칭 전 필수
 
-**Fretboard.tsx (재사용 프렛보드)**
-- 현재 각 퀴즈 화면에 프렛보드 코드 중복
-- 재사용 가능한 통합 컴포넌트 필요
+**Mix 모드 실제 구현**
+- Practice 화면에 Mix 버튼이 있지만 `router.push('/quiz/note')`로 하드코딩 (스텁)
+- 모든 모드의 due 카드를 섞어서 출제하는 interleaving practice 구현 필요
 
-### 미구현 기능
+**퀴즈 중단 확인 모달**
+- QuizHeader.tsx의 뒤로 버튼이 `router.back()` 직접 호출
+- `Alert.alert()` 확인 또는 `beforeRemove` 리스너 필요
 
-**Supabase 백엔드 통합**
-- 클라이언트 설정만 있음 (`api/supabase.ts`)
-- 필요 기능:
-  - 사용자 인증 (회원가입/로그인)
-  - 카드 클라우드 동기화
-  - 학습 통계 백업
-  - 기기 간 데이터 이전
+**에러 바운더리 추가**
+- 앱 어디에도 ErrorBoundary 없음
+- 글로벌 에러 바운더리 + 폴백 UI 필요
+
+**단위 테스트 작성**
+- `.test.ts`, `.spec.ts`, `__tests__/` 전무
+- SM-2, 카드 생성, 진도 계산 핵심 로직 테스트 필요
+
+### P1 — 런칭 후 1개월 내
+
+**Ear Training 콘텐츠 확장**
+- 43개 WAV 중 5개(개방현)만 사용 → 나머지 38개 음 활성화
 
 **Push Notifications**
-- 일일 복습 리마인더
-- 스트릭 유지 알림
-- expo-notifications 통합 필요
+- expo-notifications 통합
+- 일일 복습 리마인더, 스트릭 유지 알림
 
-**Achievement 시스템**
-- 배지 및 마일스톤
-- 7일/30일/100일 스트릭 보상
-- 레벨별 마스터 배지
+**퀴즈 정답/오답 햅틱 피드백**
+- 배지 달성 시 햅틱은 동작하지만, 퀴즈 정답/오답 시 햅틱 없음
 
-**Mix 모드**
-- 현재 홈 화면의 "복습 시작" CTA는 항상 note 퀴즈로만 이동
-- due 카드가 있는 모든 레벨을 섞어서 출제하는 기능 필요
+**Supabase 클라우드 동기화**
+- 클라이언트 설정만 있음 (`api/supabase.ts`)
+- 카드 데이터 백업, 기기 간 이전 필요
+
+### 기술 부채
+
+**재사용 프렛보드 컴포넌트**
+- 각 퀴즈 화면에 프렛보드 코드 중복 → 통합 컴포넌트 필요
+
+**Dead Supabase 코드 정리**
+- MMKV로 완전 이전했지만 import 참조가 남아 있음
+
+**애널리틱스 인프라**
+- 이벤트 트래킹, 세션 기록, 퍼널 분석 전무
+- Mixpanel 또는 Amplitude 연동 필요
 
 ---
 
@@ -423,6 +462,7 @@ npm run typecheck     # TypeScript 타입 체크
 | `app/(tabs)/settings.tsx` | 설정 화면: 프로필, 학습 목표, 접근성 ✅ |
 | `app/quiz/*.tsx` | 각 레벨 퀴즈 (음/인터벌/스케일/귀) |
 | `hooks/useSpacedRepetition.ts` | SM-2 카드 CRUD & 리뷰 로직 |
+| `hooks/useSmartRecommendation.ts` | 스마트 모드 추천 (due 카드/진행률 기반) |
 | `stores/useAppStore.ts` | 전역 상태 (레벨, 통계) |
 | `utils/constants.ts` | 모든 디자인 토큰 |
 | `utils/music.ts` | 음 계산 (MIDI, 위치, 인터벌) |
@@ -440,31 +480,33 @@ npm run typecheck     # TypeScript 타입 체크
 
 ### Phase 1: 환경 이해
 
-- [ ] 코드베이스 전체 읽기 (특히 홈/연습/마스터리/설정 화면, 퀴즈 구조)
+- [ ] 코드베이스 전체 읽기 (홈/연습/마스터리/설정, 퀴즈 4개 모드)
 - [ ] Expo Router 문서 (탭/스택) 읽기
 - [ ] SM-2 알고리즘 이해 (`sm2.ts` + `useSpacedRepetition.ts`)
+- [ ] 스마트 추천 로직 이해 (`useSmartRecommendation.ts`)
+- [ ] 배지 시스템 이해 (useAppStore 내 badge 관련 로직)
 - [ ] `npm run lint` / `npm run typecheck` 실행 확인
-- [ ] cardGenerator.ts 동적 카드 생성 로직 이해
 
-### Phase 2: Supabase 백엔드 통합
+### Phase 2: 기능 완성 (P0)
 
-- [ ] Supabase 테이블 설계 (users, flashcards, reviews)
-- [ ] 사용자 인증 구현 (회원가입/로그인)
-- [ ] React Query 쿼리 작성 (GET /cards, POST /review)
-- [ ] 카드 클라우드 동기화
-- [ ] 기기 간 데이터 이전
+- [ ] Mix 모드 실제 구현 (Practice 화면 스텁 → 크로스모드 퀴즈)
+- [ ] 퀴즈 중단 확인 모달 추가 (QuizHeader.tsx)
+- [ ] 에러 바운더리 추가 (글로벌 + 폴백 UI)
+- [ ] SM-2 / 카드 생성 / 진도 계산 단위 테스트 작성
 
-### Phase 3: 리텐션 기능
+### Phase 3: 콘텐츠 & 리텐션
 
+- [ ] Ear Training 전체 음 활성화 (5개 → 43개)
+- [ ] 퀴즈 정답/오답 햅틱 피드백 추가
 - [ ] Push Notifications (expo-notifications 통합)
-- [ ] 일일 복습 리마인더
-- [ ] 스트릭 유지 알림
+- [ ] 스트릭 마일스톤 축하 연출
 
-### Phase 4: 확장 기능
+### Phase 4: 인프라 & 수익화
 
-- [ ] Mix 모드 구현 (복습 시작 시 모든 레벨 섞기)
-- [ ] Achievement 시스템 (배지, 마일스톤)
-- [ ] 재사용 가능한 Fretboard 컴포넌트 (중복 제거)
+- [ ] 애널리틱스 연동 (Mixpanel/Amplitude)
+- [ ] Supabase 클라우드 동기화
+- [ ] RevenueCat 연동 (구독 시스템)
+- [ ] Free/Pro 기능 게이팅
 
 ---
 
@@ -513,9 +555,9 @@ const cy = padY + string * stringH;
 
 ---
 
-**최종 업데이트**: 2026-02-16
-**상태**: MVP 완성 (마스터리/설정/오디오/동적 카드 생성 완료)
-**V5.2 와이어프레임 기준 준수**
+**최종 업데이트**: 2026-02-17
+**상태**: MVP 완성 (핵심 학습 플로우, 스마트 추천, 배지, 온보딩, 일일 목표 시각화 완료)
 **한글 UI + 영문 코드**
+**교차검증 완료**: 2026-02-17 (코드베이스 직접 대조 후 업데이트)
 
 더 자세한 개발 가이드는 `DEVELOPMENT.md` 참조.
