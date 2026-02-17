@@ -2,6 +2,7 @@ import type { Router } from 'expo-router';
 import type { TrackId } from '@/config/tracks';
 import type { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
+import { usePhaseStore } from '@/stores/usePhaseStore';
 import type { FretPosition } from '@/types/music';
 
 type SpacedRepetitionHook = ReturnType<typeof useSpacedRepetition>;
@@ -22,6 +23,7 @@ interface RecordQuizAnswerOptions {
  * 2. Adding card to spaced repetition system
  * 3. Recording review in SM-2 algorithm
  * 4. Updating daily statistics
+ * 5. Recording phase progression (for note/scale tracks)
  */
 export function recordQuizAnswer(options: RecordQuizAnswerOptions): void {
   const { cardId, trackId, isCorrect, questionData, recordAnswer, addCard, recordReview } = options;
@@ -41,6 +43,12 @@ export function recordQuizAnswer(options: RecordQuizAnswerOptions): void {
 
   // 4. Update daily statistics
   useAppStore.getState().incrementReview(isCorrect);
+
+  // 5. Phase progression (for note/scale tracks)
+  if (trackId === 'note' || trackId === 'scale') {
+    const phaseStore = usePhaseStore.getState();
+    phaseStore.recordPhaseAnswer(trackId, isCorrect);
+  }
 }
 
 interface NavigateToCompletionOptions {
