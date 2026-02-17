@@ -145,6 +145,7 @@
       "unlockHint": "Lv.1 음 위치 80% 달성 시 → 전체 음 모드 해금",
       "basicMode": "기초 모드"
     },
+    "goalAchieved": "오늘 목표 달성! 🎉",
     "completion": {
       "sessionComplete": "세션 완료!",
       "score": "{{correct}}/{{total}}개 정답",
@@ -173,6 +174,15 @@
       "daily": "일일 목표",
       "dailyDesc": "하루에 복습할 카드 수",
       "cards": "{{count}}장"
+    },
+    "notifications": {
+      "title": "알림",
+      "dailyReminder": "복습 알림",
+      "dailyReminderDesc": "복습할 카드가 있을 때 알림을 받습니다",
+      "reminderTime": "알림 시간",
+      "enableInSettings": "시스템 설정에서 알림 허용 →",
+      "permissionDenied": "알림이 비활성화되었습니다",
+      "permissionDeniedMessage": "복습 알림을 받으려면 기기 설정에서 알림을 허용해주세요."
     },
     "accessibility": {
       "title": "접근성",
@@ -246,7 +256,19 @@
     "levelShort": "Lv.{{num}}",
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
-    "english": "English"
+    "english": "English",
+    "openSettings": "설정 열기",
+    "cancel": "취소"
+  },
+  "notifications": {
+    "dailyReminder": {
+      "title": "프렛보드 연습 시간이에요! 🎸",
+      "body": "복습할 카드가 {{count}}장 있어요 (약 {{minutes}}분)"
+    },
+    "streakAlert": {
+      "title": "{{count}}일 연속 기록을 지켜요! 🔥",
+      "body": "지금 빠르게 복습하고 연속 기록을 유지하세요"
+    }
   },
   "badges": {
     "beginner": "입문",

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import {
   Alert,
+  Linking,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -13,6 +14,9 @@ import {
 import Svg, { Circle, Path } from 'react-native-svg';
 import i18n from '@/i18n';
 import { useAppStore } from '@/stores/useAppStore';
+import { useNotifications } from '@/hooks/useNotifications';
+import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
+import { TimePickerRow } from '@/components/settings/TimePickerRow';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 // ─── User icon ───
@@ -50,6 +54,24 @@ function TargetIcon({ size = 20 }: { size?: number }) {
       <Circle cx={12} cy={12} r={10} />
       <Circle cx={12} cy={12} r={6} />
       <Circle cx={12} cy={12} r={2} />
+    </Svg>
+  );
+}
+
+// ─── Bell icon ───
+function BellIcon({ size = 20 }: { size?: number }) {
+  return (
+    <Svg
+      width={size}
+      height={size}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={COLORS.level3}
+      strokeWidth={2}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+    >
+      <Path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 0 1-3.46 0" />
     </Svg>
   );
 }
@@ -120,6 +142,8 @@ export default function SettingsScreen() {
   const { settings, updateSettings } = useAppStore();
   const [isEditingUsername, setIsEditingUsername] = useState(false);
   const [tempUsername, setTempUsername] = useState(settings.username);
+  const { scheduleAllNotifications } = useNotifications();
+  const { requestPermissions } = useNotificationPermissions();
 
   // Save username
   const saveUsername = () => {
@@ -133,6 +157,53 @@ export default function SettingsScreen() {
 
   // Daily goal options
   const dailyGoalOptions = [10, 20, 30, 50];
+
+  // Notification handlers
+  const handleToggleNotifications = async (enabled: boolean) => {
+    if (enabled && !settings.notifications.permissionGranted) {
+      // Request permission if not granted
+      const { status } = await requestPermissions();
+      if (status !== 'granted') {
+        Alert.alert(
+          t('settings.notifications.permissionDenied'),
+          t('settings.notifications.permissionDeniedMessage')
+        );
+        return;
+      }
+
+      updateSettings({
+        notifications: {
+          ...settings.notifications,
+          enabled: true,
+          permissionGranted: true,
+        },
+      });
+    } else {
+      updateSettings({
+        notifications: {
+          ...settings.notifications,
+          enabled,
+        },
+      });
+    }
+
+    await scheduleAllNotifications();
+  };
+
+  const handleTimeChange = async (newTime: string) => {
+    updateSettings({
+      notifications: {
+        ...settings.notifications,
+        dailyReminderTime: newTime,
+      },
+    });
+
+    await scheduleAllNotifications();
+  };
+
+  const handleOpenSystemSettings = () => {
+    Linking.openSettings();
+  };
 
   return (
     <View style={s.container}>
@@ -235,6 +306,49 @@ export default function SettingsScreen() {
                 </Pressable>
               ))}
             </View>
+          </View>
+        </View>
+
+        {/* ─── Notifications section ─── */}
+        <View style={s.section}>
+          <View style={s.sectionHeader}>
+            <BellIcon size={20} />
+            <Text style={s.sectionTitle}>{t('settings.notifications.title')}</Text>
+          </View>
+
+          <View style={s.card}>
+            <View style={s.settingRow}>
+              <View style={{ flex: 1 }}>
+                <Text style={s.settingLabel}>{t('settings.notifications.dailyReminder')}</Text>
+                <Text style={s.settingDesc}>{t('settings.notifications.dailyReminderDesc')}</Text>
+              </View>
+              <Switch
+                value={settings.notifications.enabled}
+                onValueChange={handleToggleNotifications}
+                disabled={!settings.notifications.permissionGranted}
+                trackColor={{ false: COLORS.border, true: `${COLORS.level3}80` }}
+                thumbColor={settings.notifications.enabled ? COLORS.level3 : COLORS.textSecondary}
+              />
+            </View>
+
+            {!settings.notifications.permissionGranted && (
+              <Pressable style={s.permissionHint} onPress={handleOpenSystemSettings}>
+                <Text style={s.permissionHintText}>
+                  {t('settings.notifications.enableInSettings')}
+                </Text>
+              </Pressable>
+            )}
+
+            {settings.notifications.enabled && settings.notifications.permissionGranted && (
+              <>
+                <View style={s.divider} />
+                <TimePickerRow
+                  label={t('settings.notifications.reminderTime')}
+                  value={settings.notifications.dailyReminderTime}
+                  onChange={handleTimeChange}
+                />
+              </>
+            )}
           </View>
         </View>
 
@@ -568,6 +682,16 @@ const s = StyleSheet.create({
     height: 1,
     backgroundColor: COLORS.border,
     marginVertical: SPACING.xs,
+  },
+
+  // Notifications
+  permissionHint: {
+    paddingTop: SPACING.sm,
+    paddingBottom: SPACING.xs,
+  },
+  permissionHintText: {
+    fontSize: FONT_SIZE.sm,
+    color: COLORS.level3,
   },
 
   // Footer

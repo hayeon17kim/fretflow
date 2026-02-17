@@ -13,7 +13,21 @@
       "backgroundColor": "#0D0D0F"
     },
     "scheme": "fretflow",
-    "plugins": ["expo-router"],
+    "plugins": [
+      "expo-router",
+      [
+        "expo-notifications",
+        {
+          "icon": "./assets/notification-icon.png",
+          "color": "#A78BFA"
+        }
+      ]
+    ],
+    "notification": {
+      "icon": "./assets/notification-icon.png",
+      "color": "#A78BFA",
+      "androidMode": "default"
+    },
     "ios": {
       "bundleIdentifier": "com.fretflow.app",
       "supportsTablet": true
@@ -25,7 +39,8 @@
       },
       "package": "com.fretflow.app",
       "edgeToEdgeEnabled": true,
-      "predictiveBackGestureEnabled": false
+      "predictiveBackGestureEnabled": false,
+      "permissions": ["android.permission.POST_NOTIFICATIONS"]
     },
     "web": {
       "favicon": "./assets/favicon.png"

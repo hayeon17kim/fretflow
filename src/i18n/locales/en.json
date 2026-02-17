@@ -145,6 +145,7 @@
       "unlockHint": "Achieve 80% in Lv.1 Note Position → Unlock all notes mode",
       "basicMode": "Basic Mode"
     },
+    "goalAchieved": "Daily goal achieved! 🎉",
     "completion": {
       "sessionComplete": "Session Complete!",
       "score": "{{correct}}/{{total}} correct",
@@ -173,6 +174,15 @@
       "daily": "Daily Goal",
       "dailyDesc": "Number of cards to review per day",
       "cards": "{{count}} cards"
+    },
+    "notifications": {
+      "title": "Notifications",
+      "dailyReminder": "Daily Review Reminder",
+      "dailyReminderDesc": "Get reminded when cards are ready to review",
+      "reminderTime": "Reminder Time",
+      "enableInSettings": "Enable notifications in system settings →",
+      "permissionDenied": "Notifications Disabled",
+      "permissionDeniedMessage": "To receive review reminders, please enable notifications in your device settings."
     },
     "accessibility": {
       "title": "Accessibility",
@@ -246,7 +256,19 @@
     "levelShort": "Lv.{{num}}",
     "progress": "{{current}}/{{total}}",
     "korean": "한국어",
-    "english": "English"
+    "english": "English",
+    "openSettings": "Open Settings",
+    "cancel": "Cancel"
+  },
+  "notifications": {
+    "dailyReminder": {
+      "title": "Time for Fretboard Practice! 🎸",
+      "body": "You have {{count}} cards ready to review (~{{minutes}} min)"
+    },
+    "streakAlert": {
+      "title": "Don't break your {{count}}-day streak! 🔥",
+      "body": "Quick review now to keep your streak alive"
+    }
   },
   "badges": {
     "beginner": "Beginner",

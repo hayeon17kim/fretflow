@@ -1,5 +1,6 @@
 import { Platform } from 'react-native';
 import { create, type StateCreator } from 'zustand';
+import * as Haptics from 'expo-haptics';
 import { appStorage } from '@/utils/storage';
 import type { LevelId } from '@/config/levels';
 import type { BadgeLevel } from '@/utils/badges';
@@ -40,7 +41,10 @@ interface AppState {
     cardsReviewed: number;
     correctCount: number;
     streak: number;
+    bestStreak: number;
     lastReviewDate: string | null; // ISO date (YYYY-MM-DD)
+    goalAchievedToday: boolean;
+    lastGoalAchievedDate: string | null; // ISO date (YYYY-MM-DD)
   };
   incrementReview: (correct: boolean) => void;
   resetDailyStats: () => void;
@@ -55,6 +59,12 @@ interface AppState {
     username: string;
     dailyGoal: number; // 일일 목표 카드 수
     vibrationEnabled: boolean;
+    notifications: {
+      enabled: boolean;
+      dailyReminderTime: string; // "HH:mm" format
+      permissionGranted: boolean;
+      lastPermissionRequest: string | null;
+    };
   };
   updateSettings: (settings: Partial<AppState['settings']>) => void;
 
@@ -86,46 +96,55 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
     cardsReviewed: 0,
     correctCount: 0,
     streak: 0,
+    bestStreak: 0,
     lastReviewDate: null,
+    goalAchievedToday: false,
+    lastGoalAchievedDate: null,
   },
   incrementReview: (correct) => {
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const state = get();
-    const lastReview = state.todayStats.lastReviewDate;
+    const settings = state.settings;
 
-    let newStreak = state.todayStats.streak;
+    // If date changed, reset daily stats first
+    if (state.todayStats.lastReviewDate !== today && state.todayStats.lastReviewDate !== null) {
+      get().checkAndResetDailyStats();
+    }
 
-    // If this is the first review of the day, handle streak logic
-    if (lastReview !== today) {
-      if (!lastReview) {
-        // First time ever or after reset - start new streak
-        newStreak = 1;
-      } else {
-        // Calculate days difference
-        const lastDate = new Date(lastReview);
-        const todayDate = new Date(today);
-        const daysDiff = Math.floor(
-          (todayDate.getTime() - lastDate.getTime()) / (1000 * 60 * 60 * 24),
-        );
+    const currentState = get(); // Get fresh state after potential reset
+    const newCardsReviewed = currentState.todayStats.cardsReviewed + 1;
+    const wasGoalAchieved = currentState.todayStats.goalAchievedToday;
+    const isGoalAchieved = newCardsReviewed >= settings.dailyGoal;
 
-        if (daysDiff === 1) {
-          // Consecutive day - increment streak
-          newStreak = state.todayStats.streak + 1;
-        } else if (daysDiff > 1) {
-          // Missed days - reset to 1 (new streak starts today)
-          newStreak = 1;
-        }
+    let newStreak = currentState.todayStats.streak;
+    let newBestStreak = currentState.todayStats.bestStreak;
+    let goalAchievedToday = wasGoalAchieved;
+    let lastGoalAchievedDate = currentState.todayStats.lastGoalAchievedDate;
+
+    // If goal is achieved for the first time today
+    if (!wasGoalAchieved && isGoalAchieved) {
+      newStreak = currentState.todayStats.streak + 1;
+      newBestStreak = Math.max(newBestStreak, newStreak);
+      goalAchievedToday = true;
+      lastGoalAchievedDate = today;
+
+      // Trigger haptic feedback if enabled
+      if (settings.vibrationEnabled) {
+        Haptics.notificationAsync(Haptics.NotificationFeedbackType.Success);
       }
     }
 
-    set((state) => ({
+    set({
       todayStats: {
-        cardsReviewed: state.todayStats.cardsReviewed + 1,
-        correctCount: state.todayStats.correctCount + (correct ? 1 : 0),
+        cardsReviewed: newCardsReviewed,
+        correctCount: currentState.todayStats.correctCount + (correct ? 1 : 0),
         streak: newStreak,
+        bestStreak: newBestStreak,
         lastReviewDate: today,
+        goalAchievedToday,
+        lastGoalAchievedDate,
       },
-    }));
+    });
   },
   resetDailyStats: () =>
     set({
@@ -133,26 +152,42 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
         cardsReviewed: 0,
         correctCount: 0,
         streak: 0,
+        bestStreak: 0,
         lastReviewDate: null,
+        goalAchievedToday: false,
+        lastGoalAchievedDate: null,
       },
     }),
   checkAndResetDailyStats: () => {
     const state = get();
     const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD
     const lastReview = state.todayStats.lastReviewDate;
+    const lastGoalAchieved = state.todayStats.lastGoalAchievedDate;
 
     // If no last review date or it's the same day, do nothing
     if (!lastReview || lastReview === today) {
       return;
     }
 
-    // If it's a new day, reset daily counters
-    // Note: Streak logic is handled in incrementReview on first review
+    // Calculate yesterday's date
+    const yesterday = new Date();
+    yesterday.setDate(yesterday.getDate() - 1);
+    const yesterdayStr = yesterday.toISOString().split('T')[0];
+
+    // If yesterday's goal was not achieved, reset streak to 0
+    let newStreak = state.todayStats.streak;
+    if (lastGoalAchieved !== yesterdayStr) {
+      newStreak = 0;
+    }
+
+    // Reset daily counters for the new day
     set({
       todayStats: {
         ...state.todayStats,
         cardsReviewed: 0,
         correctCount: 0,
+        goalAchievedToday: false,
+        streak: newStreak,
       },
     });
   },
@@ -164,6 +199,12 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
     username: '기타 학습자',
     dailyGoal: 20,
     vibrationEnabled: true,
+    notifications: {
+      enabled: true,
+      dailyReminderTime: '19:00',
+      permissionGranted: false,
+      lastPermissionRequest: null,
+    },
   },
   updateSettings: (newSettings) =>
     set((state) => ({
