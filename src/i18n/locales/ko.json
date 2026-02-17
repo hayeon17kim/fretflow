@@ -116,13 +116,17 @@
       "confirmButton": "확인 ({{count}}개 선택)",
       "scaleNames": {
         "major": "메이저",
+        "natural-minor": "내추럴 마이너",
         "pentatonic-major": "펜타토닉 메이저",
-        "pentatonic-minor": "펜타토닉 마이너"
+        "pentatonic-minor": "펜타토닉 마이너",
+        "blues": "블루스"
       },
       "patternHints": {
         "major": "메이저 스케일은 밝고 긍정적인 느낌의 7음 음계예요. 도레미파솔라시도!",
+        "natural-minor": "내추럴 마이너는 어둡고 서정적인 느낌의 7음 음계예요. 슬픈 멜로디의 기본!",
         "pentatonic-major": "펜타토닉 메이저는 5음 음계로 밝은 느낌이에요. 블루스와 록에서 자주 쓰여요.",
-        "pentatonic-minor": "펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!"
+        "pentatonic-minor": "펜타토닉 마이너는 5음 음계로 강렬하고 감성적인 느낌이에요. 록 솔로의 기본!",
+        "blues": "블루스 스케일은 펜타토닉 마이너에 블루노트(b5)를 추가한 6음 음계예요. 블루지한 사운드의 핵심!"
       },
       "position": "{{number}}포지션"
     },

@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { StyleSheet, Text, View } from 'react-native';
+import { StyleSheet, Text, useWindowDimensions, View } from 'react-native';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { COLORS } from '@/utils/constants';
 import { FretGrid } from './fretboard/FretGrid';
@@ -31,7 +31,7 @@ interface FretboardProps {
 
 export function Fretboard({
   startFret = 0,
-  endFret = 4,
+  endFret = 15,
   highlights = [],
   onTap,
   tappable = false,
@@ -39,17 +39,23 @@ export function Fretboard({
   showOnboarding = false,
 }: FretboardProps) {
   const { t } = useTranslation();
+  const { width: screenWidth } = useWindowDimensions();
   const [pressedCell, setPressedCell] = useState<string | null>(null);
 
   // Calculations
   const fretCount = endFret - startFret + 1;
   const autoCompact = compact || fretCount > 6;
 
+  // padding(12*2) + border(1*2) + stringColumn(~28) = ~54px overhead
+  const availableWidth = screenWidth - 54;
   const cellW = useMemo(
-    () => (autoCompact ? Math.min(28, Math.floor(260 / fretCount)) : 36),
-    [autoCompact, fretCount],
+    () =>
+      autoCompact
+        ? Math.max(20, Math.min(32, Math.floor(availableWidth / fretCount)))
+        : 36,
+    [autoCompact, fretCount, availableWidth],
   );
-  const cellH = autoCompact ? 22 : 28;
+  const cellH = autoCompact ? 30 : 34;
   const dotSize = autoCompact ? 18 : 24;
 
   const handleCellPress = useCallback(

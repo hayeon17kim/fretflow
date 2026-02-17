@@ -22,7 +22,7 @@ export const COLORS = {
   selected: '#A78BFA',
 
   // 프렛보드
-  fretLine: '#3A3A40',
+  fretLine: '#68686F',
   fretDot: '#FFFFFF',
   openString: '#636366',
 } as const;

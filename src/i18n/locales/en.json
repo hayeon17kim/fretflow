@@ -116,13 +116,17 @@
       "confirmButton": "Confirm ({{count}} selected)",
       "scaleNames": {
         "major": "Major",
+        "natural-minor": "Natural Minor",
         "pentatonic-major": "Pentatonic Major",
-        "pentatonic-minor": "Pentatonic Minor"
+        "pentatonic-minor": "Pentatonic Minor",
+        "blues": "Blues"
       },
       "patternHints": {
         "major": "Major scale is a bright 7-note scale. Do-Re-Mi-Fa-Sol-La-Ti-Do!",
+        "natural-minor": "Natural minor is a dark, lyrical 7-note scale. The foundation of sad melodies!",
         "pentatonic-major": "Pentatonic major is a 5-note scale with a bright feel. Widely used in blues and rock.",
-        "pentatonic-minor": "Pentatonic minor is a 5-note scale with intense emotion. Foundation of rock solos!"
+        "pentatonic-minor": "Pentatonic minor is a 5-note scale with intense emotion. Foundation of rock solos!",
+        "blues": "Blues scale adds a blue note (b5) to pentatonic minor for a 6-note scale. The heart of bluesy sound!"
       },
       "position": "Position {{number}}"
     },

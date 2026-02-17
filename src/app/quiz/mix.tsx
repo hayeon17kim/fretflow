@@ -380,23 +380,31 @@ export default function QuizMixScreen() {
     return [];
   };
 
-  // Get fretboard range based on card type
+  // Get fretboard range based on card type — consistent window size
   const getFretRange = (): [number, number] => {
+    const MAX_FRET = 15;
     if (q.type === 'note') {
-      return [Math.max(0, q.fret - 2), Math.max(0, q.fret - 2) + 4];
+      const WINDOW = 10;
+      const ideal = Math.max(0, q.fret - 2);
+      const start = Math.min(ideal, Math.max(0, MAX_FRET - WINDOW));
+      return [start, Math.min(start + WINDOW, MAX_FRET)];
     }
     if (q.type === 'interval') {
       const minFret = Math.max(0, q.rootPosition.fret - 1);
-      const maxFret = Math.min(q.targetPosition.fret + 2, 15);
-      return [minFret, maxFret];
+      const maxFret = Math.min(q.targetPosition.fret + 2, MAX_FRET);
+      const WINDOW = Math.max(8, maxFret - minFret);
+      const start = Math.min(minFret, Math.max(0, MAX_FRET - WINDOW));
+      return [start, Math.min(start + WINDOW, MAX_FRET)];
     }
     if (q.type === 'scale') {
       const frets = q.correctPositions.map((p) => p.fret);
       const minFret = Math.min(...frets);
-      const maxFret = Math.min(Math.max(...frets) + 2, 15);
-      return [minFret, maxFret];
+      const maxFret = Math.min(Math.max(...frets) + 2, MAX_FRET);
+      const WINDOW = Math.max(8, maxFret - minFret);
+      const start = Math.min(minFret, Math.max(0, MAX_FRET - WINDOW));
+      return [start, Math.min(start + WINDOW, MAX_FRET)];
     }
-    return [0, 4];
+    return [0, 10];
   };
 
   const [startFret, endFret] = getFretRange();

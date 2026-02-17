@@ -57,6 +57,13 @@ export default function QuizNoteScreen() {
     });
   };
 
+  // Consistent fret window: always show FRET_WINDOW frets, shift left for high positions
+  const FRET_WINDOW = 8;
+  const MAX_FRET = 17;
+  const idealStart = Math.max(0, q.fret - 2);
+  const startFret = Math.min(idealStart, Math.max(0, MAX_FRET - FRET_WINDOW));
+  const endFret = Math.min(startFret + FRET_WINDOW, MAX_FRET);
+
   return (
     <View style={s.container}>
       <GoalAchievedToast visible={showGoalToast} />
@@ -74,8 +81,8 @@ export default function QuizNoteScreen() {
           {t('quiz.note.position', { string: q.string, fret: q.fret })}
         </Text>
         <Fretboard
-          startFret={Math.max(0, q.fret - 2)}
-          endFret={Math.max(0, q.fret - 2) + 4}
+          startFret={startFret}
+          endFret={endFret}
           highlights={[
             {
               string: q.string,

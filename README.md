@@ -17,12 +17,20 @@ Learning guitar means memorizing hundreds of note positions across the fretboard
 - **Intervals** - Learn interval patterns
 - **Scales** - Master scale shapes
 - **Ear Training** - Train your ear with audio
+- **Mix Mode** - Practice all tracks in one session
 
 ### 🧠 Smart Review System
 - SM-2 algorithm schedules reviews at optimal moments
 - Cards you find easy appear less often, difficult ones more frequently
 - Auto-adjusts based on response time
 - Track progress and study streaks
+
+### 📈 Tiered Progression System
+- 4 difficulty tiers per track that unlock as you master cards
+- **Note Position**: Basic (frets 0-5) → Extended (0-12) → Advanced (0-17) → Master (0-24)
+- **Intervals**: Progressive interval introduction based on mastery
+- **Scales**: Gradual scale pattern unlocking
+- **Ear Training**: Expanding note range as you improve
 
 ### 📱 Interactive Fretboard
 - Touch-responsive fretboard for hands-on practice
@@ -63,12 +71,14 @@ npm run format        # Format code
 src/
 ├── app/              # Expo Router screens
 │   ├── (tabs)/      # Home, Practice, Mastery, Settings
-│   └── quiz/        # Note, Interval, Scale, Ear quizzes
+│   ├── quiz/        # Note, Interval, Scale, Ear, Mix quizzes
+│   └── onboarding/  # 4-step onboarding flow
 ├── components/      # Reusable UI components
-├── hooks/           # useSpacedRepetition (SM-2)
+├── config/          # Tier configurations for each track
+├── hooks/           # useSpacedRepetition (SM-2), useQuizSession
 ├── stores/          # Zustand global state
-├── utils/           # SM-2, music theory, constants
-└── i18n/            # Internationalization
+├── utils/           # SM-2, music theory, card generation
+└── i18n/            # Internationalization (Korean/English)
 ```
 
 ## Documentation
@@ -80,22 +90,26 @@ src/
 ## Roadmap
 
 ### Completed (v1.0)
-- [x] 4 parallel learning tracks
+- [x] 4 parallel learning tracks (Note Position, Intervals, Scales, Ear Training)
+- [x] Mix mode (cross-track practice)
+- [x] Tiered progression system (4 tiers per track)
 - [x] SM-2 spaced repetition algorithm
 - [x] Audio playback for ear training
 - [x] Statistics and progress tracking
+- [x] Mastery dashboard with track progress
 - [x] Smart review recommendation system
 - [x] 4-step onboarding flow
 - [x] Daily goal and streak tracking
 - [x] Push notifications
 - [x] Achievement badges
+- [x] Dev mode for tier testing
 
 ### Planned (Post-Launch)
 - [ ] Analytics infrastructure
-- [ ] Ear training expansion (intervals, chords, rhythm)
-- [ ] Mix mode (cross-track practice)
+- [ ] Ear training expansion (chord recognition, rhythm training)
 - [ ] Monetization (subscription model)
 - [ ] Supabase backend integration
+- [ ] Social features (leaderboards, sharing)
 
 ---
 

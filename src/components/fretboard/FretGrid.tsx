@@ -5,7 +5,7 @@ import { COLORS, FRETBOARD } from '@/utils/constants';
 import type { FretHighlight } from '../Fretboard';
 import { FretCell } from './FretCell';
 
-const DOT_FRETS = [3, 5, 7, 9, 12, 15];
+const DOT_FRETS = [3, 5, 7, 9, 12, 15, 17];
 const DOUBLE_DOT_FRETS = [12];
 
 interface FretGridProps {
@@ -44,10 +44,35 @@ export function FretGrid({
     return map;
   }, [highlights]);
 
+  const gridHeight = cellHeight * FRETBOARD.totalStrings;
+
   return (
     <View style={s.grid}>
       {/* Nut (thick line at fret 0) */}
       {startFret === 0 && <View style={s.nut} />}
+
+      {/* Inlay dots — positioned between strings, not on them */}
+      {Array.from({ length: fretCount }, (_, fi) => {
+        const fret = startFret + fi;
+        if (!DOT_FRETS.includes(fret)) return null;
+        const isDouble = DOUBLE_DOT_FRETS.includes(fret);
+        const left = fi * cellWidth + cellWidth / 2 - 5; // 5 = dot half-width
+
+        if (isDouble) {
+          return (
+            <View key={`inlay-${fret}`} style={[s.inlayColumn, { left, height: gridHeight }]}>
+              <View style={[s.inlayDot, { top: gridHeight * 0.28 }]} />
+              <View style={[s.inlayDot, { top: gridHeight * 0.68 }]} />
+            </View>
+          );
+        }
+        return (
+          <View
+            key={`inlay-${fret}`}
+            style={[s.inlayDot, { left, top: gridHeight / 2 - 5 }]}
+          />
+        );
+      })}
 
       {FRETBOARD.standardTuning.map((_, si) => {
         const stringNum = (si + 1) as StringNumber;
@@ -73,13 +98,6 @@ export function FretGrid({
                 const highlight = highlightsMap.get(key);
                 const isPressed = pressedCell === key;
 
-                // Show inlay only on middle string (index 2)
-                const showInlay =
-                  si === 2 &&
-                  DOT_FRETS.includes(fret) &&
-                  !DOUBLE_DOT_FRETS.includes(fret) &&
-                  !highlight;
-
                 return (
                   <FretCell
                     key={fi}
@@ -94,7 +112,7 @@ export function FretGrid({
                     isLastString={isLastString}
                     highlight={highlight}
                     isPressed={isPressed}
-                    showInlay={showInlay}
+                    showInlay={false}
                     onPress={onCellPress}
                   />
                 );
@@ -111,7 +129,7 @@ const s = StyleSheet.create({
   grid: {
     flex: 1,
     borderWidth: 1,
-    borderColor: `${COLORS.textTertiary}40`,
+    borderColor: COLORS.fretLine,
     borderRadius: 4,
     overflow: 'hidden',
     position: 'relative',
@@ -134,6 +152,19 @@ const s = StyleSheet.create({
     top: '50%',
     backgroundColor: '#666',
     transform: [{ translateY: -0.5 }],
-    zIndex: 1,
+    zIndex: 0,
+  },
+  inlayColumn: {
+    position: 'absolute',
+    width: 10,
+    zIndex: 0,
+  },
+  inlayDot: {
+    position: 'absolute',
+    width: 10,
+    height: 10,
+    borderRadius: 5,
+    backgroundColor: `${COLORS.fretDot}55`,
+    zIndex: 0,
   },
 });

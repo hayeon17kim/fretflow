@@ -57,10 +57,9 @@ export const FretCell = memo(
                 : tappable && !highlight
                   ? 'rgba(255,255,255,0.02)'
                   : 'transparent',
-            borderRightWidth: 1,
-            borderRightColor: `${COLORS.textTertiary}35`,
-            borderBottomWidth: isLastString ? 0 : 1,
-            borderBottomColor: `${COLORS.bg}20`,
+            borderRightWidth: 1.5,
+            borderRightColor: COLORS.fretLine,
+            borderBottomWidth: 0,
           },
         ]}
       >

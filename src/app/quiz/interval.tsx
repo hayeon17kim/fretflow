@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
@@ -37,9 +37,17 @@ function adaptIntervalCard(
   const intervalNameKo = t(`quiz.interval.intervalNames.${card.answer}`);
   const patternHint = t(`quiz.interval.patternHints.${card.answer}`);
 
-  // Calculate fret range to show (show root - 1 to target + 2)
-  const minFret = Math.max(0, card.rootPosition.fret - 1);
-  const maxFret = Math.min(card.targetPosition.fret + 2, 15);
+  // Calculate fret range — consistent window so fretboard doesn't resize between questions
+  const MAX_FRET = 17;
+  const MIN_WINDOW = 8;
+  const naturalMin = Math.max(0, Math.min(card.rootPosition.fret, card.targetPosition.fret) - 1);
+  const naturalMax = Math.min(Math.max(card.rootPosition.fret, card.targetPosition.fret) + 2, MAX_FRET);
+  const span = naturalMax - naturalMin;
+  const window = Math.max(MIN_WINDOW, span);
+  // Center the window around the root/target, clamped to valid range
+  const idealStart = Math.max(0, naturalMin - Math.floor((window - span) / 2));
+  const startFret = Math.min(idealStart, Math.max(0, MAX_FRET - window));
+  const endFret = Math.min(startFret + window, MAX_FRET);
 
   return {
     id: card.id,
@@ -49,7 +57,7 @@ function adaptIntervalCard(
     answerNote,
     intervalName: `${intervalNameKo} ↑`,
     patternHint,
-    fretRange: [minFret, maxFret],
+    fretRange: [startFret, endFret],
   };
 }
 
@@ -59,10 +67,16 @@ export default function QuizIntervalScreen() {
   const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
+  // Stable reference so useQuizInit's useMemo doesn't regenerate cards on every render
+  const adaptCard = useCallback(
+    (card: IntervalQuestionCard) => adaptIntervalCard(card, t),
+    [t],
+  );
+
   // Initialize quiz with tier-based progression
   const { questions } = useQuizInit<TapIntervalQuestion>({
     trackId: 'interval',
-    adaptCard: (card: IntervalQuestionCard) => adaptIntervalCard(card, t),
+    adaptCard,
   });
 
   const {
@@ -273,6 +287,7 @@ const s = StyleSheet.create({
     borderRadius: 24,
     padding: SPACING.lg,
     borderWidth: 1.5,
+    overflow: 'hidden',
   },
   quizBadge: {
     alignSelf: 'center',

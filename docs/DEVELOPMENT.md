@@ -41,14 +41,22 @@ src/
 │   │   ├── _layout.tsx          # Tab bar layout
 │   │   ├── index.tsx            # Home screen
 │   │   ├── practice.tsx         # Practice screen
-│   │   ├── mastery.tsx          # Mastery tab (TODO)
-│   │   └── settings.tsx         # Settings tab (TODO)
+│   │   ├── mastery.tsx          # Mastery tab ✅
+│   │   └── settings.tsx         # Settings tab ✅
+│   ├── onboarding/              # Onboarding flow ✅
+│   │   ├── _layout.tsx          # Onboarding stack layout
+│   │   ├── index.tsx            # Welcome screen
+│   │   ├── mini-quiz.tsx        # Skill assessment
+│   │   ├── result.tsx           # Assessment results
+│   │   └── goal.tsx             # Daily goal setting
 │   └── quiz/                    # Quiz stack
 │       ├── _layout.tsx          # Quiz stack layout
-│       ├── note.tsx             # Track 1: Note Position Note position quiz
-│       ├── interval.tsx         # Track 2: Intervals Interval quiz
-│       ├── scale.tsx            # Track 3: Scales Scale quiz
-│       └── ear.tsx              # Track 4: Ear Training Ear training
+│       ├── note.tsx             # Track 1: Note Position
+│       ├── interval.tsx         # Track 2: Intervals
+│       ├── scale.tsx            # Track 3: Scales
+│       ├── ear.tsx              # Track 4: Ear Training
+│       ├── mix.tsx              # Mix mode (all tracks) ✅
+│       └── completion.tsx       # Quiz completion screen
 │
 ├── components/
 │   ├── Fretboard.tsx            # Reusable fretboard (TODO)
@@ -63,10 +71,18 @@ src/
 │
 ├── config/
 │   ├── routes.ts                # Route definitions
-│   └── tracks.ts                # Level configuration
+│   ├── tracks.ts                # Track configuration
+│   ├── notePositionTiers.ts     # Note position difficulty tiers
+│   ├── intervalTiers.ts         # Interval difficulty tiers
+│   ├── scaleTiers.ts            # Scale difficulty tiers
+│   └── earTrainingTiers.ts      # Ear training difficulty tiers
 │
 ├── hooks/
-│   └── useSpacedRepetition.ts   # SM-2 card management
+│   ├── useSpacedRepetition.ts   # SM-2 card management
+│   ├── useQuizSession.ts        # Quiz session state management
+│   ├── useEarTrainingAudio.ts   # Audio playback for ear training
+│   ├── useGoalAchievement.ts    # Daily goal tracking
+│   └── useNotifications.ts      # Push notification handling
 │
 ├── stores/
 │   └── useAppStore.ts           # Global app state
@@ -80,7 +96,10 @@ src/
 │   ├── music.ts                 # Music calculations
 │   ├── sm2.ts                   # SM-2 algorithm
 │   ├── storage.ts               # MMKV adapter
-│   └── cardGenerator.ts         # Dynamic card generation
+│   ├── cardGenerator.ts         # Dynamic card generation with tier support
+│   ├── quizHelpers.ts           # Quiz utility functions
+│   ├── devTools.ts              # Dev mode utilities (tier testing)
+│   └── earTrainingSounds.ts     # Audio file management
 │
 ├── i18n/
 │   ├── index.ts                 # i18n setup
@@ -155,7 +174,8 @@ FONT_SIZE = {
 ### File-Based Routing
 - Expo Router automatically generates routes from `src/app/`
 - Tab navigation: `(tabs)` group maintains simultaneous stacks
-- Quiz routes: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`
+- Quiz routes: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
+- Onboarding routes: `/onboarding`, `/onboarding/mini-quiz`, `/onboarding/result`, `/onboarding/goal`
 
 ### State Management
 **Zustand (useAppStore):**
@@ -188,17 +208,41 @@ FONT_SIZE = {
 - Minimum EF: 1.3
 - Initial interval: 1 day
 
-### Card Generation
+### Card Generation & Tiered Progression
 
 **Dynamic Card Generation (`cardGenerator.ts`):**
-Replaces MOCK_QUESTIONS with real-time card generation:
+Replaces MOCK_QUESTIONS with real-time card generation with progressive difficulty:
 
 ```typescript
-generateNoteCard()      // Note Position: Random fret position + 4 choices
-generateIntervalCard()  // Intervals: Root position + interval pattern
-generateScaleCard()     // Scales: Scale pattern + positions
-generateEarCard()       // Ear Training: Audio note (open strings)
+generateNoteCard(masteredCount)      // Note Position: Tiered fret range
+generateIntervalCard(masteredCount)  // Intervals: Progressive intervals
+generateScaleCard(masteredCount)     // Scales: Progressive scale patterns
+generateEarCard(masteredCount)       // Ear Training: Expanding note range
 ```
+
+**Tiered Difficulty System:**
+Each track has 4 tiers that unlock based on mastered card count:
+
+**Note Position Tiers** (`notePositionTiers.ts`):
+- Tier 1 (0 mastered): Frets 0-5 (open position)
+- Tier 2 (5 mastered): Frets 0-12 (first position to octave)
+- Tier 3 (15 mastered): Frets 0-17 (high positions)
+- Tier 4 (30 mastered): Frets 0-24 (full fretboard)
+
+**Interval Tiers** (`intervalTiers.ts`):
+- Tier 1: P1, P5, P8 (basics)
+- Tier 2: M3, P4 (common intervals)
+- Tier 3: m3, M6, m7, M7 (color tones)
+- Tier 4: m2, M2, m6, TT (advanced)
+
+**Scale Tiers** (`scaleTiers.ts`):
+- Tier 1: Major, Minor Pentatonic
+- Tier 2: Natural Minor, Blues
+- Tier 3: Dorian, Mixolydian
+- Tier 4: Phrygian, Lydian, Harmonic Minor
+
+**Ear Training Tiers** (`earTrainingTiers.ts`):
+- Progressive expansion of note range as user masters cards
 
 ## Development Workflow
 
@@ -269,15 +313,25 @@ const s = StyleSheet.create({
 ### ✅ Completed
 
 **Screens:**
-- Home (`index.tsx`) - Review cards, streak, track progress
-- Practice (`practice.tsx`) - Track cards, session options
-- Quiz screens - All 4 tracks functional
+- Home (`index.tsx`) - Daily review cards, streak tracking, track progress
+- Practice (`practice.tsx`) - 4 track cards + Mix mode, 3 session sizes (10/25/50)
+- Mastery (`mastery.tsx`) - Track progress dashboard with circular progress
+- Settings (`settings.tsx`) - Language, goals, notifications, dev mode
+- Onboarding flow - 4 steps (welcome, mini-quiz, results, goal setting)
+- Quiz screens - Note, Interval, Scale, Ear, Mix, Completion
 
 **Core Features:**
-- SM-2 spaced repetition system
-- Card generation (dynamic, no more MOCK_QUESTIONS)
-- Progress tracking
+- SM-2 spaced repetition system with quality-based scheduling
+- Tiered progression system (4 tiers per track)
+- Dynamic card generation with progressive difficulty
+- Mix mode (cross-track practice with smart shuffling)
+- Progress tracking and statistics
+- Daily goal achievement system with toast notifications
+- Streak tracking with badge system
+- Smart review recommendations
+- Push notifications for daily reminders
 - i18n support (Korean/English)
+- Dev mode for tier testing
 
 **Components:**
 - QuizHeader, AnswerGrid, QuizCard

@@ -1,5 +1,5 @@
 import { useLocalSearchParams } from 'expo-router';
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
 import type { TrackId } from '@/config/tracks';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { generateCardBatch } from '@/utils/cardGenerator';
@@ -16,6 +16,11 @@ export function useQuizInit<T = any>(options: UseQuizInitOptions<T>) {
   const params = useLocalSearchParams();
   const { getMasteredCards } = useSpacedRepetition();
 
+  // Keep latest adaptCard in a ref so it's never a useMemo dependency.
+  // This prevents card regeneration when callers pass inline functions.
+  const adaptCardRef = useRef(adaptCard);
+  adaptCardRef.current = adaptCard;
+
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize
     ? parseInt(params.sessionSize as string, 10)
@@ -25,16 +30,18 @@ export function useQuizInit<T = any>(options: UseQuizInitOptions<T>) {
   const masteredCount = getMasteredCards(trackId).length;
 
   // Generate cards for this session with tier-based difficulty
+  // NOTE: adaptCard intentionally excluded from deps — ref keeps it fresh
   const questions = useMemo(() => {
     const generatedCards = generateCardBatch(trackId, sessionSize, masteredCount);
 
-    // If there's a card adapter function, use it
-    if (adaptCard) {
-      return generatedCards.map((card) => adaptCard(card)) as T[];
+    const adapter = adaptCardRef.current;
+    if (adapter) {
+      return generatedCards.map((card) => adapter(card)) as T[];
     }
 
     return generatedCards as T[];
-  }, [trackId, sessionSize, masteredCount, adaptCard]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trackId, sessionSize, masteredCount]);
 
   return {
     questions,

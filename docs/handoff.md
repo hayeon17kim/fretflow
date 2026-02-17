@@ -7,7 +7,7 @@ FretFlow 프로젝트 핸드오프 문서
 
 ## 1. 프로젝트 개요
 
-FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 인터벌, 스케일 패턴, 귀 훈련을 4개 독립 학습 모드로 자유롭게 학습할 수 있도록 설계됨. (레벨 위계가 아닌 독립 영역)
+FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 인터벌, 스케일 패턴, 귀 훈련을 4개 독립 학습 트랙으로 자유롭게 학습하며, 각 트랙마다 4단계 티어 시스템으로 점진적 난이도 상승을 제공합니다. Mix Mode로 4개 트랙을 한 세션에서 복습 가능합니다.
 
 ### 기술 스택
 
@@ -38,13 +38,20 @@ src/
 │   │   ├── practice.tsx      # 연습 화면
 │   │   ├── mastery.tsx       # 마스터리 탭 ✅ 완성
 │   │   └── settings.tsx      # 설정 탭 ✅ 완성
-│   ├── onboarding.tsx       # 온보딩 플로우 (4단계) ✅
+│   ├── onboarding/           # 온보딩 플로우 (4단계) ✅
+│   │   ├── _layout.tsx       # 온보딩 스택 레이아웃
+│   │   ├── index.tsx         # 환영 화면
+│   │   ├── mini-quiz.tsx     # 실력 평가 미니 퀴즈
+│   │   ├── result.tsx        # 평가 결과
+│   │   └── goal.tsx          # 일일 목표 설정
 │   ├── quiz/
 │   │   ├── _layout.tsx       # 퀴즈 스택 레이아웃
 │   │   ├── note.tsx          # 음 위치 퀴즈
 │   │   ├── interval.tsx      # 인터벌 퀴즈
 │   │   ├── scale.tsx         # 스케일 퀴즈
-│   │   └── ear.tsx           # 귀 훈련
+│   │   ├── ear.tsx           # 귀 훈련
+│   │   ├── mix.tsx           # Mix Mode (4개 트랙 혼합) ✅ 완성
+│   │   └── completion.tsx    # 퀴즈 완료 화면
 │
 ├── components/
 │   ├── Fretboard.tsx         # 재사용 프렛보드 (TODO)
@@ -59,11 +66,19 @@ src/
 │
 ├── config/
 │   ├── routes.ts             # 라우트 정의
-│   └── levels.ts             # 레벨 설정
+│   ├── tracks.ts             # 트랙 설정
+│   ├── notePositionTiers.ts  # 음 위치 티어 (4단계)
+│   ├── intervalTiers.ts      # 인터벌 티어 (4단계)
+│   ├── scaleTiers.ts         # 스케일 티어 (4단계)
+│   └── earTrainingTiers.ts   # 귀 훈련 티어
 │
 ├── hooks/
 │   ├── useSpacedRepetition.ts  # SM-2 카드 관리
-│   └── useSmartRecommendation.ts  # 스마트 추천 (due 카드/진행률 기반)
+│   ├── useSmartRecommendation.ts  # 스마트 추천 (due 카드/진행률 기반)
+│   ├── useQuizSession.ts       # 퀴즈 세션 상태 관리
+│   ├── useEarTrainingAudio.ts  # 귀 훈련 오디오 재생
+│   ├── useGoalAchievement.ts   # 일일 목표 달성 추적
+│   └── useNotifications.ts     # 푸시 알림 처리
 │
 ├── stores/
 │   └── useAppStore.ts        # Zustand 전역 상태
@@ -77,7 +92,10 @@ src/
 │   ├── music.ts              # 음 계산 유틸
 │   ├── sm2.ts                # SM-2 알고리즘
 │   ├── storage.ts            # MMKV 어댑터
-│   └── cardGenerator.ts      # 동적 카드 생성 ✅ 완성
+│   ├── cardGenerator.ts      # 티어 기반 동적 카드 생성 ✅
+│   ├── quizHelpers.ts        # 퀴즈 헬퍼 함수
+│   ├── devTools.ts           # 개발자 모드 유틸 (티어 테스트)
+│   └── earTrainingSounds.ts  # 오디오 파일 관리
 │
 ├── i18n/
 │   ├── index.ts              # i18n 설정
@@ -161,7 +179,8 @@ FONT_SIZE = {
 
 - **Expo Router (file-based)**: `src/app/` 디렉토리가 자동으로 라우트 생성
 - **탭 네비게이션**: `(tabs)` 그룹으로 동시 스택 유지
-- **퀴즈 라우트**: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`
+- **퀴즈 라우트**: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
+- **온보딩 라우트**: `/onboarding`, `/onboarding/mini-quiz`, `/onboarding/result`, `/onboarding/goal`
 
 ### 상태관리
 
@@ -199,19 +218,43 @@ FONT_SIZE = {
 - 최소 EF: 1.3
 - 초기 interval: 1일
 
-### 카드 생성
+### 카드 생성 & 티어 시스템
 
-**동적 카드 생성 (`cardGenerator.ts`, 242 lines)**:
+**동적 카드 생성 (`cardGenerator.ts`)**:
 
 ```typescript
-generateNoteCard()      // Lv.1: 랜덤 프렛 위치 + 4지선다
-generateIntervalCard()  // Lv.2: 루트 위치 + 인터벌 패턴
-generateScaleCard()     // Lv.3: 스케일 패턴 + 위치들
-generateEarCard()       // Lv.4: 오디오 음 (개방현)
-generateCardBatch()     // 배치 생성 (세션 크기만큼)
+generateNoteCard(masteredCount)      // 티어별 프렛 범위
+generateIntervalCard(masteredCount)  // 티어별 인터벌 패턴
+generateScaleCard(masteredCount)     // 티어별 스케일 패턴
+generateEarCard(masteredCount)       // 티어별 음역 확장
 ```
 
-**MOCK_QUESTIONS 완전 제거됨** - 모든 퀴즈 화면이 동적 생성 사용
+**티어 기반 난이도 시스템**:
+
+각 트랙마다 마스터 카드 수에 따라 4단계 티어가 언락됩니다:
+
+**음 위치 티어 (`notePositionTiers.ts`)**:
+- Tier 1 (0개 마스터): 0-5 프렛 (오픈 포지션)
+- Tier 2 (5개 마스터): 0-12 프렛 (옥타브까지)
+- Tier 3 (15개 마스터): 0-17 프렛 (하이 포지션)
+- Tier 4 (30개 마스터): 0-24 프렛 (전체 프렛보드)
+
+**인터벌 티어 (`intervalTiers.ts`)**:
+- Tier 1: P1, P5, P8 (기본)
+- Tier 2: M3, P4 (일반적인 인터벌)
+- Tier 3: m3, M6, m7, M7 (컬러 톤)
+- Tier 4: m2, M2, m6, TT (고급)
+
+**스케일 티어 (`scaleTiers.ts`)**:
+- Tier 1: Major, Minor Pentatonic
+- Tier 2: Natural Minor, Blues
+- Tier 3: Dorian, Mixolydian
+- Tier 4: Phrygian, Lydian, Harmonic Minor
+
+**귀 훈련 티어 (`earTrainingTiers.ts`)**:
+- 마스터 카드 수에 따라 점진적으로 음역 확장
+
+**MOCK_QUESTIONS 완전 제거됨** - 모든 퀴즈 화면이 티어 기반 동적 생성 사용
 
 ---
 
@@ -233,9 +276,10 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 첫 실행 시 자동 라우팅
 
 **연습 (`/(tabs)/practice.tsx`)**
-- 모드별 카드로 펼침 (expand/collapse)
-- 예시 문제 표시
-- 세션 크기 옵션: Quick(10) / Focus(25) / Deep(50) — 실제 퀴즈에 전달됨 ✅
+- 4개 트랙 카드로 펼침 (expand/collapse)
+- 각 트랙별 예시 문제 표시
+- 세션 크기 옵션: Quick(10) / Focus(25) / Deep(50)
+- **Mix Mode 버튼** ✅ - 4개 트랙을 한 세션에서 연습
 
 **마스터리 (`/(tabs)/mastery.tsx`) ✅ 완성 (382 lines)**
 - 전체 통계 카드 (전체/마스터/약점 카드 수)
@@ -243,10 +287,12 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 약점 카드 섹션 (레벨별 분류)
 - i18n 지원 및 접근성 라벨
 
-**설정 (`/(tabs)/settings.tsx`) ✅ 완성 (580 lines)**
-- 프로필 섹션 (사용자명, 아바타 편집)
+**설정 (`/(tabs)/settings.tsx`) ✅ 완성**
+- 프로필 섹션 (사용자명)
 - 학습 목표 설정 (일일 목표: 10/20/30/50 카드)
+- 알림 설정 (푸시 알림, 시간 설정)
 - 접근성 옵션 (언어 선택: 한/영, 진동 토글)
+- **개발자 모드** ✅ - 티어 테스트용 마스터 카드 수 조정
 - 앱 정보 (버전, 라이선스, 개발자)
 
 **퀴즈 - 음 위치 (`/quiz/note.tsx`)**
@@ -269,11 +315,18 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 동적 카드 생성 (cardGenerator.ts)
 
 **퀴즈 - 귀 훈련 (`/quiz/ear.tsx`) ✅**
-- 재생 버튼 (37개 WAV 오디오 파일 전체 사용)
-- 5단계 티어 진행 시스템 (earTrainingTiers.ts)
-- 마스터 카드 수에 따라 점진적 언락 (5 → 14 → 21 → 34 → 37개)
+- 재생 버튼 (43개 WAV 오디오 파일)
+- 티어 진행 시스템 (earTrainingTiers.ts)
+- 마스터 카드 수에 따라 점진적 음역 확장
 - 4지선다 + 결과 피드백
 - 동적 카드 생성 (cardGenerator.ts)
+
+**퀴즈 - Mix Mode (`/quiz/mix.tsx`) ✅ 완성**
+- 4개 트랙을 한 세션에서 혼합 연습
+- 각 트랙별로 카드 균등 분배
+- 스마트 셔플링 (3개 이상 연속 동일 트랙 방지)
+- 트랙별 배지 표시 및 색상 구분
+- 각 트랙의 고유 UI 및 상호작용 방식 유지
 
 ### 컴포넌트 (완성)
 
@@ -295,17 +348,24 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 ### 유틸 & 훅
 
 - **useSpacedRepetition**: SM-2 카드 로직 (카드 CRUD, 리뷰 기록)
-- **useSmartRecommendation**: 스마트 추천 (due 카드 / 진행률 기반 모드 추천)
-- **sm2.ts**: 알고리즘 계산
+- **useSmartRecommendation**: 스마트 추천 (due 카드 / 진행률 기반 트랙 추천)
+- **useQuizSession**: 퀴즈 세션 상태 관리 (진행률, 정답수 추적)
+- **useEarTrainingAudio**: 귀 훈련 오디오 재생 관리
+- **useGoalAchievement**: 일일 목표 달성 토스트
+- **useNotifications**: 푸시 알림 권한 및 스케줄링
+- **sm2.ts**: SM-2 알고리즘 계산
 - **music.ts**: 음 계산 (MIDI, 위치 찾기 등)
 - **constants.ts**: 모든 디자인 토큰
-- **cardGenerator.ts**: 동적 카드 생성 (242 lines) ✅
+- **cardGenerator.ts**: 티어 기반 동적 카드 생성 ✅
+- **quizHelpers.ts**: 퀴즈 공통 헬퍼 함수
+- **devTools.ts**: 개발자 모드 유틸 (티어 테스트용)
+- **earTrainingSounds.ts**: 오디오 파일 매핑 및 관리
 
 ### 라우팅
 
 - 탭 네비게이션 (홈/연습/마스터리/설정)
-- 퀴즈 스택 (4개 모드별: note/interval/scale/ear)
-- 온보딩 플로우 (첫 실행 시)
+- 퀴즈 스택 (5개 모드: note/interval/scale/ear/mix)
+- 온보딩 플로우 (첫 실행 시 4단계)
 
 ---
 
@@ -319,12 +379,8 @@ generateCardBatch()     // 배치 생성 (세션 크기만큼)
 - 유저 행동 데이터 수집 및 분석 필요
 
 **Ear Training 추가 패턴**
-- 현재: 단일 음 듣기 (37개 전체 사용, 5단계 티어)
+- 현재: 단일 음 듣기 (43개 WAV 파일, 티어 기반 진행)
 - 향후: 인터벌 듣기, 코드 듣기, 리듬 패턴 등 추가 고려
-
-**Mix 모드 실제 구현**
-- Practice 화면에 Mix 버튼이 있지만 `router.push('/quiz/note')`로 하드코딩 (스텁)
-- 모든 모드의 due 카드를 섞어서 출제하는 interleaving practice 구현 필요
 
 **수익화 모델 구현**
 - RevenueCat 연동 (구독 시스템)
@@ -500,9 +556,9 @@ npm run typecheck     # TypeScript 타입 체크
 ### Phase 3: 데이터 & 인프라 (P2)
 
 - [ ] 애널리틱스 연동 (Mixpanel/Amplitude)
-- [ ] Ear Training 전체 음 활성화 (5개 → 43개)
-- [ ] Mix 모드 실제 구현 (크로스모드 퀴즈)
+- [ ] Ear Training 추가 패턴 (인터벌, 코드 듣기)
 - [ ] Supabase 클라우드 동기화
+- [ ] 학습 분석 인사이트 (일별/주별 트렌드, 정답률 변화)
 
 ### Phase 4: 수익화 (P2)
 

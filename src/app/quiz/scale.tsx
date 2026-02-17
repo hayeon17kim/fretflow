@@ -1,5 +1,5 @@
 import { useRouter } from 'expo-router';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
@@ -38,10 +38,19 @@ function adaptScaleCard(
   const scaleNameKo = t(`quiz.scale.scaleNames.${card.scaleName}`);
   const hint = t(`quiz.scale.patternHints.${card.scaleName}`);
 
-  // Calculate fret range from correctPositions
+  // Calculate fret range — consistent window, clamped to avoid overflow
+  const MAX_FRET = 17;
+  const MIN_WINDOW = 8;
+  const MAX_WINDOW = 10;
   const frets = card.correctPositions.map((p) => p.fret);
-  const minFret = Math.min(...frets);
-  const maxFret = Math.min(Math.max(...frets) + 2, 15);
+  const naturalMin = Math.max(0, Math.min(...frets) - 1);
+  const naturalMax = Math.min(Math.max(...frets) + 2, MAX_FRET);
+  const span = naturalMax - naturalMin;
+  const window = Math.max(MIN_WINDOW, Math.min(MAX_WINDOW, span));
+  // Center the window, clamped to valid range
+  const idealStart = Math.max(0, naturalMin - Math.floor((window - span) / 2));
+  const startFret = Math.min(idealStart, Math.max(0, MAX_FRET - window));
+  const endFret = Math.min(startFret + window, MAX_FRET);
 
   return {
     id: card.id,
@@ -51,7 +60,7 @@ function adaptScaleCard(
     rootNote: card.rootNote,
     rootPosition: card.rootPosition,
     positions: card.correctPositions,
-    fretRange: [minFret, maxFret],
+    fretRange: [startFret, endFret],
     hint,
   };
 }
@@ -70,10 +79,16 @@ export default function QuizScaleScreen() {
   const { addCard, recordReview } = useSpacedRepetition();
   const { showGoalToast } = useGoalAchievement();
 
+  // Stable reference so useQuizInit's useMemo doesn't regenerate cards on every render
+  const adaptCard = useCallback(
+    (card: ScaleQuestionCard) => adaptScaleCard(card, t),
+    [t],
+  );
+
   // Initialize quiz with tier-based progression
   const { questions } = useQuizInit<TapScaleQuestion>({
     trackId: 'scale',
-    adaptCard: (card: ScaleQuestionCard) => adaptScaleCard(card, t),
+    adaptCard,
   });
 
   const {
@@ -171,7 +186,7 @@ export default function QuizScaleScreen() {
 
     for (let s = 1; s <= 6; s++) {
       const str = s as StringNumber;
-      for (let f = 0; f <= 4; f++) {
+      for (let f = q.fretRange[0]; f <= q.fretRange[1]; f++) {
         const sel = isSelected(str, f);
         const isScale = isScalePos(str, f);
 
@@ -243,13 +258,8 @@ export default function QuizScaleScreen() {
         </View>
 
         <Text style={s.questionMain}>
-          {
-            t('quiz.scale.questionMain', {
-              scaleName: q.name,
-              position: q.position,
-            }).split(q.position)[0]
-          }
-          {q.name} <Text style={{ color: COLORS.track3 }}>{q.position}</Text>
+          {q.name}{' '}
+          <Text style={{ color: COLORS.track3 }}>{q.position}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
 
@@ -344,6 +354,7 @@ const s = StyleSheet.create({
     borderRadius: 24,
     padding: SPACING.lg,
     borderWidth: 1.5,
+    overflow: 'hidden',
   },
   quizBadge: {
     alignSelf: 'center',
