@@ -9,10 +9,9 @@ import {
   getAvailableSounds,
   parseNoteWithOctave,
 } from '@/config/earTrainingTiers';
-import { getAvailableIntervals } from '@/config/intervalTiers';
 import { getAvailableFretRange } from '@/config/notePositionTiers';
 import { getAvailableScales } from '@/config/scaleTiers';
-import type { FretPosition, IntervalName, NoteName, ScaleName } from '@/types/music';
+import type { FretPosition, NoteName, ScaleName } from '@/types/music';
 import { getNoteAtPosition } from './music';
 
 // ─── 유틸리티 함수 ───
@@ -72,95 +71,6 @@ export function generateNoteCard(masteredCount: number = 0): NoteQuestionCard {
     type: 'note',
     string,
     fret,
-    answer,
-    options,
-  };
-}
-
-// ─── 인터벌 (Interval) 카드 ───
-
-export interface IntervalQuestionCard {
-  id: string;
-  type: 'interval';
-  rootPosition: FretPosition;
-  targetPosition: FretPosition;
-  answer: IntervalName;
-  options: IntervalName[];
-}
-
-const INTERVAL_NAMES: IntervalName[] = [
-  'P1',
-  'm2',
-  'M2',
-  'm3',
-  'M3',
-  'P4',
-  'TT',
-  'P5',
-  'm6',
-  'M6',
-  'm7',
-  'M7',
-  'P8',
-];
-
-const INTERVAL_SEMITONES: Record<IntervalName, number> = {
-  P1: 0,
-  m2: 1,
-  M2: 2,
-  m3: 3,
-  M3: 4,
-  P4: 5,
-  TT: 6,
-  P5: 7,
-  m6: 8,
-  M6: 9,
-  m7: 10,
-  M7: 11,
-  P8: 12,
-};
-
-/**
- * Generate interval card with progressive difficulty
- * @param masteredCount Number of mastered interval cards (for tier unlocking)
- */
-export function generateIntervalCard(masteredCount: number = 0): IntervalQuestionCard {
-  // Get available intervals based on tier
-  const availableIntervals = getAvailableIntervals(masteredCount);
-
-  // Fallback if no intervals available
-  if (availableIntervals.length === 0) {
-    throw new Error('[CardGenerator] No intervals available');
-  }
-
-  // 루트 음 (3-9 프렛, 4-6번 줄에서 선택)
-  const rootString = (Math.floor(Math.random() * 3) + 4) as 4 | 5 | 6;
-  const rootFret = Math.floor(Math.random() * 7) + 3; // 3-9
-
-  // 목표 인터벌 선택 (티어별로 제한)
-  const answer = randomChoice(availableIntervals);
-  const semitones = INTERVAL_SEMITONES[answer];
-
-  // 목표 위치 계산 (같은 줄에서 위로)
-  const targetPosition: FretPosition = {
-    string: rootString,
-    fret: rootFret + semitones,
-  };
-
-  // 오답 생성 (available intervals에서만 선택)
-  const wrongIntervals = availableIntervals.filter((i) => i !== answer);
-  const selectedWrong = shuffle(wrongIntervals).slice(0, 3);
-  const options = shuffle([answer, ...selectedWrong]);
-
-  // Get note names for deterministic ID
-  const rootNote = getNoteAtPosition({ string: rootString, fret: rootFret });
-  const targetNote = getNoteAtPosition(targetPosition);
-
-  return {
-    id: `interval-${rootNote}-${targetNote}-${answer}`,
-    type: 'interval',
-    rootPosition: { string: rootString, fret: rootFret },
-    targetPosition,
     answer,
     options,
   };
@@ -335,13 +245,12 @@ export function generateEarCard(masteredCount: number = 0): EarQuestionCard {
  * @param masteredCount Number of mastered cards (for tier unlocking)
  */
 export function generateCardBatch(
-  type: 'note' | 'interval' | 'scale' | 'ear',
+  type: 'note' | 'scale' | 'ear',
   count: number,
   masteredCount: number = 0,
-): (NoteQuestionCard | IntervalQuestionCard | ScaleQuestionCard | EarQuestionCard)[] {
+): (NoteQuestionCard | ScaleQuestionCard | EarQuestionCard)[] {
   const generators = {
     note: () => generateNoteCard(masteredCount),
-    interval: () => generateIntervalCard(masteredCount),
     scale: () => generateScaleCard(masteredCount),
     ear: () => generateEarCard(masteredCount),
   };

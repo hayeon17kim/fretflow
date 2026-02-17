@@ -12,9 +12,8 @@ Learning guitar means memorizing hundreds of note positions across the fretboard
 
 ## Features
 
-### 🎯 4 Parallel Learning Tracks
+### 🎯 3 Parallel Learning Tracks
 - **Note Position** - Find notes on the fretboard
-- **Intervals** - Learn interval patterns
 - **Scales** - Master scale shapes
 - **Ear Training** - Train your ear with audio
 - **Mix Mode** - Practice all tracks in one session
@@ -28,7 +27,6 @@ Learning guitar means memorizing hundreds of note positions across the fretboard
 ### 📈 Tiered Progression System
 - 4 difficulty tiers per track that unlock as you master cards
 - **Note Position**: Basic (frets 0-5) → Extended (0-12) → Advanced (0-17) → Master (0-24)
-- **Intervals**: Progressive interval introduction based on mastery
 - **Scales**: Gradual scale pattern unlocking
 - **Ear Training**: Expanding note range as you improve
 
@@ -71,7 +69,7 @@ npm run format        # Format code
 src/
 ├── app/              # Expo Router screens
 │   ├── (tabs)/      # Home, Practice, Mastery, Settings
-│   ├── quiz/        # Note, Interval, Scale, Ear, Mix quizzes
+│   ├── quiz/        # Note, Scale, Ear, Mix quizzes
 │   └── onboarding/  # 4-step onboarding flow
 ├── components/      # Reusable UI components
 ├── config/          # Tier configurations for each track
@@ -90,7 +88,7 @@ src/
 ## Roadmap
 
 ### Completed (v1.0)
-- [x] 4 parallel learning tracks (Note Position, Intervals, Scales, Ear Training)
+- [x] 3 parallel learning tracks (Note Position, Scales, Ear Training)
 - [x] Mix mode (cross-track practice)
 - [x] Tiered progression system (4 tiers per track)
 - [x] SM-2 spaced repetition algorithm

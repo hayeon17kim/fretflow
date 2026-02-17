@@ -6,12 +6,6 @@ export interface NoteQuestion {
   position: FretPosition;
 }
 
-export interface IntervalQuestion {
-  type: 'interval';
-  from: FretPosition;
-  intervalName: IntervalName;
-}
-
 export interface ScaleQuestion {
   type: 'scale';
   scaleName: ScaleName;
@@ -26,7 +20,7 @@ export interface EarQuestion {
 }
 
 // Discriminated union
-export type QuizQuestion = NoteQuestion | IntervalQuestion | ScaleQuestion | EarQuestion;
+export type QuizQuestion = NoteQuestion | ScaleQuestion | EarQuestion;
 
 // Quiz state (used in all quiz screens)
 export type QuizState = 'question' | 'correct' | 'wrong';

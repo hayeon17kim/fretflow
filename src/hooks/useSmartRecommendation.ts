@@ -26,7 +26,6 @@ export function useSmartRecommendation(): RecommendationResult {
     // Calculate due cards for each track
     const trackDueCounts: Record<TrackId, number> = {
       note: getDueCards('note').length,
-      interval: getDueCards('interval').length,
       scale: getDueCards('scale').length,
       ear: getDueCards('ear').length,
     };
@@ -51,7 +50,6 @@ export function useSmartRecommendation(): RecommendationResult {
     // Priority 2: Track with lowest progress
     const trackProgress: Record<TrackId, number> = {
       note: getTrackProgress('note'),
-      interval: getTrackProgress('interval'),
       scale: getTrackProgress('scale'),
       ear: getTrackProgress('ear'),
     };

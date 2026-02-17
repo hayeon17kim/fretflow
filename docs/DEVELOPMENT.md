@@ -52,9 +52,8 @@ src/
 │   └── quiz/                    # Quiz stack
 │       ├── _layout.tsx          # Quiz stack layout
 │       ├── note.tsx             # Track 1: Note Position
-│       ├── interval.tsx         # Track 2: Intervals
-│       ├── scale.tsx            # Track 3: Scales
-│       ├── ear.tsx              # Track 4: Ear Training
+│       ├── scale.tsx            # Track 2: Scales
+│       ├── ear.tsx              # Track 3: Ear Training
 │       ├── mix.tsx              # Mix mode (all tracks) ✅
 │       └── completion.tsx       # Quiz completion screen
 │
@@ -73,7 +72,6 @@ src/
 │   ├── routes.ts                # Route definitions
 │   ├── tracks.ts                # Track configuration
 │   ├── notePositionTiers.ts     # Note position difficulty tiers
-│   ├── intervalTiers.ts         # Interval difficulty tiers
 │   ├── scaleTiers.ts            # Scale difficulty tiers
 │   └── earTrainingTiers.ts      # Ear training difficulty tiers
 │
@@ -126,10 +124,10 @@ COLORS = {
   textSecondary: '#8E8E93',    // Secondary text
 
   // Track colors
-  level1: '#4ADE80',           // Green (Note position track)
-  level2: '#A78BFA',           // Purple (Intervals track)
-  level3: '#60A5FA',           // Blue (Scales track)
-  level4: '#FB923C',           // Orange (Ear training track)
+  track1: '#4ADE80',           // Green (Note position track)
+  track2: '#60A5FA',           // Blue (Scales track)
+  track3: '#FB923C',           // Orange (Ear training track)
+  track4: '#A78BFA',           // Purple (Reserved)
 
   // State colors
   correct: '#4ADE80',
@@ -174,7 +172,7 @@ FONT_SIZE = {
 ### File-Based Routing
 - Expo Router automatically generates routes from `src/app/`
 - Tab navigation: `(tabs)` group maintains simultaneous stacks
-- Quiz routes: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
+- Quiz routes: `/quiz/note`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
 - Onboarding routes: `/onboarding`, `/onboarding/mini-quiz`, `/onboarding/result`, `/onboarding/goal`
 
 ### State Management
@@ -215,7 +213,6 @@ Replaces MOCK_QUESTIONS with real-time card generation with progressive difficul
 
 ```typescript
 generateNoteCard(masteredCount)      // Note Position: Tiered fret range
-generateIntervalCard(masteredCount)  // Intervals: Progressive intervals
 generateScaleCard(masteredCount)     // Scales: Progressive scale patterns
 generateEarCard(masteredCount)       // Ear Training: Expanding note range
 ```
@@ -228,12 +225,6 @@ Each track has 4 tiers that unlock based on mastered card count:
 - Tier 2 (5 mastered): Frets 0-12 (first position to octave)
 - Tier 3 (15 mastered): Frets 0-17 (high positions)
 - Tier 4 (30 mastered): Frets 0-24 (full fretboard)
-
-**Interval Tiers** (`intervalTiers.ts`):
-- Tier 1: P1, P5, P8 (basics)
-- Tier 2: M3, P4 (common intervals)
-- Tier 3: m3, M6, m7, M7 (color tones)
-- Tier 4: m2, M2, m6, TT (advanced)
 
 **Scale Tiers** (`scaleTiers.ts`):
 - Tier 1: Major, Minor Pentatonic
@@ -314,11 +305,11 @@ const s = StyleSheet.create({
 
 **Screens:**
 - Home (`index.tsx`) - Daily review cards, streak tracking, track progress
-- Practice (`practice.tsx`) - 4 track cards + Mix mode, 3 session sizes (10/25/50)
+- Practice (`practice.tsx`) - 3 track cards + Mix mode, 3 session sizes (10/25/50)
 - Mastery (`mastery.tsx`) - Track progress dashboard with circular progress
 - Settings (`settings.tsx`) - Language, goals, notifications, dev mode
 - Onboarding flow - 4 steps (welcome, mini-quiz, results, goal setting)
-- Quiz screens - Note, Interval, Scale, Ear, Mix, Completion
+- Quiz screens - Note, Scale, Ear, Mix, Completion
 
 **Core Features:**
 - SM-2 spaced repetition system with quality-based scheduling
@@ -342,8 +333,7 @@ const s = StyleSheet.create({
 
 **P2 Features:**
 - [ ] Analytics infrastructure (Mixpanel/Amplitude)
-- [ ] Ear training expansion (intervals, chords, rhythm patterns)
-- [ ] Mix mode implementation (cross-track practice, currently stub)
+- [ ] Ear training expansion (chords, rhythm patterns)
 - [ ] Monetization (RevenueCat subscription)
 - [ ] Supabase backend integration
   - User authentication
@@ -387,11 +377,11 @@ const s = StyleSheet.create({
 | `app/(tabs)/_layout.tsx` | Tab navigation structure |
 | `app/(tabs)/index.tsx` | Home screen |
 | `app/(tabs)/practice.tsx` | Practice screen |
-| `app/quiz/*.tsx` | Quiz screens (4 tracks) |
+| `app/quiz/*.tsx` | Quiz screens (3 tracks + mix) |
 | `hooks/useSpacedRepetition.ts` | SM-2 card CRUD & review logic |
 | `stores/useAppStore.ts` | Global state (track, stats) |
 | `utils/constants.ts` | All design tokens |
-| `utils/music.ts` | Music calculations (MIDI, positions, intervals) |
+| `utils/music.ts` | Music calculations (MIDI, positions) |
 | `utils/sm2.ts` | SM-2 algorithm implementation |
 | `utils/storage.ts` | MMKV adapter |
 | `utils/cardGenerator.ts` | Dynamic card generation |

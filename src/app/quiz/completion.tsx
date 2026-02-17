@@ -23,7 +23,7 @@ export default function QuizCompletionScreen() {
 
   const correct = Number(params.correct);
   const total = Number(params.total);
-  const trackId = params.trackId as 'note' | 'interval' | 'scale' | 'ear';
+  const trackId = params.trackId as 'note' | 'scale' | 'ear';
 
   const track = TRACKS.find((l) => l.id === trackId);
   const accuracy = Math.round((correct / total) * 100);

@@ -15,7 +15,6 @@ import {
 import Svg, { Circle, Path } from 'react-native-svg';
 import { TimePickerRow } from '@/components/settings/TimePickerRow';
 import { getCurrentTier as getCurrentEarTrainingTier } from '@/config/earTrainingTiers';
-import { getCurrentIntervalTier } from '@/config/intervalTiers';
 import { getCurrentNotePositionTier } from '@/config/notePositionTiers';
 import { getCurrentScaleTier } from '@/config/scaleTiers';
 import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
@@ -186,7 +185,7 @@ export default function SettingsScreen() {
     setForceRefresh((prev) => prev + 1);
   };
 
-  const handleDevCountChange = (type: 'note' | 'interval' | 'scale' | 'ear', value: number) => {
+  const handleDevCountChange = (type: 'note' | 'scale' | 'ear', value: number) => {
     setMasteredCount(type, Math.round(value));
     refreshDevCounts();
   };
@@ -576,32 +575,6 @@ export default function SettingsScreen() {
                 minimumTrackTintColor={COLORS.track1}
                 maximumTrackTintColor={COLORS.border}
                 thumbTintColor={COLORS.track1}
-              />
-            </View>
-
-            <View style={s.divider} />
-
-            {/* Intervals */}
-            <View style={s.devRow}>
-              <View style={s.devHeader}>
-                <Text style={s.devTrackLabel}>📏 Intervals</Text>
-                <Text style={s.devCount}>{Math.round(devCounts.interval)} cards</Text>
-              </View>
-              <Text style={s.devTierInfo}>
-                Tier: {getCurrentIntervalTier(devCounts.interval).name} (
-                {getCurrentIntervalTier(devCounts.interval).description})
-              </Text>
-              <Slider
-                style={s.slider}
-                minimumValue={0}
-                maximumValue={60}
-                step={1}
-                value={devCounts.interval}
-                onValueChange={(value) => setDevCounts({ ...devCounts, interval: value })}
-                onSlidingComplete={(value) => handleDevCountChange('interval', value)}
-                minimumTrackTintColor={COLORS.track2}
-                maximumTrackTintColor={COLORS.border}
-                thumbTintColor={COLORS.track2}
               />
             </View>
 

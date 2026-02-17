@@ -71,7 +71,6 @@ interface AppState {
   // Badge tracking (for track-up detection) - Issue #22
   badgeLevels: {
     note: BadgeLevel;
-    interval: BadgeLevel;
     scale: BadgeLevel;
     ear: BadgeLevel;
   };
@@ -80,7 +79,6 @@ interface AppState {
   // First visit tracking for soft guide - Issue #22
   trackFirstVisit: {
     note: boolean;
-    interval: boolean;
     scale: boolean;
     ear: boolean;
   };
@@ -214,7 +212,6 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
   // Badge tracking - Issue #22
   badgeLevels: {
     note: 'none',
-    interval: 'none',
     scale: 'none',
     ear: 'none',
   },
@@ -226,7 +223,6 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
   // First visit tracking - Issue #22
   trackFirstVisit: {
     note: true, // Default tracks treated as visited
-    interval: true,
     scale: false, // Will show soft guide
     ear: false,
   },

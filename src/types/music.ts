@@ -45,7 +45,7 @@ export interface ScalePattern {
 // SM-2 스페이스드 리피티션 카드
 export interface FlashCard {
   id: string;
-  type: 'note' | 'interval' | 'scale' | 'ear';
+  type: 'note' | 'scale' | 'ear';
   question: QuizQuestion; // Discriminated union으로 타입 안정성 보장
   easeFactor: number; // SM-2 EF, 기본 2.5
   interval: number; // 일 단위

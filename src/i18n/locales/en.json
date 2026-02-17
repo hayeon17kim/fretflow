@@ -61,47 +61,6 @@
       "soundPlay": "🔊 Play Sound",
       "wrongSound": "🔇 Wrong Sound"
     },
-    "interval": {
-      "title": "Interval",
-      "badge": "📏 Interval Quiz",
-      "questionMain": "{{intervalName}} from {{rootNote}}",
-      "questionSub": "Tap the position on the fretboard",
-      "patternRule": "💡 Pattern Rule",
-      "correctAnswer": "🔊 Correct! {{rootNote}} → {{answerNote}} ({{intervalName}})",
-      "wrongAnswer": "The answer is string {{string}}, fret {{fret}} ({{answerNote}})",
-      "confirmButton": "Confirm this position →",
-      "selectPosition": "Select a position on the fretboard",
-      "intervalNames": {
-        "P1": "Perfect Unison",
-        "m2": "Minor 2nd",
-        "M2": "Major 2nd",
-        "m3": "Minor 3rd",
-        "M3": "Major 3rd",
-        "P4": "Perfect 4th",
-        "TT": "Tritone",
-        "P5": "Perfect 5th",
-        "m6": "Minor 6th",
-        "M6": "Major 6th",
-        "m7": "Minor 7th",
-        "M7": "Major 7th",
-        "P8": "Perfect Octave"
-      },
-      "patternHints": {
-        "P1": "Same position = same note! The reference point for octave patterns.",
-        "m2": "1 fret up on the same string = half step! The smallest interval.",
-        "M2": "2 frets up on the same string = whole step! Most intervals in do-re-mi.",
-        "m3": "3 frets up on the same string = minor 3rd! Core interval in minor chords.",
-        "M3": "4 frets up on the same string = major 3rd! Bright sound in major chords.",
-        "P4": "5 frets up on the same string = perfect 4th! Foundation of chord construction.",
-        "TT": "6 frets up on the same string = tritone! Blues and rock tension sound.",
-        "P5": "7 frets up on the same string = perfect 5th! Most stable and harmonious interval.",
-        "m6": "8 frets up on the same string = minor 6th! Creates a melancholic feeling.",
-        "M6": "9 frets up on the same string = major 6th! Bright and warm sound.",
-        "m7": "10 frets up on the same string = minor 7th! Essential in jazz and blues.",
-        "M7": "11 frets up on the same string = major 7th! Smooth and sophisticated sound.",
-        "P8": "12 frets up on the same string = perfect octave! Higher version of the same note."
-      }
-    },
     "scale": {
       "title": "Scale Pattern",
       "badge": "🎼 Scale Quiz",
@@ -207,11 +166,6 @@
       "label": "Note Position",
       "desc": "Memorize note names on the fretboard",
       "example": "\"What note is on string 5, fret 7?\" → Multiple choice"
-    },
-    "interval": {
-      "label": "Intervals",
-      "desc": "Find interval distances on the fretboard",
-      "example": "\"Perfect 5th from A\" → Tap on fretboard"
     },
     "scale": {
       "label": "Scale Patterns",

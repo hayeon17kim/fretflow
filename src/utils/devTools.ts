@@ -10,7 +10,6 @@ const CARDS_KEY = 'cards';
 
 interface MasteredCardSimulation {
   note: number;
-  interval: number;
   scale: number;
   ear: number;
 }
@@ -64,7 +63,6 @@ export function getMasteredCounts(): MasteredCardSimulation {
 
   const counts: MasteredCardSimulation = {
     note: 0,
-    interval: 0,
     scale: 0,
     ear: 0,
   };

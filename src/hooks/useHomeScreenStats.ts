@@ -31,7 +31,7 @@ export function useHomeScreenStats(): HomeScreenStats {
         acc[card.type]++;
         return acc;
       },
-      { note: 0, interval: 0, scale: 0, ear: 0 } as Record<TrackId, number>,
+      { note: 0, scale: 0, ear: 0 } as Record<TrackId, number>,
     );
   }, [dueCards]);
 
@@ -41,10 +41,6 @@ export function useHomeScreenStats(): HomeScreenStats {
       note: Math.min(
         100,
         Math.round((getMasteredCards('note').length / TARGET_CARDS_PER_TRACK) * 100),
-      ),
-      interval: Math.min(
-        100,
-        Math.round((getMasteredCards('interval').length / TARGET_CARDS_PER_TRACK) * 100),
       ),
       scale: Math.min(
         100,

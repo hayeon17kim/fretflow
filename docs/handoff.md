@@ -7,7 +7,7 @@ FretFlow 프로젝트 핸드오프 문서
 
 ## 1. 프로젝트 개요
 
-FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 인터벌, 스케일 패턴, 귀 훈련을 4개 독립 학습 트랙으로 자유롭게 학습하며, 각 트랙마다 4단계 티어 시스템으로 점진적 난이도 상승을 제공합니다. Mix Mode로 4개 트랙을 한 세션에서 복습 가능합니다.
+FretFlow는 SM-2 스페이스드 리피티션 알고리즘을 기반으로 한 기타 음악 교육 모바일 앱입니다. 사용자가 기타 프렛보드의 음 위치, 스케일 패턴, 귀 훈련을 3개 독립 학습 트랙으로 자유롭게 학습하며, 각 트랙마다 4단계 티어 시스템으로 점진적 난이도 상승을 제공합니다. Mix Mode로 3개 트랙을 한 세션에서 복습 가능합니다.
 
 ### 기술 스택
 
@@ -47,10 +47,9 @@ src/
 │   ├── quiz/
 │   │   ├── _layout.tsx       # 퀴즈 스택 레이아웃
 │   │   ├── note.tsx          # 음 위치 퀴즈
-│   │   ├── interval.tsx      # 인터벌 퀴즈
 │   │   ├── scale.tsx         # 스케일 퀴즈
 │   │   ├── ear.tsx           # 귀 훈련
-│   │   ├── mix.tsx           # Mix Mode (4개 트랙 혼합) ✅ 완성
+│   │   ├── mix.tsx           # Mix Mode (3개 트랙 혼합) ✅ 완성
 │   │   └── completion.tsx    # 퀴즈 완료 화면
 │
 ├── components/
@@ -68,7 +67,6 @@ src/
 │   ├── routes.ts             # 라우트 정의
 │   ├── tracks.ts             # 트랙 설정
 │   ├── notePositionTiers.ts  # 음 위치 티어 (4단계)
-│   ├── intervalTiers.ts      # 인터벌 티어 (4단계)
 │   ├── scaleTiers.ts         # 스케일 티어 (4단계)
 │   └── earTrainingTiers.ts   # 귀 훈련 티어
 │
@@ -179,7 +177,7 @@ FONT_SIZE = {
 
 - **Expo Router (file-based)**: `src/app/` 디렉토리가 자동으로 라우트 생성
 - **탭 네비게이션**: `(tabs)` 그룹으로 동시 스택 유지
-- **퀴즈 라우트**: `/quiz/note`, `/quiz/interval`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
+- **퀴즈 라우트**: `/quiz/note`, `/quiz/scale`, `/quiz/ear`, `/quiz/mix`
 - **온보딩 라우트**: `/onboarding`, `/onboarding/mini-quiz`, `/onboarding/result`, `/onboarding/goal`
 
 ### 상태관리
@@ -224,7 +222,6 @@ FONT_SIZE = {
 
 ```typescript
 generateNoteCard(masteredCount)      // 티어별 프렛 범위
-generateIntervalCard(masteredCount)  // 티어별 인터벌 패턴
 generateScaleCard(masteredCount)     // 티어별 스케일 패턴
 generateEarCard(masteredCount)       // 티어별 음역 확장
 ```
@@ -238,12 +235,6 @@ generateEarCard(masteredCount)       // 티어별 음역 확장
 - Tier 2 (5개 마스터): 0-12 프렛 (옥타브까지)
 - Tier 3 (15개 마스터): 0-17 프렛 (하이 포지션)
 - Tier 4 (30개 마스터): 0-24 프렛 (전체 프렛보드)
-
-**인터벌 티어 (`intervalTiers.ts`)**:
-- Tier 1: P1, P5, P8 (기본)
-- Tier 2: M3, P4 (일반적인 인터벌)
-- Tier 3: m3, M6, m7, M7 (컬러 톤)
-- Tier 4: m2, M2, m6, TT (고급)
 
 **스케일 티어 (`scaleTiers.ts`)**:
 - Tier 1: Major, Minor Pentatonic
@@ -301,12 +292,6 @@ generateEarCard(masteredCount)       // 티어별 음역 확장
 - 정답/오답 피드백 + 다음 버튼
 - 동적 카드 생성 (cardGenerator.ts)
 
-**퀴즈 - 인터벌 (`/quiz/interval.tsx`)**
-- 탭 가능한 프렛보드 (루트 음 표시, 선택 음 표시)
-- 패턴 팁 (오답/정답 후 표시)
-- 확인 버튼 (선택 후 활성화)
-- 동적 카드 생성 (cardGenerator.ts)
-
 **퀴즈 - 스케일 (`/quiz/scale.tsx`)**
 - 다중선택 프렛보드
 - 실시간 선택/해제 UI
@@ -322,7 +307,7 @@ generateEarCard(masteredCount)       // 티어별 음역 확장
 - 동적 카드 생성 (cardGenerator.ts)
 
 **퀴즈 - Mix Mode (`/quiz/mix.tsx`) ✅ 완성**
-- 4개 트랙을 한 세션에서 혼합 연습
+- 3개 트랙을 한 세션에서 혼합 연습
 - 각 트랙별로 카드 균등 분배
 - 스마트 셔플링 (3개 이상 연속 동일 트랙 방지)
 - 트랙별 배지 표시 및 색상 구분
@@ -364,7 +349,7 @@ generateEarCard(masteredCount)       // 티어별 음역 확장
 ### 라우팅
 
 - 탭 네비게이션 (홈/연습/마스터리/설정)
-- 퀴즈 스택 (5개 모드: note/interval/scale/ear/mix)
+- 퀴즈 스택 (4개 모드: note/scale/ear/mix)
 - 온보딩 플로우 (첫 실행 시 4단계)
 
 ---
@@ -380,7 +365,7 @@ generateEarCard(masteredCount)       // 티어별 음역 확장
 
 **Ear Training 추가 패턴**
 - 현재: 단일 음 듣기 (43개 WAV 파일, 티어 기반 진행)
-- 향후: 인터벌 듣기, 코드 듣기, 리듬 패턴 등 추가 고려
+- 향후: 코드 듣기, 리듬 패턴 등 추가 고려
 
 **수익화 모델 구현**
 - RevenueCat 연동 (구독 시스템)

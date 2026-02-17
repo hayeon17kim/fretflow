@@ -16,8 +16,6 @@ import type { FretPosition } from '@/types/music';
 import {
   type EarQuestionCard,
   generateEarCard,
-  generateIntervalCard,
-  type IntervalQuestionCard,
   generateNoteCard,
   type NoteQuestionCard,
   generateScaleCard,
@@ -30,7 +28,6 @@ import { navigateToQuizCompletion, recordQuizAnswer } from '@/utils/quizHelpers'
 // ─── Mixed card type ───
 type MixedCard = (
   | NoteQuestionCard
-  | IntervalQuestionCard
   | ScaleQuestionCard
   | EarQuestionCard
 ) & {
@@ -107,13 +104,6 @@ export default function QuizMixScreen() {
               trackColor: track.color,
             };
             break;
-          case 'interval':
-            card = {
-              ...generateIntervalCard(masteredCount),
-              trackId: track.id,
-              trackColor: track.color,
-            };
-            break;
           case 'scale':
             card = {
               ...generateScaleCard(masteredCount),
@@ -150,7 +140,6 @@ export default function QuizMixScreen() {
   });
 
   // ─── State for different quiz types ───
-  const [tapped, setTapped] = useState<FretPosition | null>(null);
   const [selectedScale, setSelectedScale] = useState<FretPosition[]>([]);
 
   // Audio hook for ear training cards
@@ -180,31 +169,6 @@ export default function QuizMixScreen() {
       trackId: q.type,
       isCorrect: correct,
       questionData: q.type === 'note' ? { string: q.string, fret: q.fret } : { note: q.answer },
-      recordAnswer,
-      addCard,
-      recordReview,
-    });
-  };
-
-  const handleTapInterval = (pos: FretPosition) => {
-    if (state !== 'question' || q.type !== 'interval') return;
-    if (tapped?.string === pos.string && tapped?.fret === pos.fret) {
-      setTapped(null);
-    } else {
-      setTapped(pos);
-    }
-  };
-
-  const confirmInterval = () => {
-    if (!tapped || q.type !== 'interval') return;
-    const correct =
-      tapped.string === q.targetPosition.string && tapped.fret === q.targetPosition.fret;
-
-    recordQuizAnswer({
-      cardId: q.id,
-      trackId: 'interval',
-      isCorrect: correct,
-      questionData: { rootPosition: q.rootPosition, targetPosition: q.targetPosition } as any,
       recordAnswer,
       addCard,
       recordReview,
@@ -247,7 +211,6 @@ export default function QuizMixScreen() {
 
   const handleNext = async () => {
     await stopSound();
-    setTapped(null);
     setSelectedScale([]);
 
     nextCard(() => {
@@ -272,48 +235,6 @@ export default function QuizMixScreen() {
           label: state !== 'question' ? q.answer : '?',
         },
       ];
-    }
-
-    if (q.type === 'interval') {
-      const highlights: FretHighlight[] = [
-        {
-          string: q.rootPosition.string,
-          fret: q.rootPosition.fret,
-          color: COLORS.correct,
-          label: getNoteAtPosition(q.rootPosition),
-        },
-      ];
-
-      if (state === 'question' && tapped) {
-        highlights.push({
-          string: tapped.string,
-          fret: tapped.fret,
-          color: q.trackColor,
-          label: '?',
-          textColor: '#fff',
-        });
-      }
-
-      if (state !== 'question') {
-        if (state === 'wrong' && tapped) {
-          highlights.push({
-            string: tapped.string,
-            fret: tapped.fret,
-            color: COLORS.wrong,
-            label: '✕',
-            textColor: '#fff',
-          });
-        }
-        highlights.push({
-          string: q.targetPosition.string,
-          fret: q.targetPosition.fret,
-          color: COLORS.correct,
-          label: getNoteAtPosition(q.targetPosition),
-          border: COLORS.correct,
-        });
-      }
-
-      return highlights;
     }
 
     if (q.type === 'scale') {
@@ -389,13 +310,6 @@ export default function QuizMixScreen() {
       const start = Math.min(ideal, Math.max(0, MAX_FRET - WINDOW));
       return [start, Math.min(start + WINDOW, MAX_FRET)];
     }
-    if (q.type === 'interval') {
-      const minFret = Math.max(0, q.rootPosition.fret - 1);
-      const maxFret = Math.min(q.targetPosition.fret + 2, MAX_FRET);
-      const WINDOW = Math.max(8, maxFret - minFret);
-      const start = Math.min(minFret, Math.max(0, MAX_FRET - WINDOW));
-      return [start, Math.min(start + WINDOW, MAX_FRET)];
-    }
     if (q.type === 'scale') {
       const frets = q.correctPositions.map((p) => p.fret);
       const minFret = Math.min(...frets);
@@ -457,25 +371,6 @@ export default function QuizMixScreen() {
           </>
         )}
 
-        {q.type === 'interval' && (
-          <>
-            <Text style={s.questionMain}>
-              {t('quiz.interval.questionMain', {
-                rootNote: getNoteAtPosition(q.rootPosition),
-                intervalName: t(`quiz.interval.intervalNames.${q.answer}`),
-              })}
-            </Text>
-            <Text style={s.questionSub}>{t('quiz.interval.questionSub')}</Text>
-            <Fretboard
-              startFret={startFret}
-              endFret={endFret}
-              highlights={buildHighlights()}
-              tappable={state === 'question'}
-              onTap={handleTapInterval}
-            />
-          </>
-        )}
-
         {q.type === 'scale' && (
           <>
             <Text style={s.questionMain}>
@@ -524,21 +419,6 @@ export default function QuizMixScreen() {
           <>
             {(q.type === 'note' || q.type === 'ear') && (
               <AnswerGrid options={q.options} onSelect={handleAnswerGrid} />
-            )}
-            {q.type === 'interval' && (
-              <Pressable
-                onPress={confirmInterval}
-                disabled={!tapped}
-                style={({ pressed }) => [
-                  s.confirmBtn,
-                  { backgroundColor: tapped ? q.trackColor : `${q.trackColor}30` },
-                  pressed && tapped && { opacity: 0.8 },
-                ]}
-              >
-                <Text style={[s.confirmText, { color: tapped ? '#fff' : COLORS.textTertiary }]}>
-                  {tapped ? t('quiz.interval.confirmButton') : t('quiz.interval.selectPosition')}
-                </Text>
-              </Pressable>
             )}
             {q.type === 'scale' && (
               <Pressable

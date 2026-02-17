@@ -1,6 +1,6 @@
 import { COLORS } from '@/utils/constants';
 
-export type TrackId = 'note' | 'interval' | 'scale' | 'ear';
+export type TrackId = 'note' | 'scale' | 'ear';
 
 export interface TrackConfig {
   id: TrackId;
@@ -14,11 +14,6 @@ export const TRACKS: readonly TrackConfig[] = [
     id: 'note',
     emoji: '🎵',
     color: COLORS.track1,
-  },
-  {
-    id: 'interval',
-    emoji: '📏',
-    color: COLORS.track2,
   },
   {
     id: 'scale',
