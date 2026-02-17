@@ -2,7 +2,7 @@ import { Platform } from 'react-native';
 import { create, type StateCreator } from 'zustand';
 import * as Haptics from 'expo-haptics';
 import { appStorage } from '@/utils/storage';
-import type { LevelId } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
 import type { BadgeLevel } from '@/utils/badges';
 
 // Only import persist on native platforms to avoid import.meta issues on web
@@ -32,9 +32,9 @@ const mmkvStorage = {
 };
 
 interface AppState {
-  // 현재 활성 레벨
-  activeLevel: 1 | 2 | 3 | 4 | null;
-  setActiveLevel: (level: 1 | 2 | 3 | 4 | null) => void;
+  // 현재 활성 트랙
+  activeTrack: 1 | 2 | 3 | 4 | null;
+  setActiveTrack: (track: 1 | 2 | 3 | 4 | null) => void;
 
   // 오늘의 학습 통계
   todayStats: {
@@ -68,29 +68,29 @@ interface AppState {
   };
   updateSettings: (settings: Partial<AppState['settings']>) => void;
 
-  // Badge tracking (for level-up detection) - Issue #22
+  // Badge tracking (for track-up detection) - Issue #22
   badgeLevels: {
     note: BadgeLevel;
     interval: BadgeLevel;
     scale: BadgeLevel;
     ear: BadgeLevel;
   };
-  updateBadgeLevel: (levelId: LevelId, badge: BadgeLevel) => void;
+  updateBadgeLevel: (trackId: TrackId, badge: BadgeLevel) => void;
 
   // First visit tracking for soft guide - Issue #22
-  levelFirstVisit: {
+  trackFirstVisit: {
     note: boolean;
     interval: boolean;
     scale: boolean;
     ear: boolean;
   };
-  markLevelVisited: (levelId: LevelId) => void;
+  markTrackVisited: (trackId: TrackId) => void;
 }
 
 // Store implementation
 const storeImpl: StateCreator<AppState> = (set, get) => ({
-  activeLevel: null,
-  setActiveLevel: (level) => set({ activeLevel: level }),
+  activeTrack: null,
+  setActiveTrack: (track) => set({ activeTrack: track }),
 
   todayStats: {
     cardsReviewed: 0,
@@ -218,21 +218,21 @@ const storeImpl: StateCreator<AppState> = (set, get) => ({
     scale: 'none',
     ear: 'none',
   },
-  updateBadgeLevel: (levelId, badge) =>
+  updateBadgeLevel: (trackId, badge) =>
     set((state) => ({
-      badgeLevels: { ...state.badgeLevels, [levelId]: badge },
+      badgeLevels: { ...state.badgeLevels, [trackId]: badge },
     })),
 
   // First visit tracking - Issue #22
-  levelFirstVisit: {
-    note: true, // Default levels treated as visited
+  trackFirstVisit: {
+    note: true, // Default tracks treated as visited
     interval: true,
     scale: false, // Will show soft guide
     ear: false,
   },
-  markLevelVisited: (levelId) =>
+  markTrackVisited: (trackId) =>
     set((state) => ({
-      levelFirstVisit: { ...state.levelFirstVisit, [levelId]: true },
+      trackFirstVisit: { ...state.trackFirstVisit, [trackId]: true },
     })),
 });
 

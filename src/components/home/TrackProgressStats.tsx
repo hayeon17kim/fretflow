@@ -1,24 +1,22 @@
 import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
-import type { LevelId } from '@/config/levels';
-import { getLevelLabel, LEVELS } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
+import { getTrackLabel, TRACKS } from '@/config/tracks';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-interface LevelProgressStatsProps {
-  levelProgress: Record<LevelId, number>;
+interface TrackProgressStatsProps {
+  trackProgress: Record<TrackId, number>;
 }
 
-export function LevelProgressStats({ levelProgress }: LevelProgressStatsProps) {
+export function TrackProgressStats({ trackProgress }: TrackProgressStatsProps) {
   const { t } = useTranslation();
 
   return (
     <View style={s.statsRow}>
-      {LEVELS.map((lv) => (
-        <View key={lv.id} style={[s.statBox, { borderColor: `${lv.color}15` }]}>
-          <Text style={[s.statValue, { color: lv.color }]}>{levelProgress[lv.id]}%</Text>
-          <Text style={s.statLabel}>
-            {t('common.levelShort', { num: lv.num })} {getLevelLabel(lv.id, t)}
-          </Text>
+      {TRACKS.map((track) => (
+        <View key={track.id} style={[s.statBox, { borderColor: `${track.color}15` }]}>
+          <Text style={[s.statValue, { color: track.color }]}>{trackProgress[track.id]}%</Text>
+          <Text style={s.statLabel}>{getTrackLabel(track.id, t)}</Text>
         </View>
       ))}
     </View>

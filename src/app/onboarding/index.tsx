@@ -90,7 +90,7 @@ const s = StyleSheet.create({
     gap: SPACING.md,
   },
   startButton: {
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     paddingVertical: 16,
     paddingHorizontal: 48,
     borderRadius: 14,

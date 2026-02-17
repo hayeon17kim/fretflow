@@ -221,7 +221,7 @@ const s = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     borderRadius: 2,
   },
   skipText: {

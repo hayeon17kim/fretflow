@@ -128,7 +128,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   continueButton: {
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     paddingVertical: 16,
     borderRadius: 14,
     width: '100%',

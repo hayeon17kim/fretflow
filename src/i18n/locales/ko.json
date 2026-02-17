@@ -5,8 +5,8 @@
     "streak": "{{count}}일 연속",
     "dueInfo": "{{count}}장 · 약 {{minutes}}분",
     "todayReview": "오늘의 복습 믹스",
-    "recommendedLevel": "{{level}} {{count}}장",
-    "startWithLevel": "시작하기: {{level}}",
+    "recommendedTrack": "{{track}} {{count}}장",
+    "startWithTrack": "시작하기: {{track}}",
     "dailyGoal": "오늘의 목표",
     "startReview": "복습 시작 →",
     "addCards": "새 카드 추가하기 →",
@@ -15,8 +15,8 @@
     "reviewDone": "오늘 복습 완료! 🎉",
     "reviewDoneDesc": "수고했어요! 새로운 카드를 배워서 내일 복습할 카드를 늘려보세요.",
     "learnNew": "새로운 카드 배우기",
-    "levelPractice": "레벨별 연습",
-    "practiceShortcut": "특정 레벨만 연습하기 →",
+    "trackPractice": "트랙별 연습",
+    "practiceShortcut": "특정 트랙만 연습하기 →",
     "basicMode": "기초 모드",
     "confirm": "확인"
   },
@@ -42,7 +42,7 @@
     "mastered": "마스터 완료",
     "weakCards": "약점 카드",
     "completion": "{{progress}}% 완성",
-    "levelMastery": "레벨별 마스터리",
+    "trackMastery": "트랙별 마스터리",
     "masteredCount": "{{mastered}}/{{total}} 마스터",
     "focusReview": "집중 복습 필요",
     "weakCardsCount": "약점 카드가 {{count}}장 있습니다",
@@ -198,7 +198,7 @@
     },
     "footer": "Made with 💚 for guitar learners"
   },
-  "levels": {
+  "tracks": {
     "note": {
       "label": "음 위치",
       "desc": "프렛보드의 음 이름 외우기",
@@ -268,12 +268,12 @@
     "familiar": "익숙함",
     "proficient": "숙련",
     "master": "마스터",
-    "levelUp": "{{level}} 레벨업! {{badge}} 달성",
+    "trackUp": "{{track}} 레벨업! {{badge}} 달성",
     "nextBadge": "다음 뱃지까지 {{percent}}%"
   },
   "softGuide": {
     "title": "잠깐만요!",
-    "message": "이 레벨은 기본 음 위치를 알면 더 쉬워요. 바로 시작할까요?",
+    "message": "이 트랙은 기본 음 위치를 알면 더 쉬워요. 바로 시작할까요?",
     "continue": "네, 시작",
     "goToLevel1": "음 위치부터 할래요"
   },

@@ -2,73 +2,73 @@ import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import type { LevelId } from '@/config/levels';
-import { getLevelDesc, getLevelLabel, LEVELS } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
+import { getTrackDesc, getTrackLabel, TRACKS } from '@/config/tracks';
 import { BADGES, getBadgeForProgress } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
-interface LevelCardGridProps {
-  levelProgress: Record<LevelId, number>;
-  onLevelPress: (levelId: LevelId) => void;
+interface TrackCardGridProps {
+  trackProgress: Record<TrackId, number>;
+  onTrackPress: (trackId: TrackId) => void;
 }
 
-export function LevelCardGrid({ levelProgress, onLevelPress }: LevelCardGridProps) {
+export function TrackCardGrid({ trackProgress, onTrackPress }: TrackCardGridProps) {
   const { t } = useTranslation();
 
   return (
     <>
-      <Text style={s.sectionTitle}>{t('home.levelPractice')}</Text>
-      {LEVELS.map((lv) => {
-        const progress = levelProgress[lv.id];
+      <Text style={s.sectionTitle}>{t('home.trackPractice')}</Text>
+      {TRACKS.map((track) => {
+        const progress = trackProgress[track.id];
         const badgeLevel = getBadgeForProgress(progress); // Issue #22
         const badge = BADGES[badgeLevel];
 
         return (
           <Pressable
-            key={lv.id}
+            key={track.id}
             style={({ pressed }) => [
-              s.levelCard,
-              { borderColor: `${lv.color}25` },
+              s.trackCard,
+              { borderColor: `${track.color}25` },
               pressed && { opacity: 0.85 },
             ]}
-            onPress={() => onLevelPress(lv.id)}
+            onPress={() => onTrackPress(track.id)}
             accessibilityRole="button"
-            accessibilityLabel={getLevelLabel(lv.id, t)}
+            accessibilityLabel={getTrackLabel(track.id, t)}
           >
-            <View style={s.levelCardInner}>
+            <View style={s.trackCardInner}>
               {/* Icon with circular progress */}
-              <View style={s.levelIcon}>
-                <CircularProgress progress={progress} color={lv.color} />
-                <Text style={s.levelEmoji}>{lv.emoji}</Text>
+              <View style={s.trackIcon}>
+                <CircularProgress progress={progress} color={track.color} />
+                <Text style={s.trackEmoji}>{track.emoji}</Text>
               </View>
 
               {/* Info */}
-              <View style={s.levelInfo}>
-                <View style={s.levelNameRow}>
-                  <Text style={s.levelName}>
-                    {getLevelLabel(lv.id, t)}
+              <View style={s.trackInfo}>
+                <View style={s.trackNameRow}>
+                  <Text style={s.trackName}>
+                    {getTrackLabel(track.id, t)}
                   </Text>
                   {badge.emoji && (
-                    <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
+                    <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
                       <Text style={s.chipText}>{badge.emoji}</Text>
-                      <Text style={[s.chipText, { color: lv.color }]}>
+                      <Text style={[s.chipText, { color: track.color }]}>
                         {t(`badges.${badgeLevel}`)}
                       </Text>
                     </View>
                   )}
-                  {'basic' in lv && lv.basic && (
-                    <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                      <Text style={[s.chipText, { color: lv.color }]}>{t('home.basicMode')}</Text>
+                  {'basic' in track && track.basic && (
+                    <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
+                      <Text style={[s.chipText, { color: track.color }]}>{t('home.basicMode')}</Text>
                     </View>
                   )}
                 </View>
-                <Text style={s.levelDesc}>
-                  {getLevelDesc(lv.id, t)}
+                <Text style={s.trackDesc}>
+                  {getTrackDesc(track.id, t)}
                 </Text>
               </View>
 
               {/* Progress number */}
-              <Text style={[s.levelProgress, { color: lv.color }]}>
+              <Text style={[s.trackProgress, { color: track.color }]}>
                 {progress}%
               </Text>
             </View>
@@ -86,47 +86,47 @@ const s = StyleSheet.create({
     color: COLORS.textPrimary,
     marginBottom: SPACING.md,
   },
-  levelCard: {
+  trackCard: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.sm + 2,
     borderWidth: 1,
   },
-  levelCardInner: {
+  trackCardInner: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
   },
-  levelIcon: {
+  trackIcon: {
     width: 44,
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  levelEmoji: {
+  trackEmoji: {
     fontSize: 20,
     position: 'absolute',
   },
-  levelInfo: {
+  trackInfo: {
     flex: 1,
   },
-  levelNameRow: {
+  trackNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  levelName: {
+  trackName: {
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
     color: COLORS.textPrimary,
   },
-  levelDesc: {
+  trackDesc: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  levelProgress: {
+  trackProgress: {
     fontSize: FONT_SIZE.sm + 1,
     fontWeight: '700',
   },

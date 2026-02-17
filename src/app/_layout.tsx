@@ -2,10 +2,9 @@ import { QueryClientProvider } from '@tanstack/react-query';
 import { Redirect, Stack, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import * as Notifications from 'expo-notifications';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { queryClient } from '@/api/query-client';
 import { useAppStore } from '@/stores/useAppStore';
-import { useNotifications } from '@/hooks/useNotifications';
 import { COLORS } from '@/utils/constants';
 import { migrateEarTrainingCards } from '@/utils/earTrainingMigration';
 import '@/i18n';
@@ -22,7 +21,14 @@ Notifications.setNotificationHandler({
 export default function RootLayout() {
   const router = useRouter();
   const hasSeenOnboarding = useAppStore((s) => s.hasSeenOnboarding);
-  const { scheduleAllNotifications } = useNotifications();
+
+  // Track if we've already redirected to prevent re-redirect on re-renders
+  const hasRedirected = useRef(false);
+  const shouldRedirectToOnboarding = !hasSeenOnboarding && !hasRedirected.current;
+
+  if (shouldRedirectToOnboarding) {
+    hasRedirected.current = true;
+  }
 
   // Run migrations on app start
   useEffect(() => {
@@ -43,18 +49,11 @@ export default function RootLayout() {
     return () => subscription.remove();
   }, [router]);
 
-  // Schedule notifications on app startup (if onboarding done)
-  useEffect(() => {
-    if (hasSeenOnboarding) {
-      scheduleAllNotifications();
-    }
-  }, [hasSeenOnboarding, scheduleAllNotifications]);
-
   return (
     <QueryClientProvider client={queryClient}>
       <StatusBar style="light" />
-      {/* 첫 사용자는 온보딩으로 리다이렉트 */}
-      {!hasSeenOnboarding && <Redirect href="/onboarding" />}
+      {/* Redirect to onboarding only if user hasn't seen it (based on initial state) */}
+      {shouldRedirectToOnboarding && <Redirect href="/onboarding" />}
       <Stack
         screenOptions={{
           headerShown: false,

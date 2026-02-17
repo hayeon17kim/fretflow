@@ -1,11 +1,9 @@
-import { useFocusEffect } from '@react-navigation/native';
-import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 import { AlertIcon } from '@/components/icons/AlertIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { CircularProgress } from '@/components/progress/CircularProgress';
-import { getLevelLabel, LEVELS, TARGET_CARDS_PER_LEVEL } from '@/config/levels';
+import { getTrackLabel, TRACKS, TARGET_CARDS_PER_TRACK } from '@/config/tracks';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { BADGES, getBadgeForProgress, getProgressToNextBadge } from '@/utils/badges';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -13,32 +11,24 @@ import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 export default function MasteryScreen() {
   const { t } = useTranslation();
   const { getCardCount, getMasteredCards, getWeakCards } = useSpacedRepetition();
-  const [_refreshKey, setRefreshKey] = useState(0);
-
-  // Refresh on screen focus
-  useFocusEffect(
-    useCallback(() => {
-      setRefreshKey((prev) => prev + 1);
-    }, []),
-  );
 
   // Overall statistics
   const totalCards = getCardCount(); // Fix: Add missing variable (Issue #22)
   const totalMastered = getMasteredCards().length;
   const totalWeak = getWeakCards().length;
-  const totalTarget = LEVELS.length * TARGET_CARDS_PER_LEVEL; // 4 levels × 60 = 240
+  const totalTarget = TRACKS.length * TARGET_CARDS_PER_TRACK; // 4 tracks × 60 = 240
   const overallProgress = Math.min(100, Math.round((totalMastered / totalTarget) * 100));
 
-  // Statistics by level (Issue #22: Add badge info)
-  const levelStats = LEVELS.map((lv) => {
-    const total = getCardCount(lv.id);
-    const mastered = getMasteredCards(lv.id).length;
-    const weak = getWeakCards(lv.id).length;
-    const progress = Math.min(100, Math.round((mastered / TARGET_CARDS_PER_LEVEL) * 100));
+  // Statistics by track (Issue #22: Add badge info)
+  const trackStats = TRACKS.map((track) => {
+    const total = getCardCount(track.id);
+    const mastered = getMasteredCards(track.id).length;
+    const weak = getWeakCards(track.id).length;
+    const progress = Math.min(100, Math.round((mastered / TARGET_CARDS_PER_TRACK) * 100));
     const badgeLevel = getBadgeForProgress(progress);
     const badge = BADGES[badgeLevel];
     const progressToNext = getProgressToNextBadge(progress, badgeLevel);
-    return { ...lv, total, mastered, weak, progress, badge, badgeLevel, progressToNext };
+    return { ...track, total, mastered, weak, progress, badge, badgeLevel, progressToNext };
   });
 
   return (
@@ -53,7 +43,7 @@ export default function MasteryScreen() {
         {/* ─── Overall stats card ─── */}
         <View style={s.overallCard} accessibilityRole="summary">
           <View style={s.overallHeader}>
-            <TrophyIcon color={COLORS.level1} size={24} />
+            <TrophyIcon color={COLORS.track1} size={24} />
             <Text style={s.overallTitle}>{t('mastery.overallStatus')}</Text>
           </View>
 
@@ -64,7 +54,7 @@ export default function MasteryScreen() {
             </View>
             <View style={s.overallStatDivider} />
             <View style={s.overallStatItem}>
-              <Text style={[s.overallStatValue, { color: COLORS.level1 }]}>{totalMastered}</Text>
+              <Text style={[s.overallStatValue, { color: COLORS.track1 }]}>{totalMastered}</Text>
               <Text style={s.overallStatLabel}>{t('mastery.mastered')}</Text>
             </View>
             <View style={s.overallStatDivider} />
@@ -85,46 +75,44 @@ export default function MasteryScreen() {
           </View>
         </View>
 
-        {/* ─── Level mastery grid ─── */}
-        <Text style={s.sectionTitle}>{t('mastery.levelMastery')}</Text>
-        <View style={s.levelGrid}>
-          {levelStats.map((lv) => (
+        {/* ─── Track mastery grid ─── */}
+        <Text style={s.sectionTitle}>{t('mastery.trackMastery')}</Text>
+        <View style={s.trackGrid}>
+          {trackStats.map((track) => (
             <View
-              key={lv.id}
-              style={[s.levelBox, { borderColor: `${lv.color}25` }]}
+              key={track.id}
+              style={[s.trackBox, { borderColor: `${track.color}25` }]}
               accessibilityRole="summary"
             >
               {/* Icon with circular progress and badge (Issue #22) */}
-              <View style={s.levelIconContainer}>
-                <CircularProgress progress={lv.progress} color={lv.color} size={60} />
-                <Text style={s.levelBoxEmoji}>{lv.emoji}</Text>
+              <View style={s.trackIconContainer}>
+                <CircularProgress progress={track.progress} color={track.color} size={60} />
+                <Text style={s.trackBoxEmoji}>{track.emoji}</Text>
               </View>
 
               {/* Info */}
-              <Text style={s.levelBoxName}>
-                {t('common.levelShort', { num: lv.num })} {getLevelLabel(lv.id, t)}
-              </Text>
-              <Text style={s.levelBoxProgress}>{lv.progress}%</Text>
+              <Text style={s.trackBoxName}>{getTrackLabel(track.id, t)}</Text>
+              <Text style={s.trackBoxProgress}>{track.progress}%</Text>
 
               {/* Badge info (Issue #22) */}
-              {lv.badge.emoji && (
+              {track.badge.emoji && (
                 <View style={s.badgeInfo}>
-                  <Text style={s.badgeEmoji}>{lv.badge.emoji}</Text>
-                  <Text style={s.badgeName}>{t(`badges.${lv.badgeLevel}`)}</Text>
+                  <Text style={s.badgeEmoji}>{track.badge.emoji}</Text>
+                  <Text style={s.badgeName}>{t(`badges.${track.badgeLevel}`)}</Text>
                 </View>
               )}
-              {lv.progressToNext > 0 && (
+              {track.progressToNext > 0 && (
                 <Text style={s.nextBadgeText}>
-                  {t('badges.nextBadge', { percent: lv.progressToNext })}
+                  {t('badges.nextBadge', { percent: track.progressToNext })}
                 </Text>
               )}
 
               {/* Stats */}
-              <View style={s.levelBoxStats}>
-                <Text style={s.levelBoxStat}>
-                  <Text style={[s.levelBoxStatValue, { color: lv.color }]}>{lv.mastered}</Text>
-                  <Text style={s.levelBoxStatLabel}>
-                    /{lv.total} {t('mastery.mastered')}
+              <View style={s.trackBoxStats}>
+                <Text style={s.trackBoxStat}>
+                  <Text style={[s.trackBoxStatValue, { color: track.color }]}>{track.mastered}</Text>
+                  <Text style={s.trackBoxStatLabel}>
+                    /{track.total} {t('mastery.mastered')}
                   </Text>
                 </Text>
               </View>
@@ -155,15 +143,15 @@ export default function MasteryScreen() {
               </Text>
               <Text style={s.weakCardDesc}>{t('mastery.weakCardsDesc')}</Text>
 
-              {/* Level breakdown */}
+              {/* Track breakdown */}
               <View style={s.weakBreakdown}>
-                {levelStats
-                  .filter((lv) => lv.weak > 0)
-                  .map((lv) => (
-                    <View key={lv.id} style={s.weakBreakdownItem}>
-                      <View style={[s.weakDot, { backgroundColor: lv.color }]} />
+                {trackStats
+                  .filter((track) => track.weak > 0)
+                  .map((track) => (
+                    <View key={track.id} style={s.weakBreakdownItem}>
+                      <View style={[s.weakDot, { backgroundColor: track.color }]} />
                       <Text style={s.weakBreakdownText}>
-                        {getLevelLabel(lv.id, t)}: {lv.weak}
+                        {getTrackLabel(track.id, t)}: {track.weak}
                         {t('mastery.cardUnit')}
                       </Text>
                     </View>
@@ -262,19 +250,19 @@ const s = StyleSheet.create({
   },
   progressBarBg: {
     height: 8,
-    backgroundColor: `${COLORS.level1}20`,
+    backgroundColor: `${COLORS.track1}20`,
     borderRadius: 4,
     overflow: 'hidden',
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     borderRadius: 4,
   },
   progressBarText: {
     fontSize: FONT_SIZE.sm,
     fontWeight: '600',
-    color: COLORS.level1,
+    color: COLORS.track1,
     textAlign: 'center',
   },
 
@@ -286,14 +274,14 @@ const s = StyleSheet.create({
     marginBottom: SPACING.md,
   },
 
-  // Level grid
-  levelGrid: {
+  // Track grid
+  trackGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
     gap: SPACING.sm,
     marginBottom: SPACING.xl,
   },
-  levelBox: {
+  trackBox: {
     width: '48.5%',
     backgroundColor: COLORS.surface,
     borderRadius: 16,
@@ -301,24 +289,24 @@ const s = StyleSheet.create({
     borderWidth: 1,
     alignItems: 'center',
   },
-  levelIconContainer: {
+  trackIconContainer: {
     width: 60,
     height: 60,
     alignItems: 'center',
     justifyContent: 'center',
     marginBottom: SPACING.sm,
   },
-  levelBoxEmoji: {
+  trackBoxEmoji: {
     fontSize: 26,
     position: 'absolute',
   },
-  levelBoxName: {
+  trackBoxName: {
     fontSize: FONT_SIZE.sm,
     fontWeight: '700',
     color: COLORS.textPrimary,
     marginBottom: 2,
   },
-  levelBoxProgress: {
+  trackBoxProgress: {
     fontSize: FONT_SIZE.lg,
     fontWeight: '800',
     color: COLORS.textPrimary,
@@ -343,18 +331,18 @@ const s = StyleSheet.create({
     color: COLORS.textTertiary,
     marginBottom: SPACING.sm,
   },
-  levelBoxStats: {
+  trackBoxStats: {
     width: '100%',
   },
-  levelBoxStat: {
+  trackBoxStat: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.textSecondary,
     textAlign: 'center',
   },
-  levelBoxStatValue: {
+  trackBoxStatValue: {
     fontWeight: '700',
   },
-  levelBoxStatLabel: {
+  trackBoxStatLabel: {
     color: COLORS.textSecondary,
   },
 

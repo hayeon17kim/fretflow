@@ -5,8 +5,8 @@
     "streak": "{{count}}-day streak",
     "dueInfo": "{{count}} cards · ~{{minutes}} min",
     "todayReview": "Today's Review Mix",
-    "recommendedLevel": "{{level}} {{count}} cards",
-    "startWithLevel": "Start with: {{level}}",
+    "recommendedTrack": "{{track}} {{count}} cards",
+    "startWithTrack": "Start with: {{track}}",
     "dailyGoal": "Today's Goal",
     "startReview": "Start Review →",
     "addCards": "Add New Cards →",
@@ -15,8 +15,8 @@
     "reviewDone": "Today's Review Done! 🎉",
     "reviewDoneDesc": "Great work! Learn new cards to build up tomorrow's review.",
     "learnNew": "Learn New Cards",
-    "levelPractice": "Practice by Level",
-    "practiceShortcut": "Practice Specific Level →",
+    "trackPractice": "Practice by Track",
+    "practiceShortcut": "Practice Specific Track →",
     "basicMode": "Basic Mode",
     "confirm": "OK"
   },
@@ -42,7 +42,7 @@
     "mastered": "Mastered",
     "weakCards": "Weak Cards",
     "completion": "{{progress}}% Complete",
-    "levelMastery": "Mastery by Level",
+    "trackMastery": "Mastery by Track",
     "masteredCount": "{{mastered}}/{{total}} Mastered",
     "focusReview": "Needs Focused Review",
     "weakCardsCount": "You have {{count}} weak cards",
@@ -198,7 +198,7 @@
     },
     "footer": "Made with 💚 for guitar learners"
   },
-  "levels": {
+  "tracks": {
     "note": {
       "label": "Note Position",
       "desc": "Memorize note names on the fretboard",
@@ -268,12 +268,12 @@
     "familiar": "Familiar",
     "proficient": "Proficient",
     "master": "Master",
-    "levelUp": "{{level}} Level Up! {{badge}} Achieved",
+    "trackUp": "{{track}} Level Up! {{badge}} Achieved",
     "nextBadge": "{{percent}}% to next badge"
   },
   "softGuide": {
     "title": "Hold on!",
-    "message": "This level is easier if you know basic note positions. Start now?",
+    "message": "This track is easier if you know basic note positions. Start now?",
     "continue": "Yes, Start",
     "goToLevel1": "Start with Note Position"
   },

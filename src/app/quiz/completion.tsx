@@ -4,7 +4,7 @@ import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
 import { TrophyIcon } from '@/components/icons/TrophyIcon';
 import { Toast } from '@/components/Toast';
-import { getLevelLabel, LEVELS } from '@/config/levels';
+import { getTrackLabel, TRACKS } from '@/config/tracks';
 import { useBadgeCheck, getBadgeLevelUpMessage } from '@/hooks/useBadgeCheck';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useToast } from '@/hooks/useToast';
@@ -18,32 +18,32 @@ export default function QuizCompletionScreen() {
   const params = useLocalSearchParams<{
     correct: string;
     total: string;
-    levelNum: string;
+    trackId: string;
   }>();
 
   const correct = Number(params.correct);
   const total = Number(params.total);
-  const levelNum = Number(params.levelNum) as 1 | 2 | 3 | 4;
+  const trackId = params.trackId as 'note' | 'interval' | 'scale' | 'ear';
 
-  const level = LEVELS.find((l) => l.num === levelNum);
+  const track = TRACKS.find((l) => l.id === trackId);
   const accuracy = Math.round((correct / total) * 100);
 
   // Get streak from app store
   const streak = useAppStore((state) => state.todayStats.streak);
 
-  // Get due cards count and level progress
-  const { getDueCards, getLevelProgress } = useSpacedRepetition();
+  // Get due cards count and track progress
+  const { getDueCards, getTrackProgress } = useSpacedRepetition();
   const dueCards = getDueCards();
   const tomorrowDueCount = dueCards.length;
 
-  // Badge check for level-up detection (Issue #22)
+  // Badge check for track-up detection (Issue #22)
   const { visible, message, emoji, showToast, hideToast } = useToast();
-  const levelProgress = level ? getLevelProgress(level.id) : 0;
+  const trackProgress = track ? getTrackProgress(track.id) : 0;
 
-  useBadgeCheck(level?.id || 'note', levelProgress, {
-    onBadgeLevelUp: (levelId, newBadge) => {
+  useBadgeCheck(track?.id || 'note', trackProgress, {
+    onBadgeLevelUp: (trackId, newBadge) => {
       const badge = BADGES[newBadge];
-      const toastMessage = getBadgeLevelUpMessage(levelId, newBadge, t);
+      const toastMessage = getBadgeLevelUpMessage(trackId, newBadge, t);
       showToast(toastMessage, badge.emoji);
     },
   });
@@ -61,28 +61,28 @@ export default function QuizCompletionScreen() {
     router.replace('/(tabs)');
   };
 
-  if (!level) return null;
+  if (!track) return null;
 
   return (
     <View style={s.container}>
       {/* Header */}
       <View style={s.header}>
-        <View style={[s.levelBadge, { backgroundColor: `${level.color}20` }]}>
-          <Text style={s.levelEmoji}>{level.emoji}</Text>
-          <Text style={[s.levelLabel, { color: level.color }]}>{getLevelLabel(level.id, t)}</Text>
+        <View style={[s.trackBadge, { backgroundColor: `${track.color}20` }]}>
+          <Text style={s.trackEmoji}>{track.emoji}</Text>
+          <Text style={[s.trackLabel, { color: track.color }]}>{getTrackLabel(track.id, t)}</Text>
         </View>
         <Text style={s.headerTitle}>{t('quiz.completion.sessionComplete')}</Text>
       </View>
 
       {/* Main Result Card */}
-      <View style={[s.resultCard, { borderColor: `${level.color}40` }]}>
+      <View style={[s.resultCard, { borderColor: `${track.color}40` }]}>
         {/* Trophy icon */}
         <View style={s.trophyContainer}>
-          <TrophyIcon color={level.color} size={64} />
+          <TrophyIcon color={track.color} size={64} />
         </View>
 
         {/* Accuracy */}
-        <Text style={[s.accuracyText, { color: level.color }]}>{accuracy}%</Text>
+        <Text style={[s.accuracyText, { color: track.color }]}>{accuracy}%</Text>
         <Text style={s.scoreText}>{t('quiz.completion.score', { correct, total })}</Text>
 
         {/* Message */}
@@ -94,10 +94,10 @@ export default function QuizCompletionScreen() {
         {/* Streak */}
         <View style={s.statCard}>
           <View style={s.statIconRow}>
-            <FireIcon color={COLORS.level1} size={20} />
+            <FireIcon color={COLORS.track1} size={20} />
             <Text style={s.statLabel}>{t('quiz.completion.streak')}</Text>
           </View>
-          <Text style={[s.statValue, { color: COLORS.level1 }]}>
+          <Text style={[s.statValue, { color: COLORS.track1 }]}>
             {t('quiz.completion.streakDays', { count: streak })}
           </Text>
         </View>
@@ -105,7 +105,7 @@ export default function QuizCompletionScreen() {
         {/* Tomorrow's review */}
         <View style={s.statCard}>
           <Text style={s.statLabel}>{t('quiz.completion.tomorrow')}</Text>
-          <Text style={[s.statValue, { color: level.color }]}>
+          <Text style={[s.statValue, { color: track.color }]}>
             {t('quiz.completion.tomorrowCards', { count: tomorrowDueCount })}
           </Text>
         </View>
@@ -115,7 +115,7 @@ export default function QuizCompletionScreen() {
       <Pressable
         style={({ pressed }) => [
           s.continueBtn,
-          { backgroundColor: level.color },
+          { backgroundColor: track.color },
           pressed && s.continueBtnPressed,
         ]}
         onPress={handleContinue}
@@ -123,7 +123,7 @@ export default function QuizCompletionScreen() {
         <Text style={s.continueBtnText}>{t('quiz.completion.continue')}</Text>
       </Pressable>
 
-      {/* Badge level-up toast notification */}
+      {/* Badge track-up toast notification */}
       <Toast visible={visible} message={message} emoji={emoji} onHide={hideToast} />
     </View>
   );
@@ -141,7 +141,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
     marginBottom: SPACING.xl,
   },
-  levelBadge: {
+  trackBadge: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
@@ -150,10 +150,10 @@ const s = StyleSheet.create({
     borderRadius: 12,
     marginBottom: SPACING.sm,
   },
-  levelEmoji: {
+  trackEmoji: {
     fontSize: 16,
   },
-  levelLabel: {
+  trackLabel: {
     fontSize: FONT_SIZE.sm,
     fontWeight: '700',
   },

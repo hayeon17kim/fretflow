@@ -4,23 +4,23 @@
 import { useEffect, useRef } from 'react';
 import * as Haptics from 'expo-haptics';
 import { useTranslation } from 'react-i18next';
-import type { LevelId } from '@/config/levels';
-import { getLevelLabel } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
+import { getTrackLabel } from '@/config/tracks';
 import { useAppStore } from '@/stores/useAppStore';
 import { BADGES, getBadgeForProgress, type BadgeLevel } from '@/utils/badges';
 
 interface UseBadgeCheckOptions {
-  onBadgeLevelUp?: (levelId: LevelId, newBadge: BadgeLevel) => void;
+  onBadgeLevelUp?: (trackId: TrackId, newBadge: BadgeLevel) => void;
 }
 
 /**
  * Hook to check for badge level-ups and trigger feedback
- * @param levelId - Level to check
+ * @param trackId - Track to check
  * @param currentProgress - Current progress percentage (0-100)
  * @param options - Optional callbacks
  */
 export function useBadgeCheck(
-  levelId: LevelId,
+  trackId: TrackId,
   currentProgress: number,
   options?: UseBadgeCheckOptions,
 ) {
@@ -40,7 +40,7 @@ export function useBadgeCheck(
     }
 
     const currentBadge = getBadgeForProgress(currentProgress);
-    const storedBadge = badgeLevels[levelId];
+    const storedBadge = badgeLevels[trackId];
 
     // Check if badge level increased
     if (currentBadge !== storedBadge) {
@@ -50,7 +50,7 @@ export function useBadgeCheck(
 
       if (currentIndex > storedIndex) {
         // Badge level up!
-        updateBadgeLevel(levelId, currentBadge);
+        updateBadgeLevel(trackId, currentBadge);
 
         // Trigger haptic feedback
         if (vibrationEnabled) {
@@ -59,25 +59,25 @@ export function useBadgeCheck(
 
         // Call callback if provided
         if (options?.onBadgeLevelUp) {
-          options.onBadgeLevelUp(levelId, currentBadge);
+          options.onBadgeLevelUp(trackId, currentBadge);
         }
       }
     }
-  }, [levelId, currentProgress, badgeLevels, updateBadgeLevel, vibrationEnabled, options]);
+  }, [trackId, currentProgress, badgeLevels, updateBadgeLevel, vibrationEnabled, options]);
 }
 
 /**
  * Get the toast message for badge level-up
- * @param levelId - Level that leveled up
+ * @param trackId - Track that leveled up
  * @param badgeLevel - New badge level
  * @param t - Translation function
  */
 export function getBadgeLevelUpMessage(
-  levelId: LevelId,
+  trackId: TrackId,
   badgeLevel: BadgeLevel,
   t: ReturnType<typeof useTranslation>['t'],
 ): string {
-  const levelLabel = getLevelLabel(levelId, t);
+  const trackLabel = getTrackLabel(trackId, t);
   const badgeName = t(`badges.${badgeLevel}`);
-  return t('badges.levelUp', { level: levelLabel, badge: badgeName });
+  return t('badges.trackUp', { track: trackLabel, badge: badgeName });
 }

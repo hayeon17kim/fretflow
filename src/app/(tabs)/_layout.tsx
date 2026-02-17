@@ -1,10 +1,28 @@
 import { Tabs } from 'expo-router';
 import { useTranslation } from 'react-i18next';
+import { useEffect } from 'react';
+import { AppState } from 'react-native';
 import { TabIcon } from '@/components/TabIcon';
+import { useNotifications } from '@/hooks/useNotifications';
 import { COLORS, FONT_SIZE } from '@/utils/constants';
 
 export default function TabLayout() {
   const { t } = useTranslation();
+  const { scheduleAllNotifications } = useNotifications();
+
+  // Schedule notifications on tab layout mount (after onboarding)
+  useEffect(() => {
+    scheduleAllNotifications();
+
+    // Listen for app state changes (foreground/background)
+    const subscription = AppState.addEventListener('change', (nextState) => {
+      if (nextState === 'active') {
+        scheduleAllNotifications();
+      }
+    });
+
+    return () => subscription.remove();
+  }, [scheduleAllNotifications]);
 
   return (
     <Tabs
@@ -18,7 +36,7 @@ export default function TabLayout() {
           paddingBottom: 28,
           paddingTop: 8,
         },
-        tabBarActiveTintColor: COLORS.level1,
+        tabBarActiveTintColor: COLORS.track1,
         tabBarInactiveTintColor: COLORS.textTertiary,
         tabBarLabelStyle: {
           fontSize: FONT_SIZE.xs - 1,

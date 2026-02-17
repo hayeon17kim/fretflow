@@ -69,7 +69,7 @@ export default function QuizNoteScreen() {
         params: {
           correct: correctCount.toString(),
           total: total.toString(),
-          levelNum: '1',
+          trackId: 'note',
         },
       });
     });
@@ -80,7 +80,7 @@ export default function QuizNoteScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.note.title')}
-        color={COLORS.level1}
+        color={COLORS.track1}
         progress={progress}
         total={total}
         onBack={() => router.back()}

@@ -1,18 +1,18 @@
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { FireIcon } from '@/components/icons/FireIcon';
-import type { LevelId } from '@/config/levels';
-import { getLevelLabel, LEVELS } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
+import { getTrackLabel, TRACKS } from '@/config/tracks';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface DailyReviewCardProps {
   streak: number;
   dueCount: number;
   estimatedMinutes: number;
-  levelDueCounts: Record<LevelId, number>;
+  trackDueCounts: Record<TrackId, number>;
   cardsReviewed: number;
   dailyGoal: number;
-  recommendedLevel: LevelId; // Issue #22
+  recommendedTrack: TrackId; // Issue #22
   onStartReview: () => void;
   onLearnNew: () => void;
 }
@@ -21,10 +21,10 @@ export function DailyReviewCard({
   streak,
   dueCount,
   estimatedMinutes,
-  levelDueCounts,
+  trackDueCounts,
   cardsReviewed,
   dailyGoal,
-  recommendedLevel,
+  recommendedTrack,
   onStartReview,
   onLearnNew,
 }: DailyReviewCardProps) {
@@ -37,15 +37,15 @@ export function DailyReviewCard({
   // Determine progress color based on percentage
   const getProgressColor = () => {
     if (progressPercent >= 100) return COLORS.correct; // Green for complete
-    if (progressPercent >= 67) return COLORS.level2; // Blue for good progress
+    if (progressPercent >= 67) return COLORS.track2; // Blue for good progress
     if (progressPercent >= 34) return '#F59E0B'; // Yellow for moderate progress
     return COLORS.textTertiary; // Gray for low progress
   };
 
   const progressColor = getProgressColor();
 
-  // Get recommended level label (Issue #22)
-  const recommendedLevelLabel = getLevelLabel(recommendedLevel, t);
+  // Get recommended track label (Issue #22)
+  const recommendedTrackLabel = getTrackLabel(recommendedTrack, t);
 
   const hasDueCards = dueCount > 0;
   // First-time user: never reviewed anything AND nothing scheduled yet
@@ -56,14 +56,14 @@ export function DailyReviewCard({
       {/* Streak + count */}
       <View style={s.ctaTopRow}>
         <View style={s.streakRow}>
-          <FireIcon color={COLORS.level1} />
-          <Text style={[s.streakText, { color: COLORS.level1 }]}>
+          <FireIcon color={COLORS.track1} />
+          <Text style={[s.streakText, { color: COLORS.track1 }]}>
             {t('home.streak', { count: streak })}
           </Text>
         </View>
         {hasDueCards && (
           <Text style={s.dueInfo}>
-            {t('home.recommendedLevel', { level: recommendedLevelLabel, count: dueCount })}
+            {t('home.recommendedTrack', { track: recommendedTrackLabel, count: dueCount })}
           </Text>
         )}
       </View>
@@ -112,18 +112,18 @@ export function DailyReviewCard({
         <>
           {/* ── Due cards exist: review mode ── */}
           <Text style={s.ctaTitle}>
-            {`${t('home.todayReview')}: ${recommendedLevelLabel}`}
+            {`${t('home.todayReview')}: ${recommendedTrackLabel}`}
           </Text>
 
-          {/* Level composition chips */}
+          {/* Track composition chips */}
           <View style={s.chipRow}>
-            {LEVELS.map((lv) => {
-              const count = levelDueCounts[lv.id];
+            {TRACKS.map((track) => {
+              const count = trackDueCounts[track.id];
               if (count === 0) return null;
               return (
-                <View key={lv.id} style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                  <Text style={[s.chipText, { color: lv.color }]}>
-                    {getLevelLabel(lv.id, t)} ×{count}
+                <View key={track.id} style={[s.chip, { backgroundColor: `${track.color}15` }]}>
+                  <Text style={[s.chipText, { color: track.color }]}>
+                    {getTrackLabel(track.id, t)} ×{count}
                   </Text>
                 </View>
               );
@@ -167,7 +167,7 @@ const s = StyleSheet.create({
     padding: SPACING.xl,
     marginBottom: SPACING.md,
     borderWidth: 1,
-    borderColor: `${COLORS.level1}30`,
+    borderColor: `${COLORS.track1}30`,
     backgroundColor: COLORS.surface,
   },
   ctaTopRow: {
@@ -213,7 +213,7 @@ const s = StyleSheet.create({
   ctaBtn: {
     height: 50,
     borderRadius: 25,
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -237,14 +237,14 @@ const s = StyleSheet.create({
     borderRadius: 25,
     backgroundColor: 'transparent',
     borderWidth: 1.5,
-    borderColor: COLORS.level1,
+    borderColor: COLORS.track1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   learnBtnText: {
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
-    color: COLORS.level1,
+    color: COLORS.track1,
   },
   goalSection: {
     marginBottom: SPACING.md,

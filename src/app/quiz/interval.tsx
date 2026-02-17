@@ -119,7 +119,7 @@ export default function QuizIntervalScreen() {
         params: {
           correct: correctCount.toString(),
           total: total.toString(),
-          levelNum: '2',
+          trackId: 'interval',
         },
       });
     });
@@ -137,10 +137,10 @@ export default function QuizIntervalScreen() {
       highlights.push({
         string: tapped.string,
         fret: tapped.fret,
-        color: COLORS.level2,
+        color: COLORS.track2,
         label: '?',
         textColor: '#fff',
-        border: COLORS.level2,
+        border: COLORS.track2,
       });
     }
 
@@ -182,7 +182,7 @@ export default function QuizIntervalScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.interval.title')}
-        color={COLORS.level2}
+        color={COLORS.track2}
         progress={progress}
         total={total}
         onBack={() => router.back()}
@@ -208,7 +208,7 @@ export default function QuizIntervalScreen() {
 
         <Text style={s.questionMain}>
           {t('quiz.interval.questionMain', { rootNote: q.rootNote, intervalName: '' })}{' '}
-          <Text style={{ color: COLORS.level2 }}>{q.intervalName}</Text>
+          <Text style={{ color: COLORS.track2 }}>{q.intervalName}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.interval.questionSub')}</Text>
 
@@ -258,7 +258,7 @@ export default function QuizIntervalScreen() {
             disabled={!tapped}
             style={({ pressed }) => [
               s.confirmBtn,
-              { backgroundColor: tapped ? COLORS.level2 : `${COLORS.level2}30` },
+              { backgroundColor: tapped ? COLORS.track2 : `${COLORS.track2}30` },
               pressed && tapped && { opacity: 0.8 },
             ]}
           >
@@ -292,7 +292,7 @@ const s = StyleSheet.create({
   },
   quizBadge: {
     alignSelf: 'center',
-    backgroundColor: `${COLORS.level2}20`,
+    backgroundColor: `${COLORS.track2}20`,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 10,
@@ -301,7 +301,7 @@ const s = StyleSheet.create({
   quizBadgeText: {
     fontSize: FONT_SIZE.xs,
     fontWeight: '600',
-    color: COLORS.level2,
+    color: COLORS.track2,
   },
   questionMain: {
     fontSize: FONT_SIZE.lg + 1,
@@ -318,16 +318,16 @@ const s = StyleSheet.create({
   },
   hintBox: {
     marginTop: SPACING.sm,
-    backgroundColor: `${COLORS.level2}10`,
+    backgroundColor: `${COLORS.track2}10`,
     borderRadius: 10,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: `${COLORS.level2}20`,
+    borderColor: `${COLORS.track2}20`,
   },
   hintTitle: {
     fontSize: FONT_SIZE.xs,
     fontWeight: '700',
-    color: COLORS.level2,
+    color: COLORS.track2,
     marginBottom: 2,
   },
   hintText: {

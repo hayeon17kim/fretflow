@@ -1,6 +1,6 @@
 import type { FretPosition, IntervalName, NoteName, ScaleName } from './music';
 
-// Question types for each level
+// Question types for each track
 export interface NoteQuestion {
   type: 'note';
   position: FretPosition;

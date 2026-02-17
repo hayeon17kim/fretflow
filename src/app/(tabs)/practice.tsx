@@ -1,16 +1,15 @@
-import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { CircularProgress } from '@/components/progress/CircularProgress';
 import {
-  getLevelDesc,
-  getLevelExample,
-  getLevelLabel,
-  LEVELS,
-  TARGET_CARDS_PER_LEVEL,
-} from '@/config/levels';
+  getTrackDesc,
+  getTrackExample,
+  getTrackLabel,
+  TRACKS,
+  TARGET_CARDS_PER_TRACK,
+} from '@/config/tracks';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -25,19 +24,11 @@ const SESSION_OPTIONS = [
 export default function PracticeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const [expandedLevel, setExpandedLevel] = useState<string | null>(null);
-  const [_refreshKey, setRefreshKey] = useState(0);
-  const { getLevelProgress } = useSpacedRepetition();
-
-  // Refresh on screen focus
-  useFocusEffect(
-    useCallback(() => {
-      setRefreshKey((prev) => prev + 1);
-    }, []),
-  );
+  const [expandedTrack, setExpandedTrack] = useState<string | null>(null);
+  const { getTrackProgress } = useSpacedRepetition();
 
   const toggleExpand = (id: string) => {
-    setExpandedLevel((prev) => (prev === id ? null : id));
+    setExpandedTrack((prev) => (prev === id ? null : id));
   };
 
   return (
@@ -47,49 +38,49 @@ export default function PracticeScreen() {
         <Text style={s.title}>{t('practice.title')}</Text>
         <Text style={s.subtitle}>{t('practice.subtitle')}</Text>
 
-        {/* Level cards */}
-        {LEVELS.map((lv) => {
-          const progress = getLevelProgress(lv.id);
-          const isExpanded = expandedLevel === lv.id;
+        {/* Track cards */}
+        {TRACKS.map((track) => {
+          const progress = getTrackProgress(track.id);
+          const isExpanded = expandedTrack === track.id;
 
           return (
             <Pressable
-              key={lv.id}
-              onPress={() => toggleExpand(lv.id)}
-              style={[s.levelCard, { borderColor: `${lv.color}25` }]}
+              key={track.id}
+              onPress={() => toggleExpand(track.id)}
+              style={[s.trackCard, { borderColor: `${track.color}25` }]}
               accessibilityRole="button"
-              accessibilityLabel={getLevelLabel(lv.id, t)}
+              accessibilityLabel={getTrackLabel(track.id, t)}
               accessibilityState={{ expanded: isExpanded }}
             >
               {/* Main row */}
-              <View style={s.levelRow}>
+              <View style={s.trackRow}>
                 {/* Icon + circular progress */}
-                <View style={s.levelIcon}>
-                  <CircularProgress progress={progress} color={lv.color} />
-                  <Text style={s.levelEmoji}>{lv.emoji}</Text>
+                <View style={s.trackIcon}>
+                  <CircularProgress progress={progress} color={track.color} />
+                  <Text style={s.trackEmoji}>{track.emoji}</Text>
                 </View>
 
                 {/* Info */}
-                <View style={s.levelInfo}>
-                  <View style={s.levelNameRow}>
-                    <Text style={s.levelName}>
-                      {getLevelLabel(lv.id, t)}
+                <View style={s.trackInfo}>
+                  <View style={s.trackNameRow}>
+                    <Text style={s.trackName}>
+                      {getTrackLabel(track.id, t)}
                     </Text>
-                    {'basic' in lv && lv.basic && (
-                      <View style={[s.chip, { backgroundColor: `${lv.color}15` }]}>
-                        <Text style={[s.chipText, { color: lv.color }]}>
+                    {'basic' in track && track.basic && (
+                      <View style={[s.chip, { backgroundColor: `${track.color}15` }]}>
+                        <Text style={[s.chipText, { color: track.color }]}>
                           {t('practice.basicMode')}
                         </Text>
                       </View>
                     )}
                   </View>
-                  <Text style={s.levelDesc}>
-                    {getLevelDesc(lv.id, t)}
+                  <Text style={s.trackDesc}>
+                    {getTrackDesc(track.id, t)}
                   </Text>
                 </View>
 
                 {/* Progress % */}
-                <Text style={[s.levelProgress, { color: lv.color }]}>
+                <Text style={[s.trackProgress, { color: track.color }]}>
                   {progress}%
                 </Text>
               </View>
@@ -100,7 +91,7 @@ export default function PracticeScreen() {
                   {/* Example */}
                   <View style={s.exampleBox}>
                     <Text style={s.exampleLabel}>{t('practice.exampleProblem')}</Text>
-                    <Text style={s.exampleText}>{getLevelExample(lv.id, t)}</Text>
+                    <Text style={s.exampleText}>{getTrackExample(track.id, t)}</Text>
                   </View>
 
                   {/* Session option buttons */}
@@ -114,14 +105,14 @@ export default function PracticeScreen() {
                         ]}
                         onPress={() => {
                           router.push({
-                            pathname: QUIZ_ROUTES[lv.id],
+                            pathname: QUIZ_ROUTES[track.id],
                             params: { sessionSize: opt.cards.toString() },
                           });
                         }}
                         accessibilityRole="button"
                         accessibilityLabel={t(`practice.sessions.${opt.key}`)}
                       >
-                        <Text style={[s.sessionBtnLabel, { color: lv.color }]}>
+                        <Text style={[s.sessionBtnLabel, { color: track.color }]}>
                           {t(`practice.sessions.${opt.key}`)}
                         </Text>
                         <Text style={s.sessionBtnCards}>
@@ -178,38 +169,38 @@ const s = StyleSheet.create({
     marginBottom: SPACING.lg,
   },
 
-  // Level card
-  levelCard: {
+  // Track card
+  trackCard: {
     backgroundColor: COLORS.surface,
     borderRadius: 16,
     padding: SPACING.lg,
     marginBottom: SPACING.sm + 2,
     borderWidth: 1,
   },
-  levelRow: {
+  trackRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: SPACING.md,
   },
-  levelIcon: {
+  trackIcon: {
     width: 44,
     height: 44,
     alignItems: 'center',
     justifyContent: 'center',
   },
-  levelEmoji: {
+  trackEmoji: {
     fontSize: 20,
     position: 'absolute',
   },
-  levelInfo: {
+  trackInfo: {
     flex: 1,
   },
-  levelNameRow: {
+  trackNameRow: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: 6,
   },
-  levelName: {
+  trackName: {
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
     color: COLORS.textPrimary,
@@ -223,12 +214,12 @@ const s = StyleSheet.create({
     fontSize: 9,
     fontWeight: '600',
   },
-  levelDesc: {
+  trackDesc: {
     fontSize: FONT_SIZE.xs,
     color: COLORS.textSecondary,
     marginTop: 2,
   },
-  levelProgress: {
+  trackProgress: {
     fontSize: FONT_SIZE.sm + 1,
     fontWeight: '700',
   },
@@ -282,7 +273,7 @@ const s = StyleSheet.create({
     height: 52,
     borderRadius: 26,
     borderWidth: 1,
-    borderColor: COLORS.level1,
+    borderColor: COLORS.track1,
     backgroundColor: 'transparent',
     alignItems: 'center',
     justifyContent: 'center',
@@ -291,6 +282,6 @@ const s = StyleSheet.create({
   mixBtnText: {
     fontSize: FONT_SIZE.sm + 1,
     fontWeight: '600',
-    color: COLORS.level1,
+    color: COLORS.track1,
   },
 });

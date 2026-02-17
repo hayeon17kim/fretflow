@@ -3,26 +3,26 @@
 
 import { useTranslation } from 'react-i18next';
 import { Modal, Pressable, StyleSheet, Text, View } from 'react-native';
-import type { LevelId } from '@/config/levels';
+import type { TrackId } from '@/config/tracks';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 interface SoftGuideModalProps {
   visible: boolean;
-  levelId: LevelId;
+  trackId: TrackId;
   onContinue: () => void;
   onGoToLevel1: () => void;
 }
 
 export function SoftGuideModal({
   visible,
-  levelId,
+  trackId,
   onContinue,
   onGoToLevel1,
 }: SoftGuideModalProps) {
   const { t } = useTranslation();
 
   // Only show for Scale Pattern or Ear Training tracks
-  if (levelId !== 'scale' && levelId !== 'ear') return null;
+  if (trackId !== 'scale' && trackId !== 'ear') return null;
 
   return (
     <Modal visible={visible} transparent animationType="fade">
@@ -109,7 +109,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   buttonPrimary: {
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
   },
   buttonPrimaryText: {
     fontSize: FONT_SIZE.sm,

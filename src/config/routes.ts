@@ -1,6 +1,6 @@
-import type { LevelId } from './levels';
+import type { TrackId } from './tracks';
 
-export const QUIZ_ROUTES: Record<LevelId, string> = {
+export const QUIZ_ROUTES: Record<TrackId, string> = {
   note: '/quiz/note',
   interval: '/quiz/interval',
   scale: '/quiz/scale',

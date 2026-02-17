@@ -11,7 +11,7 @@ import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import { QUIZ_ROUTES } from '@/config/levels';
+import { QUIZ_ROUTES } from '@/config/routes';
 import type { FretPosition, StringNumber } from '@/types/music';
 import { generateCardBatch, type ScaleQuestionCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -94,23 +94,23 @@ export default function QuizScaleScreen() {
   const [score, setScore] = useState<Score | null>(null);
 
   // Soft guide for first visit (Issue #22)
-  const levelFirstVisit = useAppStore((s) => s.levelFirstVisit);
-  const markLevelVisited = useAppStore((s) => s.markLevelVisited);
+  const trackFirstVisit = useAppStore((s) => s.trackFirstVisit);
+  const markTrackVisited = useAppStore((s) => s.markTrackVisited);
   const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
-    if (!levelFirstVisit.scale) {
+    if (!trackFirstVisit.scale) {
       setShowGuide(true);
     }
-  }, [levelFirstVisit.scale]);
+  }, [trackFirstVisit.scale]);
 
   const handleContinue = () => {
-    markLevelVisited('scale');
+    markTrackVisited('scale');
     setShowGuide(false);
   };
 
   const handleGoToLevel1 = () => {
-    markLevelVisited('scale');
+    markTrackVisited('scale');
     setShowGuide(false);
     router.replace(QUIZ_ROUTES.note);
   };
@@ -173,7 +173,7 @@ export default function QuizScaleScreen() {
         params: {
           correct: correctCount.toString(),
           total: total.toString(),
-          levelNum: '3',
+          trackId: 'scale',
         },
       });
     });
@@ -195,7 +195,7 @@ export default function QuizScaleScreen() {
             highlights.push({
               string: str,
               fret: f,
-              color: COLORS.level3,
+              color: COLORS.track3,
               label: '●',
               textColor: '#fff',
             });
@@ -234,7 +234,7 @@ export default function QuizScaleScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.scale.title')}
-        color={COLORS.level3}
+        color={COLORS.track3}
         progress={progress}
         total={total}
         onBack={() => router.back()}
@@ -264,7 +264,8 @@ export default function QuizScaleScreen() {
               position: q.position,
             }).split(q.position)[0]
           }
-          {q.name} <Text style={{ color: COLORS.level3 }}>{q.position}</Text>
+          {q.name}{' '}
+          <Text style={{ color: COLORS.track3 }}>{q.position}</Text>
         </Text>
         <Text style={s.questionSub}>{t('quiz.scale.questionSub')}</Text>
 
@@ -318,7 +319,7 @@ export default function QuizScaleScreen() {
             disabled={selected.length === 0}
             style={({ pressed }) => [
               s.confirmBtn,
-              { backgroundColor: selected.length > 0 ? COLORS.level3 : `${COLORS.level3}40` },
+              { backgroundColor: selected.length > 0 ? COLORS.track3 : `${COLORS.track3}40` },
               pressed && selected.length > 0 && { opacity: 0.8 },
             ]}
           >
@@ -336,7 +337,7 @@ export default function QuizScaleScreen() {
       {/* Soft guide modal for first visit (Issue #22) */}
       <SoftGuideModal
         visible={showGuide}
-        levelId="scale"
+        trackId="scale"
         onContinue={handleContinue}
         onGoToLevel1={handleGoToLevel1}
       />
@@ -362,7 +363,7 @@ const s = StyleSheet.create({
   },
   quizBadge: {
     alignSelf: 'center',
-    backgroundColor: `${COLORS.level3}20`,
+    backgroundColor: `${COLORS.track3}20`,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 10,
@@ -371,7 +372,7 @@ const s = StyleSheet.create({
   quizBadgeText: {
     fontSize: FONT_SIZE.xs,
     fontWeight: '600',
-    color: COLORS.level3,
+    color: COLORS.track3,
   },
   questionMain: {
     fontSize: FONT_SIZE.lg + 1,
@@ -388,16 +389,16 @@ const s = StyleSheet.create({
   },
   hintBox: {
     marginTop: SPACING.sm,
-    backgroundColor: `${COLORS.level3}10`,
+    backgroundColor: `${COLORS.track3}10`,
     borderRadius: 10,
     padding: SPACING.md,
     borderWidth: 1,
-    borderColor: `${COLORS.level3}20`,
+    borderColor: `${COLORS.track3}20`,
   },
   hintTitle: {
     fontSize: FONT_SIZE.xs,
     fontWeight: '700',
-    color: COLORS.level3,
+    color: COLORS.track3,
     marginBottom: 2,
   },
   hintText: {

@@ -10,11 +10,11 @@ export const COLORS = {
   textTertiary: '#636366',
   accent: '#A78BFA', // 메인 퍼플
 
-  // 레벨별 컬러
-  level1: '#4ADE80', // 초록 — Note Position
-  level2: '#A78BFA', // 퍼플 — Intervals
-  level3: '#60A5FA', // 블루 — Scale Patterns
-  level4: '#FB923C', // 오렌지 — Ear Training
+  // 트랙별 컬러
+  track1: '#4ADE80', // 초록 — Note Position
+  track2: '#A78BFA', // 퍼플 — Intervals
+  track3: '#60A5FA', // 블루 — Scale Patterns
+  track4: '#FB923C', // 오렌지 — Ear Training
 
   // 상태
   correct: '#4ADE80',

@@ -1,17 +1,16 @@
 import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
-import { useCallback, useState } from 'react';
+import { useCallback } from 'react';
 import { useTranslation } from 'react-i18next';
 import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { DailyReviewCard } from '@/components/home/DailyReviewCard';
-import { LevelCardGrid } from '@/components/home/LevelCardGrid';
-import type { LevelId } from '@/config/levels';
-import { LEVELS } from '@/config/levels';
+import { TrackCardGrid } from '@/components/home/TrackCardGrid';
+import type { TrackId } from '@/config/tracks';
+import { TRACKS } from '@/config/tracks';
 import { QUIZ_ROUTES } from '@/config/routes';
 import { useHomeScreenStats } from '@/hooks/useHomeScreenStats';
 import { useSmartRecommendation } from '@/hooks/useSmartRecommendation';
-import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useNotifications } from '@/hooks/useNotifications';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
@@ -23,13 +22,9 @@ export default function HomeScreen() {
   const settings = useAppStore((s) => s.settings);
   const { scheduleAllNotifications } = useNotifications();
 
-  // State to trigger re-render on screen focus
-  const [_refreshKey, setRefreshKey] = useState(0);
-
-  // Refresh data and reschedule notifications whenever screen gains focus
+  // Reschedule notifications whenever screen gains focus
   useFocusEffect(
     useCallback(() => {
-      setRefreshKey((prev) => prev + 1);
       scheduleAllNotifications();
 
       // Listen for app state changes (foreground/background)
@@ -44,24 +39,24 @@ export default function HomeScreen() {
   );
 
   // Get all statistics from hook
-  const { dueCount, estimatedMinutes, levelDueCounts, levelProgress } = useHomeScreenStats();
+  const { dueCount, estimatedMinutes, trackDueCounts, trackProgress } = useHomeScreenStats();
 
-  // Smart recommendation for optimal level selection (Issue #22)
-  const { recommendedLevel, dueCount: recommendedDueCount } = useSmartRecommendation();
+  // Smart recommendation for optimal track selection (Issue #22)
+  const { recommendedTrack, dueCount: recommendedDueCount } = useSmartRecommendation();
 
   const handleStartReview = useCallback(() => {
-    // Route to the recommended level for due card review
-    router.push(QUIZ_ROUTES[recommendedLevel]);
-  }, [router, recommendedLevel]);
+    // Route to the recommended track for due card review
+    router.push(QUIZ_ROUTES[recommendedTrack]);
+  }, [router, recommendedTrack]);
 
-  // Learn new cards — go directly to recommended level quiz (no extra level-select step)
+  // Learn new cards — go directly to recommended track quiz (no extra track-select step)
   const handleLearnNew = useCallback(() => {
-    router.push(QUIZ_ROUTES[recommendedLevel]);
-  }, [router, recommendedLevel]);
+    router.push(QUIZ_ROUTES[recommendedTrack]);
+  }, [router, recommendedTrack]);
 
-  const handleLevelPress = useCallback(
-    (levelId: LevelId) => {
-      router.push(QUIZ_ROUTES[levelId]);
+  const handleTrackPress = useCallback(
+    (trackId: TrackId) => {
+      router.push(QUIZ_ROUTES[trackId]);
     },
     [router],
   );
@@ -86,7 +81,7 @@ export default function HomeScreen() {
               height={18}
               viewBox="0 0 24 24"
               fill="none"
-              stroke={COLORS.level1}
+              stroke={COLORS.track1}
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -102,16 +97,16 @@ export default function HomeScreen() {
           streak={todayStats.streak}
           dueCount={dueCount}
           estimatedMinutes={estimatedMinutes}
-          levelDueCounts={levelDueCounts}
+          trackDueCounts={trackDueCounts}
           cardsReviewed={todayStats.cardsReviewed}
           dailyGoal={settings.dailyGoal}
-          recommendedLevel={recommendedLevel}
+          recommendedTrack={recommendedTrack}
           onStartReview={handleStartReview}
           onLearnNew={handleLearnNew}
         />
 
-        {/* ─── Level cards ─── */}
-        <LevelCardGrid levelProgress={levelProgress} onLevelPress={handleLevelPress} />
+        {/* ─── Track cards ─── */}
+        <TrackCardGrid trackProgress={trackProgress} onTrackPress={handleTrackPress} />
       </ScrollView>
     </View>
   );

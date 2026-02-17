@@ -1,4 +1,4 @@
-// Badge system for level mastery progression (Issue #22)
+// Badge system for track mastery progression (Issue #22)
 
 export type BadgeLevel = 'none' | 'beginner' | 'familiar' | 'proficient' | 'master';
 

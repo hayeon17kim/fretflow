@@ -56,7 +56,7 @@ export interface FlashCard {
 
 // 퀴즈 세션
 export interface QuizSession {
-  level: 1 | 2 | 3 | 4;
+  track: 1 | 2 | 3 | 4;
   totalCards: number;
   correctCount: number;
   wrongCount: number;

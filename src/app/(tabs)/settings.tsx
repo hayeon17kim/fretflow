@@ -27,7 +27,7 @@ function UserIcon({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={COLORS.level1}
+      stroke={COLORS.track1}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -46,7 +46,7 @@ function TargetIcon({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={COLORS.level2}
+      stroke={COLORS.track2}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -66,7 +66,7 @@ function BellIcon({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={COLORS.level3}
+      stroke={COLORS.track3}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -84,7 +84,7 @@ function AccessibilityIcon({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={COLORS.level3}
+      stroke={COLORS.track3}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -107,7 +107,7 @@ function InfoIcon({ size = 20 }: { size?: number }) {
       height={size}
       viewBox="0 0 24 24"
       fill="none"
-      stroke={COLORS.level4}
+      stroke={COLORS.track4}
       strokeWidth={2}
       strokeLinecap="round"
       strokeLinejoin="round"
@@ -291,14 +291,14 @@ export default function SettingsScreen() {
                   style={[
                     s.goalOption,
                     settings.dailyGoal === goal && s.goalOptionActive,
-                    settings.dailyGoal === goal && { borderColor: COLORS.level2 },
+                    settings.dailyGoal === goal && { borderColor: COLORS.track2 },
                   ]}
                   onPress={() => updateSettings({ dailyGoal: goal })}
                 >
                   <Text
                     style={[
                       s.goalOptionText,
-                      settings.dailyGoal === goal && { color: COLORS.level2 },
+                      settings.dailyGoal === goal && { color: COLORS.track2 },
                     ]}
                   >
                     {t('settings.goals.cards', { count: goal })}
@@ -326,8 +326,8 @@ export default function SettingsScreen() {
                 value={settings.notifications.enabled}
                 onValueChange={handleToggleNotifications}
                 disabled={!settings.notifications.permissionGranted}
-                trackColor={{ false: COLORS.border, true: `${COLORS.level3}80` }}
-                thumbColor={settings.notifications.enabled ? COLORS.level3 : COLORS.textSecondary}
+                trackColor={{ false: COLORS.border, true: `${COLORS.track3}80` }}
+                thumbColor={settings.notifications.enabled ? COLORS.track3 : COLORS.textSecondary}
               />
             </View>
 
@@ -374,12 +374,12 @@ export default function SettingsScreen() {
                 style={[
                   s.languageOption,
                   i18n.language === 'ko' && s.languageOptionActive,
-                  i18n.language === 'ko' && { borderColor: COLORS.level3 },
+                  i18n.language === 'ko' && { borderColor: COLORS.track3 },
                 ]}
                 onPress={() => i18n.changeLanguage('ko')}
               >
                 <Text
-                  style={[s.languageOptionText, i18n.language === 'ko' && { color: COLORS.level3 }]}
+                  style={[s.languageOptionText, i18n.language === 'ko' && { color: COLORS.track3 }]}
                 >
                   {t('common.korean')}
                 </Text>
@@ -388,12 +388,12 @@ export default function SettingsScreen() {
                 style={[
                   s.languageOption,
                   i18n.language === 'en' && s.languageOptionActive,
-                  i18n.language === 'en' && { borderColor: COLORS.level3 },
+                  i18n.language === 'en' && { borderColor: COLORS.track3 },
                 ]}
                 onPress={() => i18n.changeLanguage('en')}
               >
                 <Text
-                  style={[s.languageOptionText, i18n.language === 'en' && { color: COLORS.level3 }]}
+                  style={[s.languageOptionText, i18n.language === 'en' && { color: COLORS.track3 }]}
                 >
                   {t('common.english')}
                 </Text>
@@ -411,8 +411,8 @@ export default function SettingsScreen() {
               <Switch
                 value={settings.vibrationEnabled}
                 onValueChange={(value) => updateSettings({ vibrationEnabled: value })}
-                trackColor={{ false: COLORS.border, true: `${COLORS.level3}80` }}
-                thumbColor={settings.vibrationEnabled ? COLORS.level3 : COLORS.textSecondary}
+                trackColor={{ false: COLORS.border, true: `${COLORS.track3}80` }}
+                thumbColor={settings.vibrationEnabled ? COLORS.track3 : COLORS.textSecondary}
               />
             </View>
           </View>
@@ -541,16 +541,16 @@ const s = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: `${COLORS.level1}20`,
+    backgroundColor: `${COLORS.track1}20`,
     borderWidth: 2,
-    borderColor: COLORS.level1,
+    borderColor: COLORS.track1,
     alignItems: 'center',
     justifyContent: 'center',
   },
   avatarText: {
     fontSize: FONT_SIZE.xxl,
     fontWeight: '700',
-    color: COLORS.level1,
+    color: COLORS.track1,
   },
   profileInfo: {
     flex: 1,
@@ -567,7 +567,7 @@ const s = StyleSheet.create({
     padding: 0,
     margin: 0,
     borderBottomWidth: 1,
-    borderBottomColor: COLORS.level1,
+    borderBottomColor: COLORS.track1,
   },
   profileLabel: {
     fontSize: FONT_SIZE.xs,
@@ -578,12 +578,12 @@ const s = StyleSheet.create({
     paddingHorizontal: SPACING.md,
     paddingVertical: SPACING.sm,
     borderRadius: 8,
-    backgroundColor: `${COLORS.level1}20`,
+    backgroundColor: `${COLORS.track1}20`,
   },
   editBtnText: {
     fontSize: FONT_SIZE.sm,
     fontWeight: '600',
-    color: COLORS.level1,
+    color: COLORS.track1,
   },
 
   // Settings row
@@ -605,7 +605,7 @@ const s = StyleSheet.create({
   settingValue: {
     fontSize: FONT_SIZE.md,
     fontWeight: '700',
-    color: COLORS.level2,
+    color: COLORS.track2,
   },
 
   // Goal options
@@ -624,7 +624,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   goalOptionActive: {
-    backgroundColor: `${COLORS.level2}15`,
+    backgroundColor: `${COLORS.track2}15`,
   },
   goalOptionText: {
     fontSize: FONT_SIZE.sm,
@@ -649,7 +649,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   languageOptionActive: {
-    backgroundColor: `${COLORS.level3}15`,
+    backgroundColor: `${COLORS.track3}15`,
   },
   languageOptionText: {
     fontSize: FONT_SIZE.sm,
@@ -691,7 +691,7 @@ const s = StyleSheet.create({
   },
   permissionHintText: {
     fontSize: FONT_SIZE.sm,
-    color: COLORS.level3,
+    color: COLORS.track3,
   },
 
   // Footer

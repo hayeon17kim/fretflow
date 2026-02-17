@@ -12,11 +12,11 @@ Learning guitar means memorizing hundreds of note positions across the fretboard
 
 ## Features
 
-### 🎯 4-Level Learning Path
-- **Lv.1** Note Position - Find notes on the fretboard
-- **Lv.2** Intervals - Learn interval patterns
-- **Lv.3** Scales - Master scale shapes
-- **Lv.4** Ear Training - Train your ear with audio
+### 🎯 4 Parallel Learning Tracks
+- **Note Position** - Find notes on the fretboard
+- **Intervals** - Learn interval patterns
+- **Scales** - Master scale shapes
+- **Ear Training** - Train your ear with audio
 
 ### 🧠 Smart Review System
 - SM-2 algorithm schedules reviews at optimal moments
@@ -80,7 +80,7 @@ src/
 ## Roadmap
 
 ### Completed (v1.0)
-- [x] 4-level progressive learning system
+- [x] 4 parallel learning tracks
 - [x] SM-2 spaced repetition algorithm
 - [x] Audio playback for ear training
 - [x] Statistics and progress tracking
@@ -93,7 +93,7 @@ src/
 ### Planned (Post-Launch)
 - [ ] Analytics infrastructure
 - [ ] Ear training expansion (intervals, chords, rhythm)
-- [ ] Mix mode (cross-level practice)
+- [ ] Mix mode (cross-track practice)
 - [ ] Monetization (subscription model)
 - [ ] Supabase backend integration
 

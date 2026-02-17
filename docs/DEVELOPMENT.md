@@ -1,6 +1,6 @@
 # FretFlow Development Guide
 
-Last updated: **Feb 16, 2026**
+Last updated: **Feb 17, 2026**
 
 This document provides technical details for developers working on FretFlow.
 
@@ -45,10 +45,10 @@ src/
 │   │   └── settings.tsx         # Settings tab (TODO)
 │   └── quiz/                    # Quiz stack
 │       ├── _layout.tsx          # Quiz stack layout
-│       ├── note.tsx             # Lv.1 Note position quiz
-│       ├── interval.tsx         # Lv.2 Interval quiz
-│       ├── scale.tsx            # Lv.3 Scale quiz
-│       └── ear.tsx              # Lv.4 Ear training
+│       ├── note.tsx             # Track 1: Note Position Note position quiz
+│       ├── interval.tsx         # Track 2: Intervals Interval quiz
+│       ├── scale.tsx            # Track 3: Scales Scale quiz
+│       └── ear.tsx              # Track 4: Ear Training Ear training
 │
 ├── components/
 │   ├── Fretboard.tsx            # Reusable fretboard (TODO)
@@ -63,7 +63,7 @@ src/
 │
 ├── config/
 │   ├── routes.ts                # Route definitions
-│   └── levels.ts                # Level configuration
+│   └── tracks.ts                # Level configuration
 │
 ├── hooks/
 │   └── useSpacedRepetition.ts   # SM-2 card management
@@ -106,11 +106,11 @@ COLORS = {
   textPrimary: '#FFFFFF',      // Primary text
   textSecondary: '#8E8E93',    // Secondary text
 
-  // Level colors
-  level1: '#4ADE80',           // Green (Note position)
-  level2: '#A78BFA',           // Purple (Intervals)
-  level3: '#60A5FA',           // Blue (Scales)
-  level4: '#FB923C',           // Orange (Ear training)
+  // Track colors
+  level1: '#4ADE80',           // Green (Note position track)
+  level2: '#A78BFA',           // Purple (Intervals track)
+  level3: '#60A5FA',           // Blue (Scales track)
+  level4: '#FB923C',           // Orange (Ear training track)
 
   // State colors
   correct: '#4ADE80',
@@ -159,7 +159,7 @@ FONT_SIZE = {
 
 ### State Management
 **Zustand (useAppStore):**
-- Active level
+- Active track
 - Today's stats (cards reviewed, correct count, streak)
 - Onboarding state
 
@@ -194,10 +194,10 @@ FONT_SIZE = {
 Replaces MOCK_QUESTIONS with real-time card generation:
 
 ```typescript
-generateNoteCard()      // Lv.1: Random fret position + 4 choices
-generateIntervalCard()  // Lv.2: Root position + interval pattern
-generateScaleCard()     // Lv.3: Scale pattern + positions
-generateEarCard()       // Lv.4: Audio note (open strings)
+generateNoteCard()      // Note Position: Random fret position + 4 choices
+generateIntervalCard()  // Intervals: Root position + interval pattern
+generateScaleCard()     // Scales: Scale pattern + positions
+generateEarCard()       // Ear Training: Audio note (open strings)
 ```
 
 ## Development Workflow
@@ -269,9 +269,9 @@ const s = StyleSheet.create({
 ### ✅ Completed
 
 **Screens:**
-- Home (`index.tsx`) - Review cards, streak, level progress
-- Practice (`practice.tsx`) - Level cards, session options
-- Quiz screens - All 4 levels functional
+- Home (`index.tsx`) - Review cards, streak, track progress
+- Practice (`practice.tsx`) - Track cards, session options
+- Quiz screens - All 4 tracks functional
 
 **Core Features:**
 - SM-2 spaced repetition system
@@ -289,7 +289,7 @@ const s = StyleSheet.create({
 **P2 Features:**
 - [ ] Analytics infrastructure (Mixpanel/Amplitude)
 - [ ] Ear training expansion (intervals, chords, rhythm patterns)
-- [ ] Mix mode implementation (cross-level practice, currently stub)
+- [ ] Mix mode implementation (cross-track practice, currently stub)
 - [ ] Monetization (RevenueCat subscription)
 - [ ] Supabase backend integration
   - User authentication
@@ -306,7 +306,7 @@ const s = StyleSheet.create({
 ### ✅ Recently Completed (v1.0)
 
 **Screens:**
-- [x] Mastery tab - Statistics, weak cards, level progress
+- [x] Mastery tab - Statistics, weak cards, track progress
 - [x] Settings tab - Profile, learning goals, accessibility, language
 - [x] Onboarding flow - 4-step onboarding
 
@@ -316,9 +316,9 @@ const s = StyleSheet.create({
 - [x] Smart review recommendation system
 - [x] Daily goal and streak tracking
 - [x] Push notifications
-- [x] Achievement badges (5 levels)
+- [x] Achievement badges (5 tiers)
 - [x] Session size options (Quick/Focus/Deep)
-- [x] Parallel progression (all levels unlocked)
+- [x] Parallel progression (all tracks unlocked)
 
 **Components:**
 - [x] TabIcon components
@@ -333,9 +333,9 @@ const s = StyleSheet.create({
 | `app/(tabs)/_layout.tsx` | Tab navigation structure |
 | `app/(tabs)/index.tsx` | Home screen |
 | `app/(tabs)/practice.tsx` | Practice screen |
-| `app/quiz/*.tsx` | Quiz screens (4 levels) |
+| `app/quiz/*.tsx` | Quiz screens (4 tracks) |
 | `hooks/useSpacedRepetition.ts` | SM-2 card CRUD & review logic |
-| `stores/useAppStore.ts` | Global state (level, stats) |
+| `stores/useAppStore.ts` | Global state (track, stats) |
 | `utils/constants.ts` | All design tokens |
 | `utils/music.ts` | Music calculations (MIDI, positions, intervals) |
 | `utils/sm2.ts` | SM-2 algorithm implementation |
@@ -351,7 +351,7 @@ const s = StyleSheet.create({
 1. Create type in `types/quiz.ts`
 2. Add generator function in `utils/cardGenerator.ts`
 3. Create screen in `app/quiz/[name].tsx`
-4. Update `config/levels.ts` if needed
+4. Update `config/tracks.ts` if needed
 
 ### Adding a New Design Token
 1. Add to `utils/constants.ts`

@@ -142,8 +142,8 @@ const s = StyleSheet.create({
     gap: SPACING.md,
   },
   optionCardSelected: {
-    borderColor: COLORS.level1,
-    backgroundColor: `${COLORS.level1}10`,
+    borderColor: COLORS.track1,
+    backgroundColor: `${COLORS.track1}10`,
   },
   optionEmoji: {
     fontSize: 28,
@@ -158,7 +158,7 @@ const s = StyleSheet.create({
     color: COLORS.textPrimary,
   },
   optionLabelSelected: {
-    color: COLORS.level1,
+    color: COLORS.track1,
   },
   optionDesc: {
     fontSize: FONT_SIZE.sm,
@@ -174,19 +174,19 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   radioSelected: {
-    borderColor: COLORS.level1,
+    borderColor: COLORS.track1,
   },
   radioDot: {
     width: 12,
     height: 12,
     borderRadius: 6,
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
   },
   bottomArea: {
     alignItems: 'center',
   },
   confirmButton: {
-    backgroundColor: COLORS.level1,
+    backgroundColor: COLORS.track1,
     paddingVertical: 16,
     borderRadius: 14,
     width: '100%',

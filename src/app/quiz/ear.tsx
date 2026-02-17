@@ -12,7 +12,7 @@ import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import { QUIZ_ROUTES } from '@/config/levels';
+import { QUIZ_ROUTES } from '@/config/routes';
 import { type EarQuestionCard, generateEarCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 import type { NoteWithOctave } from '@/config/earTrainingTiers';
@@ -43,7 +43,7 @@ function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => voi
       ]}
     >
       {playing ? (
-        <WaveBars color={COLORS.level4} />
+        <WaveBars color={COLORS.track4} />
       ) : (
         <Svg
           width={28}
@@ -108,23 +108,23 @@ export default function QuizEarScreen() {
   );
 
   // Soft guide for first visit (Issue #22)
-  const levelFirstVisit = useAppStore((s) => s.levelFirstVisit);
-  const markLevelVisited = useAppStore((s) => s.markLevelVisited);
+  const trackFirstVisit = useAppStore((s) => s.trackFirstVisit);
+  const markTrackVisited = useAppStore((s) => s.markTrackVisited);
   const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
-    if (!levelFirstVisit.ear) {
+    if (!trackFirstVisit.ear) {
       setShowGuide(true);
     }
-  }, [levelFirstVisit.ear]);
+  }, [trackFirstVisit.ear]);
 
   const handleContinue = () => {
-    markLevelVisited('ear');
+    markTrackVisited('ear');
     setShowGuide(false);
   };
 
   const handleGoToLevel1 = () => {
-    markLevelVisited('ear');
+    markTrackVisited('ear');
     setShowGuide(false);
     router.replace(QUIZ_ROUTES.note);
   };
@@ -259,7 +259,7 @@ export default function QuizEarScreen() {
         params: {
           correct: correctCount.toString(),
           total: total.toString(),
-          levelNum: '4',
+          trackId: 'ear',
         },
       });
     });
@@ -270,7 +270,7 @@ export default function QuizEarScreen() {
       <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.ear.title')}
-        color={COLORS.level4}
+        color={COLORS.track4}
         progress={progress}
         total={total}
         onBack={() => router.back()}
@@ -342,7 +342,7 @@ export default function QuizEarScreen() {
       {/* Soft guide modal for first visit (Issue #22) */}
       <SoftGuideModal
         visible={showGuide}
-        levelId="ear"
+        trackId="ear"
         onContinue={handleContinue}
         onGoToLevel1={handleGoToLevel1}
       />
@@ -369,7 +369,7 @@ const s = StyleSheet.create({
     justifyContent: 'center',
   },
   quizBadge: {
-    backgroundColor: `${COLORS.level4}20`,
+    backgroundColor: `${COLORS.track4}20`,
     paddingHorizontal: 12,
     paddingVertical: 4,
     borderRadius: 10,
@@ -378,7 +378,7 @@ const s = StyleSheet.create({
   quizBadgeText: {
     fontSize: FONT_SIZE.xs,
     fontWeight: '600',
-    color: COLORS.level4,
+    color: COLORS.track4,
   },
   modeDesc: {
     fontSize: 10,
@@ -394,10 +394,10 @@ const s = StyleSheet.create({
     marginBottom: SPACING.md,
   },
   playBtnIdle: {
-    backgroundColor: COLORS.level4,
+    backgroundColor: COLORS.track4,
   },
   playBtnPlaying: {
-    backgroundColor: `${COLORS.level4}20`,
+    backgroundColor: `${COLORS.track4}20`,
   },
   playLabel: {
     fontSize: FONT_SIZE.sm + 1,

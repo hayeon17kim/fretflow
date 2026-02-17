@@ -60,11 +60,11 @@ export function useSpacedRepetition() {
   useSyncExternalStore(subscribe, getSnapshot);
 
   // 오늘 복습할 카드 가져오기
-  const getDueCards = useCallback((level?: FlashCard['type']) => {
+  const getDueCards = useCallback((trackType?: FlashCard['type']) => {
     const today = new Date().toISOString().split('T')[0];
     const cards = getCards();
     return cards.filter((card) => {
-      if (level && card.type !== level) return false;
+      if (trackType && card.type !== trackType) return false;
       return card.nextReviewDate <= today;
     });
   }, []);
@@ -134,44 +134,44 @@ export function useSpacedRepetition() {
     return cards[idx];
   }, []);
 
-  // 레벨별 카드 수
-  const getCardCount = useCallback((level?: FlashCard['type']) => {
+  // 트랙별 카드 수
+  const getCardCount = useCallback((trackType?: FlashCard['type']) => {
     const cards = getCards();
-    if (!level) return cards.length;
-    return cards.filter((c) => c.type === level).length;
+    if (!trackType) return cards.length;
+    return cards.filter((c) => c.type === trackType).length;
   }, []);
 
   // 마스터된 카드 (repetitions >= 3 && easeFactor >= 2.5 && interval >= 7)
-  const getMasteredCards = useCallback((level?: FlashCard['type']) => {
+  const getMasteredCards = useCallback((trackType?: FlashCard['type']) => {
     const cards = getCards();
     return cards.filter((c) => {
-      if (level && c.type !== level) return false;
+      if (trackType && c.type !== trackType) return false;
       return c.repetitions >= 3 && c.easeFactor >= 2.5 && c.interval >= 7;
     });
   }, []);
 
   // 약점 카드 (easeFactor < 2.0 또는 repetitions >= 2 && easeFactor < 2.3)
-  const getWeakCards = useCallback((level?: FlashCard['type']) => {
+  const getWeakCards = useCallback((trackType?: FlashCard['type']) => {
     const cards = getCards();
     return cards.filter((c) => {
-      if (level && c.type !== level) return false;
+      if (trackType && c.type !== trackType) return false;
       return c.easeFactor < 2.0 || (c.repetitions >= 2 && c.easeFactor < 2.3);
     });
   }, []);
 
   // 모든 카드 가져오기
-  const getAllCards = useCallback((level?: FlashCard['type']) => {
+  const getAllCards = useCallback((trackType?: FlashCard['type']) => {
     const cards = getCards();
-    if (!level) return cards;
-    return cards.filter((c) => c.type === level);
+    if (!trackType) return cards;
+    return cards.filter((c) => c.type === trackType);
   }, []);
 
-  // 레벨별 마스터리 진도율 (0-100)
-  const getLevelProgress = useCallback(
-    (level: FlashCard['type']) => {
-      const TARGET_PER_LEVEL = 60; // 목표: 각 레벨당 60장
-      const mastered = getMasteredCards(level).length;
-      return Math.min(100, Math.round((mastered / TARGET_PER_LEVEL) * 100));
+  // 트랙별 마스터리 진도율 (0-100)
+  const getTrackProgress = useCallback(
+    (track: FlashCard['type']) => {
+      const TARGET_PER_TRACK = 60; // 목표: 각 트랙당 60장
+      const mastered = getMasteredCards(track).length;
+      return Math.min(100, Math.round((mastered / TARGET_PER_TRACK) * 100));
     },
     [getMasteredCards],
   );
@@ -184,6 +184,6 @@ export function useSpacedRepetition() {
     getMasteredCards,
     getWeakCards,
     getAllCards,
-    getLevelProgress,
+    getTrackProgress,
   };
 }

@@ -1,9 +1,12 @@
 import { useCallback } from 'react';
+import { Platform } from 'react-native';
 import * as Notifications from 'expo-notifications';
 import { useTranslation } from 'react-i18next';
 import { useAppStore } from '@/stores/useAppStore';
 import { useSpacedRepetition } from './useSpacedRepetition';
 import { NOTIFICATION_IDS, parseTime } from '@/utils/notifications';
+
+const IS_WEB = Platform.OS === 'web';
 
 export function useNotifications() {
   const { t } = useTranslation();
@@ -11,10 +14,12 @@ export function useNotifications() {
   const { getDueCards } = useSpacedRepetition();
 
   const cancelAllScheduledNotifications = useCallback(async () => {
+    if (IS_WEB) return;
     await Notifications.cancelAllScheduledNotificationsAsync();
   }, []);
 
   const scheduleDailyReminder = useCallback(async () => {
+    if (IS_WEB) return;
     const dueCount = getDueCards().length;
     if (dueCount === 0) return; // Don't schedule if no due cards
 
@@ -60,6 +65,7 @@ export function useNotifications() {
   }, [settings.notifications.dailyReminderTime, getDueCards, t]);
 
   const scheduleStreakAlert = useCallback(async () => {
+    if (IS_WEB) return;
     const { streak, cardsReviewed } = todayStats;
     if (streak === 0) return; // No streak to protect
 
@@ -105,6 +111,10 @@ export function useNotifications() {
 
 // Debug helper function
 export async function debugScheduledNotifications() {
+  if (Platform.OS === 'web') {
+    console.log('[알림 디버그] 웹에서는 알림이 지원되지 않습니다');
+    return;
+  }
   const scheduled = await Notifications.getAllScheduledNotificationsAsync();
   console.log('[알림 디버그] 예약된 알림:', scheduled.length);
   scheduled.forEach((n) => {
