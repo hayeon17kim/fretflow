@@ -1,66 +1,21 @@
-import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Polygon } from 'react-native-svg';
+import { StyleSheet, Text, View } from 'react-native';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
+import { PlayButton } from '@/components/quiz/AudioControls';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { SoftGuideModal } from '@/components/SoftGuideModal';
-import type { NoteWithOctave } from '@/config/earTrainingTiers';
 import { getAvailableSounds, getCurrentTier } from '@/config/earTrainingTiers';
 import { QUIZ_ROUTES } from '@/config/routes';
+import { useEarTrainingAudio } from '@/hooks/useEarTrainingAudio';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { type EarQuestionCard, generateEarCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-import { getSoundFile } from '@/utils/earTrainingSounds';
-
-// ─── Sound wave bars (playing indicator) ───
-function WaveBars({ color }: { color: string }) {
-  const heights = [12, 20, 28, 20, 12, 24, 16];
-  return (
-    <View style={s.waveBars}>
-      {heights.map((h, i) => (
-        <View key={`bar${i}`} style={[s.waveBar, { height: h, backgroundColor: color }]} />
-      ))}
-    </View>
-  );
-}
-
-// ─── Play button ───
-function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        s.playBtn,
-        playing ? s.playBtnPlaying : s.playBtnIdle,
-        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-      ]}
-    >
-      {playing ? (
-        <WaveBars color={COLORS.track4} />
-      ) : (
-        <Svg
-          width={28}
-          height={28}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <Polygon points="5,3 19,12 5,21" fill="#fff" stroke="none" />
-        </Svg>
-      )}
-    </Pressable>
-  );
-}
 
 export default function QuizEarScreen() {
   const router = useRouter();
@@ -101,11 +56,15 @@ export default function QuizEarScreen() {
   } = useQuizSession({
     cards: questions,
   });
-  const [playing, setPlaying] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [preloadedSounds, setPreloadedSounds] = useState<Map<NoteWithOctave, Audio.Sound>>(
-    new Map(),
-  );
+
+  // Audio hook for ear training
+  const { playing, playSound, stopSound } = useEarTrainingAudio({
+    questions,
+    currentAnswer: q.answer,
+    autoPlay: true,
+    questionId: q.id,
+    questionState: state,
+  });
 
   // Soft guide for first visit (Issue #22)
   const trackFirstVisit = useAppStore((s) => s.trackFirstVisit);
@@ -129,113 +88,11 @@ export default function QuizEarScreen() {
     router.replace(QUIZ_ROUTES.note);
   };
 
-  // Setup audio and preload session sounds
-  useEffect(() => {
-    (async () => {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-      });
-    })();
-
-    // Collect all unique sounds in this session
-    const sessionSounds = new Set<NoteWithOctave>();
-    questions.forEach((question) => {
-      sessionSounds.add(question.answer);
-      question.options.forEach((opt) => sessionSounds.add(opt));
-    });
-
-    // Preload all session sounds
-    const preloadAllSounds = async () => {
-      const loadedMap = new Map<NoteWithOctave, Audio.Sound>();
-
-      const loadPromises = Array.from(sessionSounds).map(async (note) => {
-        const soundFile = getSoundFile(note);
-        if (!soundFile) {
-          console.warn(`[QuizEar] Sound file not found: ${note}`);
-          return;
-        }
-
-        try {
-          const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: false });
-          loadedMap.set(note, sound);
-        } catch (error) {
-          console.error(`[QuizEar] Failed to preload sound ${note}:`, error);
-        }
-      });
-
-      await Promise.all(loadPromises);
-      setPreloadedSounds(loadedMap);
-    };
-
-    preloadAllSounds();
-
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-      preloadedSounds.forEach((sound) => sound.unloadAsync());
-    };
-  }, [questions]);
-
-  // Play sound
-  const playSound = useCallback(async () => {
-    try {
-      // Stop previous sound
-      if (soundRef.current) {
-        await soundRef.current.stopAsync();
-      }
-
-      setPlaying(true);
-
-      // Try to use preloaded sound first
-      const preloaded = preloadedSounds.get(q.answer);
-      if (preloaded) {
-        await preloaded.setPositionAsync(0); // Reset to start
-        await preloaded.playAsync();
-        soundRef.current = preloaded;
-
-        // Set callback
-        preloaded.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setPlaying(false);
-          }
-        });
-      } else {
-        // Fallback to on-demand loading
-        const soundFile = getSoundFile(q.answer);
-        if (!soundFile) {
-          console.warn(`[QuizEar] Sound file not found: ${q.answer}`);
-          setPlaying(false);
-          return;
-        }
-
-        const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: true });
-        soundRef.current = sound;
-
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setPlaying(false);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('[QuizEar] Failed to play sound:', error);
-      setPlaying(false);
-    }
-  }, [q.answer, preloadedSounds]);
-
-  // Auto-play sound when new question appears
-  useEffect(() => {
-    if (state === 'question' && preloadedSounds.size > 0) {
-      playSound();
-    }
-  }, [q.id, state, preloadedSounds.size, playSound]);
 
   const handleAnswer = (index: number) => {
     if (state !== 'question') return;
     const correct = q.options[index] === q.answer;
-    setPlaying(false);
+    stopSound();
 
     // 응답 시간 기록
     const responseTime = recordAnswer(correct);
@@ -253,13 +110,7 @@ export default function QuizEarScreen() {
   };
 
   const handleNext = async () => {
-    // Stop current sound
-    if (soundRef.current) {
-      await soundRef.current.unloadAsync();
-      soundRef.current = null;
-    }
-
-    setPlaying(false);
+    await stopSound();
     nextCard(() => {
       router.push({
         pathname: '/quiz/completion',
@@ -392,35 +243,11 @@ const s = StyleSheet.create({
     color: COLORS.textTertiary,
     marginBottom: SPACING.lg,
   },
-  playBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.md,
-  },
-  playBtnIdle: {
-    backgroundColor: COLORS.track4,
-  },
-  playBtnPlaying: {
-    backgroundColor: `${COLORS.track4}20`,
-  },
   playLabel: {
     fontSize: FONT_SIZE.sm + 1,
     fontWeight: '600',
     color: COLORS.textPrimary,
     marginBottom: 4,
-  },
-  waveBars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 3,
-    height: 28,
-  },
-  waveBar: {
-    width: 4,
-    borderRadius: 2,
   },
   resultRow: {
     flexDirection: 'row',

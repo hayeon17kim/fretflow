@@ -1,21 +1,19 @@
-import { Audio } from 'expo-av';
 import { useLocalSearchParams, useRouter } from 'expo-router';
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
-import Svg, { Polygon } from 'react-native-svg';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
+import { PlayButton } from '@/components/quiz/AudioControls';
 import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
-import type { NoteWithOctave } from '@/config/earTrainingTiers';
-import { getAvailableSounds } from '@/config/earTrainingTiers';
 import { TRACKS, type TrackId } from '@/config/tracks';
+import { useEarTrainingAudio } from '@/hooks/useEarTrainingAudio';
 import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
-import type { FretPosition, IntervalName, NoteName, ScaleName } from '@/types/music';
+import type { FretPosition } from '@/types/music';
 import {
   type EarQuestionCard,
   generateEarCard,
@@ -27,7 +25,6 @@ import {
   type ScaleQuestionCard,
 } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-import { getSoundFile } from '@/utils/earTrainingSounds';
 import { getNoteAtPosition } from '@/utils/music';
 
 // ─── Mixed card type ───
@@ -40,49 +37,6 @@ type MixedCard = (
   trackId: TrackId;
   trackColor: string;
 };
-
-// ─── Sound wave bars (playing indicator) ───
-function WaveBars({ color }: { color: string }) {
-  const heights = [12, 20, 28, 20, 12, 24, 16];
-  return (
-    <View style={s.waveBars}>
-      {heights.map((h, i) => (
-        <View key={`bar${i}`} style={[s.waveBar, { height: h, backgroundColor: color }]} />
-      ))}
-    </View>
-  );
-}
-
-// ─── Play button ───
-function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => void }) {
-  return (
-    <Pressable
-      onPress={onPress}
-      style={({ pressed }) => [
-        s.playBtn,
-        playing ? s.playBtnPlaying : s.playBtnIdle,
-        pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] },
-      ]}
-    >
-      {playing ? (
-        <WaveBars color={COLORS.track4} />
-      ) : (
-        <Svg
-          width={28}
-          height={28}
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="#fff"
-          strokeWidth={2.5}
-          strokeLinecap="round"
-          strokeLinejoin="round"
-        >
-          <Polygon points="5,3 19,12 5,21" fill="#fff" stroke="none" />
-        </Svg>
-      )}
-    </Pressable>
-  );
-}
 
 // ─── Shuffle cards to avoid 3+ consecutive same track ───
 function shuffleWithTrackSpread<T extends { trackId: string }>(cards: T[]): T[] {
@@ -196,106 +150,22 @@ export default function QuizMixScreen() {
   });
 
   // ─── State for different quiz types ───
-  const [playing, setPlaying] = useState(false);
-  const soundRef = useRef<Audio.Sound | null>(null);
-  const [preloadedSounds, setPreloadedSounds] = useState<Map<NoteWithOctave, Audio.Sound>>(
-    new Map(),
-  );
   const [tapped, setTapped] = useState<FretPosition | null>(null);
   const [selectedScale, setSelectedScale] = useState<FretPosition[]>([]);
 
-  // ─── Preload sounds for ear training ───
-  useEffect(() => {
-    const earCards = questions.filter((c) => c.type === 'ear') as EarQuestionCard[];
-    if (earCards.length === 0) return;
+  // Audio hook for ear training cards
+  const earCards = useMemo(
+    () => questions.filter((c) => c.type === 'ear') as EarQuestionCard[],
+    [questions],
+  );
+  const { playing, playSound, stopSound } = useEarTrainingAudio({
+    questions: earCards,
+    currentAnswer: q.type === 'ear' ? q.answer : undefined,
+    autoPlay: true,
+    questionId: q.id,
+    questionState: state,
+  });
 
-    (async () => {
-      await Audio.setAudioModeAsync({
-        playsInSilentModeIOS: true,
-        staysActiveInBackground: false,
-      });
-
-      const sessionSounds = new Set<NoteWithOctave>();
-      earCards.forEach((card) => {
-        sessionSounds.add(card.answer);
-        card.options.forEach((opt) => sessionSounds.add(opt));
-      });
-
-      const loadedMap = new Map<NoteWithOctave, Audio.Sound>();
-      const loadPromises = Array.from(sessionSounds).map(async (note) => {
-        const soundFile = getSoundFile(note);
-        if (!soundFile) return;
-
-        try {
-          const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: false });
-          loadedMap.set(note, sound);
-        } catch (error) {
-          console.error(`[QuizMix] Failed to preload sound ${note}:`, error);
-        }
-      });
-
-      await Promise.all(loadPromises);
-      setPreloadedSounds(loadedMap);
-    })();
-
-    return () => {
-      if (soundRef.current) {
-        soundRef.current.unloadAsync();
-      }
-      preloadedSounds.forEach((sound) => sound.unloadAsync());
-    };
-  }, [questions]);
-
-  // ─── Play sound (for ear training) ───
-  const playSound = useCallback(async () => {
-    if (q.type !== 'ear') return;
-
-    try {
-      if (soundRef.current) {
-        await soundRef.current.stopAsync();
-      }
-
-      setPlaying(true);
-
-      const preloaded = preloadedSounds.get(q.answer);
-      if (preloaded) {
-        await preloaded.setPositionAsync(0);
-        await preloaded.playAsync();
-        soundRef.current = preloaded;
-
-        preloaded.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setPlaying(false);
-          }
-        });
-      } else {
-        const soundFile = getSoundFile(q.answer);
-        if (!soundFile) {
-          setPlaying(false);
-          return;
-        }
-
-        const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: true });
-        soundRef.current = sound;
-
-        sound.setOnPlaybackStatusUpdate((status) => {
-          if (status.isLoaded && status.didJustFinish) {
-            setPlaying(false);
-          }
-        });
-      }
-    } catch (error) {
-      console.error('[QuizMix] Failed to play sound:', error);
-      setPlaying(false);
-    }
-  }, [q, preloadedSounds]);
-
-  // Auto-play sound for ear training
-  useEffect(() => {
-    if (state === 'question' && q.type === 'ear' && preloadedSounds.size > 0) {
-      playSound();
-    }
-  }, [q.id, state, q.type, preloadedSounds.size, playSound]);
 
   // ─── Answer handlers ───
   const handleAnswerGrid = (index: number) => {
@@ -303,7 +173,7 @@ export default function QuizMixScreen() {
     if (q.type !== 'note' && q.type !== 'ear') return;
 
     const correct = q.options[index] === q.answer;
-    if (q.type === 'ear') setPlaying(false);
+    if (q.type === 'ear') stopSound();
 
     const responseTime = recordAnswer(correct);
 
@@ -376,13 +246,7 @@ export default function QuizMixScreen() {
   };
 
   const handleNext = async () => {
-    // Stop current sound if playing
-    if (soundRef.current) {
-      await soundRef.current.unloadAsync();
-      soundRef.current = null;
-    }
-
-    setPlaying(false);
+    await stopSound();
     setTapped(null);
     setSelectedScale([]);
 
@@ -777,35 +641,11 @@ const s = StyleSheet.create({
     color: COLORS.textTertiary,
     marginBottom: SPACING.lg,
   },
-  playBtn: {
-    width: 80,
-    height: 80,
-    borderRadius: 40,
-    alignItems: 'center',
-    justifyContent: 'center',
-    marginBottom: SPACING.md,
-  },
-  playBtnIdle: {
-    backgroundColor: COLORS.track4,
-  },
-  playBtnPlaying: {
-    backgroundColor: `${COLORS.track4}20`,
-  },
   playLabel: {
     fontSize: FONT_SIZE.sm + 1,
     fontWeight: '600',
     color: COLORS.textPrimary,
     marginBottom: 4,
-  },
-  waveBars: {
-    flexDirection: 'row',
-    alignItems: 'flex-end',
-    gap: 3,
-    height: 28,
-  },
-  waveBar: {
-    width: 4,
-    borderRadius: 2,
   },
   answerArea: {
     marginTop: SPACING.lg,
