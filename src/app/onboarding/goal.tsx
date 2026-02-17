@@ -8,6 +8,8 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useAppStore } from '@/stores/useAppStore';
+import { useNotificationPermissions } from '@/hooks/useNotificationPermissions';
+import { useNotifications } from '@/hooks/useNotifications';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
 const GOAL_OPTIONS = [10, 20, 30] as const;
@@ -24,12 +26,32 @@ export default function OnboardingGoalScreen() {
   const insets = useSafeAreaInsets();
   const [selected, setSelected] = useState<number>(20);
   const updateSettings = useAppStore((s) => s.updateSettings);
+  const settings = useAppStore((s) => s.settings);
   const setHasSeenOnboarding = useAppStore((s) => s.setHasSeenOnboarding);
+  const { requestPermissions } = useNotificationPermissions();
+  const { scheduleAllNotifications } = useNotifications();
 
-  const handleConfirm = () => {
-    // 설정 저장
-    updateSettings({ dailyGoal: selected });
-    // 온보딩 완료 플래그
+  const handleConfirm = async () => {
+    // 1. Request notification permission
+    const { status } = await requestPermissions();
+    const granted = status === 'granted';
+
+    // 2. Save settings with permission status
+    updateSettings({
+      dailyGoal: selected,
+      notifications: {
+        ...settings.notifications,
+        permissionGranted: granted,
+        lastPermissionRequest: new Date().toISOString(),
+      },
+    });
+
+    // 3. Schedule notifications if granted
+    if (granted) {
+      await scheduleAllNotifications();
+    }
+
+    // 4. Complete onboarding
     setHasSeenOnboarding(true);
     // 홈으로 이동 (replace로 뒤로가기 방지)
     router.replace('/(tabs)');

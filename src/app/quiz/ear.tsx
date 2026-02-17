@@ -5,39 +5,19 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import Svg, { Polygon } from 'react-native-svg';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
+import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
 import { SoftGuideModal } from '@/components/SoftGuideModal';
+import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
 import { QUIZ_ROUTES } from '@/config/levels';
-import { type EarQuestionCard, generateCardBatch } from '@/utils/cardGenerator';
+import { type EarQuestionCard, generateEarCard } from '@/utils/cardGenerator';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
-
-// ─── Audio file mapping ───
-// NOTE: 개방현 5음 (기초 모드)
-// E2 = 6번줄, A2 = 5번줄, D3 = 4번줄, G3 = 3번줄, B3 = 2번줄
-const BASIC_MODE_SOUNDS: Record<string, number | null> = {
-  E: null,
-  A: null,
-  D: null,
-  G: null,
-  B: null,
-};
-
-// Try to load basic mode audio files
-try {
-  BASIC_MODE_SOUNDS.E = require('../../../assets/sounds/E2.wav');
-  BASIC_MODE_SOUNDS.A = require('../../../assets/sounds/A2.wav');
-  BASIC_MODE_SOUNDS.D = require('../../../assets/sounds/D3.wav');
-  BASIC_MODE_SOUNDS.G = require('../../../assets/sounds/G3.wav');
-  BASIC_MODE_SOUNDS.B = require('../../../assets/sounds/B3.wav');
-} catch (_error) {
-  console.warn('[QuizEar] Audio files not found in assets/sounds/');
-}
-
-// 현재 사용 중인 사운드 맵 (나중에 전체 모드로 확장 가능)
-const SOUND_FILES = BASIC_MODE_SOUNDS;
+import type { NoteWithOctave } from '@/config/earTrainingTiers';
+import { getCurrentTier, getAvailableSounds } from '@/config/earTrainingTiers';
+import { getSoundFile } from '@/utils/earTrainingSounds';
 
 // ─── Sound wave bars (playing indicator) ───
 function WaveBars({ color }: { color: string }) {
@@ -85,17 +65,29 @@ function PlayButton({ playing, onPress }: { playing: boolean; onPress: () => voi
 export default function QuizEarScreen() {
   const router = useRouter();
   const { t } = useTranslation();
-  const { addCard, recordReview } = useSpacedRepetition();
+  const { addCard, recordReview, getMasteredCards } = useSpacedRepetition();
   const params = useLocalSearchParams();
+  const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
 
-  // 세션 시작 시 카드 생성
-  const questions = useMemo(
-    () => generateCardBatch('ear', sessionSize) as EarQuestionCard[],
-    [sessionSize],
-  );
+  // Get mastered count for tier calculation
+  const masteredEarCards = getMasteredCards('ear');
+  const masteredCount = masteredEarCards.length;
+
+  // Calculate current tier
+  const currentTier = getCurrentTier(masteredCount);
+  const availableSounds = getAvailableSounds(masteredCount);
+
+  // Generate cards with mastery-based progression
+  const questions = useMemo(() => {
+    const batch: EarQuestionCard[] = [];
+    for (let i = 0; i < sessionSize; i++) {
+      batch.push(generateEarCard(masteredCount));
+    }
+    return batch;
+  }, [sessionSize, masteredCount]);
 
   const {
     currentCard: q,
@@ -111,6 +103,9 @@ export default function QuizEarScreen() {
   });
   const [playing, setPlaying] = useState(false);
   const soundRef = useRef<Audio.Sound | null>(null);
+  const [preloadedSounds, setPreloadedSounds] = useState<Map<NoteWithOctave, Audio.Sound>>(
+    new Map(),
+  );
 
   // Soft guide for first visit (Issue #22)
   const levelFirstVisit = useAppStore((s) => s.levelFirstVisit);
@@ -134,7 +129,7 @@ export default function QuizEarScreen() {
     router.replace(QUIZ_ROUTES.note);
   };
 
-  // Setup audio
+  // Setup audio and preload session sounds
   useEffect(() => {
     (async () => {
       await Audio.setAudioModeAsync({
@@ -143,41 +138,87 @@ export default function QuizEarScreen() {
       });
     })();
 
+    // Collect all unique sounds in this session
+    const sessionSounds = new Set<NoteWithOctave>();
+    questions.forEach((question) => {
+      sessionSounds.add(question.answer);
+      question.options.forEach((opt) => sessionSounds.add(opt));
+    });
+
+    // Preload all session sounds
+    const preloadAllSounds = async () => {
+      const loadedMap = new Map<NoteWithOctave, Audio.Sound>();
+
+      const loadPromises = Array.from(sessionSounds).map(async (note) => {
+        const soundFile = getSoundFile(note);
+        if (!soundFile) {
+          console.warn(`[QuizEar] Sound file not found: ${note}`);
+          return;
+        }
+
+        try {
+          const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: false });
+          loadedMap.set(note, sound);
+        } catch (error) {
+          console.error(`[QuizEar] Failed to preload sound ${note}:`, error);
+        }
+      });
+
+      await Promise.all(loadPromises);
+      setPreloadedSounds(loadedMap);
+    };
+
+    preloadAllSounds();
+
     return () => {
       if (soundRef.current) {
         soundRef.current.unloadAsync();
       }
+      preloadedSounds.forEach((sound) => sound.unloadAsync());
     };
-  }, []);
+  }, [questions]);
 
   // Play sound
   const playSound = async () => {
     try {
-      // Unload previous sound
+      // Stop previous sound
       if (soundRef.current) {
-        await soundRef.current.unloadAsync();
-        soundRef.current = null;
+        await soundRef.current.stopAsync();
       }
 
       setPlaying(true);
 
-      // Load and play
-      const soundFile = SOUND_FILES[q.answer];
-      if (!soundFile) {
-        console.warn(`[QuizEar] Sound file not found for: ${q.answer}`);
-        setPlaying(false);
-        return;
-      }
+      // Try to use preloaded sound first
+      const preloaded = preloadedSounds.get(q.answer);
+      if (preloaded) {
+        await preloaded.setPositionAsync(0); // Reset to start
+        await preloaded.playAsync();
+        soundRef.current = preloaded;
 
-      const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: true });
-      soundRef.current = sound;
-
-      // Set callback when finished
-      sound.setOnPlaybackStatusUpdate((status) => {
-        if (status.isLoaded && status.didJustFinish) {
+        // Set callback
+        preloaded.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlaying(false);
+          }
+        });
+      } else {
+        // Fallback to on-demand loading
+        const soundFile = getSoundFile(q.answer);
+        if (!soundFile) {
+          console.warn(`[QuizEar] Sound file not found: ${q.answer}`);
           setPlaying(false);
+          return;
         }
-      });
+
+        const { sound } = await Audio.Sound.createAsync(soundFile, { shouldPlay: true });
+        soundRef.current = sound;
+
+        sound.setOnPlaybackStatusUpdate((status) => {
+          if (status.isLoaded && status.didJustFinish) {
+            setPlaying(false);
+          }
+        });
+      }
     } catch (error) {
       console.error('[QuizEar] Failed to play sound:', error);
       setPlaying(false);
@@ -226,6 +267,7 @@ export default function QuizEarScreen() {
 
   return (
     <View style={s.container}>
+      <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.ear.title')}
         levelNum={4}
@@ -233,7 +275,7 @@ export default function QuizEarScreen() {
         progress={progress}
         total={total}
         onBack={() => router.back()}
-        badge={t('quiz.ear.basicMode')}
+        badge={`Tier ${currentTier.id}/5 • ${availableSounds.length} sounds`}
       />
 
       {/* Card */}

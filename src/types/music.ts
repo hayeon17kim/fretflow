@@ -3,6 +3,9 @@ import type { QuizQuestion } from './quiz';
 
 export type NoteName = 'C' | 'C#' | 'D' | 'D#' | 'E' | 'F' | 'F#' | 'G' | 'G#' | 'A' | 'A#' | 'B';
 
+// Re-export NoteWithOctave for ear training
+export type { NoteWithOctave } from '@/config/earTrainingTiers';
+
 export type StringNumber = 1 | 2 | 3 | 4 | 5 | 6; // 1번줄(높은 E) ~ 6번줄(낮은 E)
 
 export interface FretPosition {

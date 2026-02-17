@@ -4,6 +4,12 @@
  */
 
 import type { FretPosition, IntervalName, NoteName, ScaleName } from '@/types/music';
+import type { NoteWithOctave } from '@/config/earTrainingTiers';
+import {
+  getAvailableSounds,
+  parseNoteWithOctave,
+  getAdjacentNotes,
+} from '@/config/earTrainingTiers';
 import { getNoteAtPosition } from './music';
 
 // ─── 유틸리티 함수 ───
@@ -201,18 +207,87 @@ export function generateScaleCard(): ScaleQuestionCard {
 export interface EarQuestionCard {
   id: string;
   type: 'ear';
-  answer: NoteName;
-  options: NoteName[];
+  answer: NoteWithOctave;
+  options: NoteWithOctave[];
 }
 
-const BASIC_EAR_NOTES: NoteName[] = ['E', 'A', 'D', 'G', 'B']; // 개방현 5음
+/**
+ * Generate distractor options for ear training
+ */
+function generateDistractors(
+  correct: NoteWithOctave,
+  pool: NoteWithOctave[],
+): NoteWithOctave[] {
+  const [note, octaveStr] = parseNoteWithOctave(correct);
+  const octave = parseInt(octaveStr, 10);
 
-export function generateEarCard(): EarQuestionCard {
-  const answer = randomChoice(BASIC_EAR_NOTES);
+  const distractors: NoteWithOctave[] = [];
+  const used = new Set<NoteWithOctave>([correct]);
 
-  // 오답 생성 (나머지 개방현)
-  const wrongNotes = BASIC_EAR_NOTES.filter((n) => n !== answer);
-  const selectedWrong = shuffle(wrongNotes).slice(0, 3);
+  // 1. Same note, different octave (if available)
+  const sameNoteDiffOctave = pool.filter(
+    (n) => n.startsWith(note) && !n.endsWith(octaveStr) && !used.has(n),
+  );
+  if (sameNoteDiffOctave.length > 0) {
+    const selected = randomChoice(sameNoteDiffOctave);
+    distractors.push(selected);
+    used.add(selected);
+  }
+
+  // 2. Adjacent semitones (harder distractors)
+  const adjacentNotes = getAdjacentNotes(note);
+  const adjacentOptions = pool.filter(
+    (n) => adjacentNotes.some((adj) => n.startsWith(adj)) && n.endsWith(octaveStr) && !used.has(n),
+  );
+  if (adjacentOptions.length > 0 && distractors.length < 3) {
+    const selected = randomChoice(adjacentOptions);
+    distractors.push(selected);
+    used.add(selected);
+  }
+
+  // 3. Random from pool (fill remaining)
+  while (distractors.length < 3) {
+    const remaining = pool.filter((n) => !used.has(n));
+    if (remaining.length === 0) break;
+
+    const selected = randomChoice(remaining);
+    distractors.push(selected);
+    used.add(selected);
+  }
+
+  return distractors;
+}
+
+/**
+ * Generate ear training card with progressive difficulty
+ * @param masteredCount Number of mastered ear training cards (for tier unlocking)
+ */
+export function generateEarCard(masteredCount: number = 0): EarQuestionCard {
+  const availableSounds = getAvailableSounds(masteredCount);
+
+  // Fallback if no sounds available
+  if (availableSounds.length === 0) {
+    throw new Error('[CardGenerator] No sounds available for ear training');
+  }
+
+  // Select random answer
+  const answer = randomChoice(availableSounds);
+
+  // Generate distractors
+  const wrongNotes = generateDistractors(answer, availableSounds);
+
+  // If we don't have enough options, add random ones
+  while (wrongNotes.length < 3 && availableSounds.length > wrongNotes.length + 1) {
+    const candidate = randomChoice(availableSounds);
+    if (candidate !== answer && !wrongNotes.includes(candidate)) {
+      wrongNotes.push(candidate);
+    }
+  }
+
+  // Ensure we have exactly 3 distractors
+  const selectedWrong = wrongNotes.slice(0, 3);
+
+  // Shuffle options
   const options = shuffle([answer, ...selectedWrong]);
 
   return {

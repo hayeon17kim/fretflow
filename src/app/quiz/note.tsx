@@ -4,8 +4,10 @@ import { useTranslation } from 'react-i18next';
 import { StyleSheet, Text, View } from 'react-native';
 import { Fretboard } from '@/components/Fretboard';
 import { AnswerGrid, NextButton } from '@/components/quiz/AnswerGrid';
+import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizCard } from '@/components/quiz/QuizCard';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
@@ -17,6 +19,7 @@ export default function QuizNoteScreen() {
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
   const params = useLocalSearchParams();
+  const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
@@ -74,6 +77,7 @@ export default function QuizNoteScreen() {
 
   return (
     <View style={s.container}>
+      <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.note.title')}
         levelNum={1}

@@ -4,7 +4,9 @@ import { useTranslation } from 'react-i18next';
 import { Pressable, StyleSheet, Text, View } from 'react-native';
 import { Fretboard, type FretHighlight } from '@/components/Fretboard';
 import { NextButton } from '@/components/quiz/AnswerGrid';
+import { GoalAchievedToast } from '@/components/quiz/GoalAchievedToast';
 import { QuizHeader } from '@/components/quiz/QuizHeader';
+import { useGoalAchievement } from '@/hooks/useGoalAchievement';
 import { useQuizSession } from '@/hooks/useQuizSession';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
 import { useAppStore } from '@/stores/useAppStore';
@@ -55,6 +57,7 @@ export default function QuizIntervalScreen() {
   const { t } = useTranslation();
   const { addCard, recordReview } = useSpacedRepetition();
   const params = useLocalSearchParams();
+  const { showGoalToast } = useGoalAchievement();
 
   // Get session size from params, default to 10
   const sessionSize = params.sessionSize ? parseInt(params.sessionSize as string, 10) : 10;
@@ -176,6 +179,7 @@ export default function QuizIntervalScreen() {
 
   return (
     <View style={s.container}>
+      <GoalAchievedToast visible={showGoalToast} />
       <QuizHeader
         label={t('quiz.interval.title')}
         levelNum={2}

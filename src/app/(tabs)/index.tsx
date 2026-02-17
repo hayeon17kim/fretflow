@@ -2,7 +2,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { useRouter } from 'expo-router';
 import { useCallback, useState } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
+import { AppState, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import Svg, { Circle, Path } from 'react-native-svg';
 import { DailyReviewCard } from '@/components/home/DailyReviewCard';
 import { LevelCardGrid } from '@/components/home/LevelCardGrid';
@@ -12,6 +12,7 @@ import { QUIZ_ROUTES } from '@/config/routes';
 import { useHomeScreenStats } from '@/hooks/useHomeScreenStats';
 import { useSmartRecommendation } from '@/hooks/useSmartRecommendation';
 import { useSpacedRepetition } from '@/hooks/useSpacedRepetition';
+import { useNotifications } from '@/hooks/useNotifications';
 import { useAppStore } from '@/stores/useAppStore';
 import { COLORS, FONT_SIZE, SPACING } from '@/utils/constants';
 
@@ -20,15 +21,26 @@ export default function HomeScreen() {
   const { t } = useTranslation();
   const todayStats = useAppStore((s) => s.todayStats);
   const settings = useAppStore((s) => s.settings);
+  const { scheduleAllNotifications } = useNotifications();
 
   // State to trigger re-render on screen focus
   const [_refreshKey, setRefreshKey] = useState(0);
 
-  // Refresh data whenever screen gains focus
+  // Refresh data and reschedule notifications whenever screen gains focus
   useFocusEffect(
     useCallback(() => {
       setRefreshKey((prev) => prev + 1);
-    }, []),
+      scheduleAllNotifications();
+
+      // Listen for app state changes (foreground/background)
+      const subscription = AppState.addEventListener('change', (nextState) => {
+        if (nextState === 'active') {
+          scheduleAllNotifications();
+        }
+      });
+
+      return () => subscription.remove();
+    }, [scheduleAllNotifications]),
   );
 
   // Get all statistics from hook
